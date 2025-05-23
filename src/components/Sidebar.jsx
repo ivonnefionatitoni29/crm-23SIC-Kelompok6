@@ -17,6 +17,8 @@ const menuItems = [
   { name: 'Produk', icon: <Box />, path: '/produk' },
   { name: 'Pelanggan', icon: <User />, path: '/CustomerManagement' },
   { name: 'Penjualan', icon: <CarTaxiFront />, path: '/penjualan' },
+  { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
+  { name: 'Penjualan', icon: <ShoppingCart />, path: '/penjualan' },
 ]
 
 const accountItems = [
