@@ -18,6 +18,16 @@ const Header = () => {
           Sign In
         </div>
       </div>
+      <button
+        onClick={() => {
+          localStorage.removeItem("isLoggedIn");
+          window.location.href = "/login";
+        }}
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+      >
+        Logout
+      </button>
+
     </header>
   )
 }

@@ -1,3 +1,5 @@
+import { RiHospitalFill } from "react-icons/ri"; 
+import { RiHotelFill } from "react-icons/ri"; 
 import {
   LayoutDashboard,
   Users,         // untuk pelanggan
@@ -15,7 +17,8 @@ import { Link, useLocation } from 'react-router-dom'
 const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
-  { name: 'Penjualan', icon: <CarTaxiFront />, path: '/penjualan' },
+  { name: 'Penitipan Hewan', icon: <RiHotelFill /> , path: '/penitipan' },
+  { name: 'Vaksinasi', icon: <RiHospitalFill /> , path: '/vaksinasi' },
 ]
 
 const accountItems = [
@@ -31,7 +34,7 @@ const Sidebar = () => {
 
   return (
     <aside className="bg-white w-64 h-screen shadow-lg px-4 py-6 hidden md:block">
-      <div className="text-xl font-bold mb-8 text-purple-700">UMKM CRM</div>
+      <div className="text-xl font-bold mb-8 text-purple-700">KLINIK HEWAN</div>
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link
