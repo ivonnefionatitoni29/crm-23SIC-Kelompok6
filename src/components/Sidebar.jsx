@@ -10,6 +10,8 @@ import {
   UserPlus,
   CarTaxiFront,
 } from 'lucide-react'
+import iconKebiri from '../assets/iconKebiri.png';
+import cart from '../assets/cart.png';
 import { Link, useLocation } from 'react-router-dom'
 
 const menuItems = [
@@ -18,7 +20,21 @@ const menuItems = [
   { name: 'Pelanggan', icon: <User />, path: '/CustomerManagement' },
   { name: 'Penjualan', icon: <CarTaxiFront />, path: '/penjualan' },
   { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
-]
+{
+  name: 'kebiri',
+  icon: <img src={iconKebiri} alt="kebiri" className="w-5 h-5" />,
+  path: '/kebiri'
+},
+
+    {
+  name: 'Jual Beli',
+  icon: <img src={cart} alt="kebiri" className="w-5 h-5" />,
+  path: '/jualbeli'
+},
+
+
+
+] 
 
 const accountItems = [
   { name: 'Pengaturan Akun', icon: <Settings />, path: '/akun' },
