@@ -32,7 +32,7 @@ function formatCurrency(num) {
   }).format(num);
 }
 
-export default function SalesManagement() {
+export default function LoyalitasPelanggan() {
   const [sales, setSales] = useState(initialSales);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -81,7 +81,7 @@ export default function SalesManagement() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Yakin ingin menghapus penjualan ini?")) {
+    if (window.confirm("Yakin ingin menghapus data loyalitas ini?")) {
       setSales(sales.filter((s) => s.id !== id));
     }
   };
@@ -93,19 +93,19 @@ export default function SalesManagement() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Management Penjualan</h1>
+      <h1 className="text-2xl font-semibold mb-4">Loyalitas Pelanggan</h1>
 
       <button
         onClick={() => setShowForm((prev) => !prev)}
         className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
       >
-        {showForm ? "Batal Tambah Penjualan" : "Tambah Penjualan"}
+        {showForm ? "Batal Tambah Loyalitas" : "Tambah Loyalitas"}
       </button>
 
       {showForm && (
         <div className="mb-6 p-4 border border-gray-300 rounded shadow-sm bg-white">
           <div className="mb-2">
-            <label className="block font-medium mb-1">Nomor Invoice</label>
+            <label className="block font-medium mb-1">Nomor Transaksi</label>
             <input
               type="text"
               name="invoice"
@@ -145,20 +145,20 @@ export default function SalesManagement() {
           </div>
 
           <div className="mb-2">
-            <label className="block font-medium mb-1">Total (Rp)</label>
+            <label className="block font-medium mb-1">Total Belanja (Rp)</label>
             <input
               type="number"
               name="total"
               value={formData.total}
               onChange={handleInputChange}
-              placeholder="Jumlah total penjualan"
+              placeholder="Jumlah total belanja"
               className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
               min="0"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block font-medium mb-1">Status</label>
+            <label className="block font-medium mb-1">Status Pembayaran</label>
             <select
               name="status"
               value={formData.status}
@@ -185,7 +185,7 @@ export default function SalesManagement() {
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Invoice
+                Transaksi
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Pelanggan
@@ -249,7 +249,7 @@ export default function SalesManagement() {
             {sales.length === 0 && (
               <tr>
                 <td colSpan={6} className="text-center py-4 text-gray-500">
-                  Tidak ada data penjualan
+                  Tidak ada data loyalitas pelanggan
                 </td>
               </tr>
             )}

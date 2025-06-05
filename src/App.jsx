@@ -1,9 +1,8 @@
 import Dashboard from './pages/Dashboard'
-import SalesManagement from './pages/SalesManagement'
 import {Routes, Route} from 'react-router-dom'
 import MainLayout from './components/MainLayout'
-import CustomerManagement from './pages/CustomerManagement'
-import ProductManagement from './pages/Produk'
+import FAQ from './pages/FAQ'
+import Loyalitaspelanggan from './pages/Loyalitaspelanggan'
 import Kebiri from './pages/Kebiri'
 import Beli from './pages/Beli'
 
@@ -13,9 +12,8 @@ function App() {
     <Routes>
       <Route element={<MainLayout />}>
       <Route path ="/" element={<Dashboard />} />
-      <Route path ="/CustomerManagement" element={<CustomerManagement />} />
-      <Route path ="/produk" element={<ProductManagement />} />
-      <Route path ="/penjualan" element={<SalesManagement/>} />
+      <Route path ="/faq" element={<FAQ />} />
+      <Route path ="/loyalitaspelanggan" element={<Loyalitaspelanggan/>} />
       <Route path ="/kebiri" element={<Kebiri/>} />
       <Route path ="/jualbeli" element={<Beli/>} />
       
