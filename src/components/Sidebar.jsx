@@ -1,6 +1,12 @@
 import { RiHospitalFill } from "react-icons/ri"; 
 import { RiHotelFill } from "react-icons/ri"; 
 import { GiRoyalLove } from "react-icons/gi"; 
+
+import { RiHospitalFill } from "react-icons/ri"; 
+import { RiHotelFill } from "react-icons/ri"; 
+
+import { GiRoyalLove } from "react-icons/gi"; 
+
 import {
   LayoutDashboard,
 
@@ -21,6 +27,12 @@ const menuItems = [
   { name: 'Penitipan Hewan', icon: <RiHotelFill /> , path: '/penitipan' },
   { name: 'Vaksinasi', icon: <RiHospitalFill /> , path: '/vaksinasi' },
 ]
+
+  { name: 'Produk', icon: <Box />, path: '/produk' },
+  { name: 'Penitipan Hewan', icon: <RiHotelFill /> , path: '/penitipan' },
+  { name: 'Vaksinasi', icon: <RiHospitalFill /> , path: '/vaksinasi' },
+]
+
   { name: 'FAQ', icon: <User />, path: '/faq' },
   { name: 'LoyalitasPelanggan', icon: <GiRoyalLove />, path: '/loyalitaspelanggan' },
 {
@@ -39,6 +51,7 @@ const menuItems = [
 
 ] 
 
+
 const accountItems = [
   { name: 'Pengaturan Akun', icon: <Settings />, path: '/akun' },
   { name: 'Sign In', icon: <LogIn />, path: '/signin' },
@@ -54,6 +67,11 @@ const Sidebar = () => {
     <aside className="bg-white w-64 h-screen shadow-lg px-4 py-6 hidden md:block">
       <div className="text-xl font-bold mb-8 text-purple-700">KLINIK HEWAN</div>
       <div className="text-xl font-bold mb-8 text-purple-700">GROOVY VETCARE</div>
+
+      <div className="text-xl font-bold mb-8 text-purple-700">KLINIK HEWAN</div>
+
+      <div className="text-xl font-bold mb-8 text-purple-700">GROOVY VETCARE</div>
+
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link
