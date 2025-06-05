@@ -26,20 +26,20 @@ ChartJS.register(
 const Dashboard = () => {
   // Data summary cards
   const stats = [
-    { label: "Pendapatan Hari Ini", value: "$53,000", percent: "+55%", color: "green" },
-    { label: "Pengguna Hari Ini", value: "2,300", percent: "+3%", color: "blue" },
-    { label: "Klien Baru", value: "+3,462", percent: "-2%", color: "red" },
-    { label: "Penjualan", value: "$103,430", percent: "+5%", color: "purple" },
+    { label: "Pasien Hari Ini", value: "38 ekor", percent: "+8%", color: "green" },
+    { label: "Janji Temu Hari Ini", value: "25", percent: "-5%", color: "blue" },
+    { label: "Pelanggan Baru", value: "+12", percent: "+10%", color: "red" },
+    { label: "Tingkat Kepuasan", value: "96%", percent: "+1%", color: "purple" },
   ]
 
-  // Data untuk grafik Penjualan Bulanan (Bar Chart)
+  // Data untuk grafik Penjualan Bulanan (diubah menjadi Janji Temu Bulanan)
   const barData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
     datasets: [
       {
-        label: "Penjualan (dalam ribuan $)",
-        data: [12, 19, 14, 17, 22, 30, 28, 26, 32, 35, 40, 45],
-        backgroundColor: "rgba(99, 102, 241, 0.7)", // purple-600
+        label: "Jumlah Janji Temu",
+        data: [40, 55, 60, 50, 70, 90, 100, 95, 85, 80, 75, 95],
+        backgroundColor: "rgba(34, 197, 94, 0.7)", // green-500
       },
     ],
   }
@@ -48,21 +48,21 @@ const Dashboard = () => {
     responsive: true,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'Penjualan Bulanan Tahun Ini' },
+      title: { display: true, text: 'Statistik Janji Temu Tahun Ini' },
     },
   }
 
-  // Data untuk grafik Pertumbuhan Pelanggan (Line Chart)
+  // Data untuk grafik Pertumbuhan Pelanggan (diubah jadi Pasien Baru)
   const lineData = {
     labels: ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"],
     datasets: [
       {
-        label: "Jumlah Pelanggan",
-        data: [50, 75, 120, 180, 220, 260, 300, 350, 400, 430, 460, 500],
-        borderColor: "rgba(59, 130, 246, 1)", // blue-500
-        backgroundColor: "rgba(59, 130, 246, 0.3)",
+        label: "Jumlah Pasien Baru",
+        data: [20, 30, 25, 35, 45, 60, 70, 65, 55, 58, 62, 75],
+        borderColor: "rgba(139, 92, 246, 1)", // purple-500
+        backgroundColor: "rgba(139, 92, 246, 0.3)",
         fill: true,
-        tension: 0.3,
+        tension: 0.4,
         pointRadius: 4,
       },
     ],
@@ -72,7 +72,7 @@ const Dashboard = () => {
     responsive: true,
     plugins: {
       legend: { position: 'top' },
-      title: { display: true, text: 'Pertumbuhan Pelanggan Tahun Ini' },
+      title: { display: true, text: 'Pertumbuhan Pasien Baru' },
     },
   }
 
