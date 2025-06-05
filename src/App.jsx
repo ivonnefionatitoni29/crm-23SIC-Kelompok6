@@ -4,6 +4,8 @@ import MainLayout from './components/MainLayout'
 import ProductManagement from './pages/Produk'
 import FAQ from './pages/FAQ'
 import Loyalitaspelanggan from './pages/Loyalitaspelanggan'
+import Kebiri from './pages/Kebiri'
+import Beli from './pages/Beli'
 
 function App() {
 
@@ -14,6 +16,10 @@ function App() {
       <Route path ="/faq" element={<FAQ />} />
       <Route path ="/produk" element={<ProductManagement />} />
       <Route path ="/loyalitaspelanggan" element={<Loyalitaspelanggan/>} />
+      <Route path ="/penjualan" element={<SalesManagement/>} />
+      <Route path ="/kebiri" element={<Kebiri/>} />
+      <Route path ="/jualbeli" element={<Beli/>} />
+      
       </Route>
     </Routes>
   )
