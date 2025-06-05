@@ -1,8 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
-
 import Dashboard from './pages/Dashboard';
-import ProductManagement from './pages/Produk';
 import Penitipan from './pages/Penitipan';
 import Vaksinasi from './pages/Vaksinasi';
 import LandingPage from './pages/LandingPage';
@@ -19,7 +17,6 @@ function App() {
       {/* Halaman yang memakai layout utama */}
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/produk" element={<ProductManagement />} />
         <Route path="/penitipan" element={<Penitipan />} />
         <Route path="/vaksinasi" element={<Vaksinasi />} />
       </Route>
