@@ -1,5 +1,4 @@
 import { GiRoyalLove } from "react-icons/gi"; 
-import { MdOutlineLoyalty } from "react-icons/md"; 
 import {
   LayoutDashboard,
 
