@@ -1,7 +1,6 @@
 import Dashboard from './pages/Dashboard'
 import {Routes, Route} from 'react-router-dom'
 import MainLayout from './components/MainLayout'
-import ProductManagement from './pages/Produk'
 import FAQ from './pages/FAQ'
 import Loyalitaspelanggan from './pages/Loyalitaspelanggan'
 import Kebiri from './pages/Kebiri'
@@ -14,9 +13,7 @@ function App() {
       <Route element={<MainLayout />}>
       <Route path ="/" element={<Dashboard />} />
       <Route path ="/faq" element={<FAQ />} />
-      <Route path ="/produk" element={<ProductManagement />} />
       <Route path ="/loyalitaspelanggan" element={<Loyalitaspelanggan/>} />
-      <Route path ="/penjualan" element={<SalesManagement/>} />
       <Route path ="/kebiri" element={<Kebiri/>} />
       <Route path ="/jualbeli" element={<Beli/>} />
       

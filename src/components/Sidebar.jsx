@@ -16,10 +16,8 @@ import { Link, useLocation } from 'react-router-dom'
 
 const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
-  { name: 'Produk', icon: <Box />, path: '/produk' },
   { name: 'FAQ', icon: <User />, path: '/faq' },
   { name: 'LoyalitasPelanggan', icon: <GiRoyalLove />, path: '/loyalitaspelanggan' },
-  { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
 {
   name: 'kebiri',
   icon: <img src={iconKebiri} alt="kebiri" className="w-5 h-5" />,
