@@ -1,9 +1,9 @@
 import { RiHospitalFill } from "react-icons/ri"; 
 import { RiHotelFill } from "react-icons/ri"; 
+import { GiRoyalLove } from "react-icons/gi"; 
 import {
   LayoutDashboard,
-  Users,         // untuk pelanggan
-  ShoppingCart,  // untuk penjualan
+
   Box,           // untuk produk
   BarChart2,     // untuk laporan
   Settings,      // untuk pengaturan akun
@@ -12,6 +12,8 @@ import {
   UserPlus,
   CarTaxiFront,
 } from 'lucide-react'
+import iconKebiri from '../assets/iconKebiri.png';
+import cart from '../assets/cart.png';
 import { Link, useLocation } from 'react-router-dom'
 
 const menuItems = [
@@ -19,6 +21,23 @@ const menuItems = [
   { name: 'Penitipan Hewan', icon: <RiHotelFill /> , path: '/penitipan' },
   { name: 'Vaksinasi', icon: <RiHospitalFill /> , path: '/vaksinasi' },
 ]
+  { name: 'FAQ', icon: <User />, path: '/faq' },
+  { name: 'LoyalitasPelanggan', icon: <GiRoyalLove />, path: '/loyalitaspelanggan' },
+{
+  name: 'kebiri',
+  icon: <img src={iconKebiri} alt="kebiri" className="w-5 h-5" />,
+  path: '/kebiri'
+},
+
+    {
+  name: 'Jual Beli',
+  icon: <img src={cart} alt="kebiri" className="w-5 h-5" />,
+  path: '/jualbeli'
+},
+
+
+
+] 
 
 const accountItems = [
   { name: 'Pengaturan Akun', icon: <Settings />, path: '/akun' },
@@ -34,6 +53,7 @@ const Sidebar = () => {
   return (
     <aside className="bg-white w-64 h-screen shadow-lg px-4 py-6 hidden md:block">
       <div className="text-xl font-bold mb-8 text-purple-700">KLINIK HEWAN</div>
+      <div className="text-xl font-bold mb-8 text-purple-700">GROOVY VETCARE</div>
       <nav className="space-y-1">
         {menuItems.map((item) => (
           <Link
