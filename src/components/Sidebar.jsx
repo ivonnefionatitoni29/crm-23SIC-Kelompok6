@@ -1,7 +1,8 @@
+import { GiRoyalLove } from "react-icons/gi"; 
+import { MdOutlineLoyalty } from "react-icons/md"; 
 import {
   LayoutDashboard,
-  Users,         // untuk pelanggan
-  ShoppingCart,  // untuk penjualan
+
   Box,           // untuk produk
   BarChart2,     // untuk laporan
   Settings,      // untuk pengaturan akun
@@ -15,8 +16,8 @@ import { Link, useLocation } from 'react-router-dom'
 const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
   { name: 'Produk', icon: <Box />, path: '/produk' },
-  { name: 'Pelanggan', icon: <User />, path: '/CustomerManagement' },
-  { name: 'Penjualan', icon: <CarTaxiFront />, path: '/penjualan' },
+  { name: 'FAQ', icon: <User />, path: '/faq' },
+  { name: 'LoyalitasPelanggan', icon: <GiRoyalLove />, path: '/loyalitaspelanggan' },
   { name: 'Laporan', icon: <BarChart2 />, path: '/laporan' },
 ]
 
