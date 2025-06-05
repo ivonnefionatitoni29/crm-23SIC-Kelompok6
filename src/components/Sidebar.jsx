@@ -19,7 +19,6 @@ const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard />, path: '/' },
   { name: 'Penitipan Hewan', icon: <RiHotelFill />, path: '/penitipan' },
   { name: 'Vaksinasi', icon: <RiHospitalFill />, path: '/vaksinasi' },
-  { name: 'Produk', icon: <Box />, path: '/produk' },
   { name: 'FAQ', icon: <User />, path: '/faq' },
   { name: 'LoyalitasPelanggan', icon: <GiRoyalLove />, path: '/loyalitaspelanggan' },
   {
