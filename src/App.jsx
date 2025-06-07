@@ -11,15 +11,27 @@ import FAQ from './pages/FAQ';
 import Loyalitaspelanggan from './pages/Loyalitaspelanggan';
 import Kebiri from './pages/Kebiri';
 import Beli from './pages/Beli';
+import HomeUser from './pages/Homeuser';
+
+// ✅ Tambahkan import untuk form user
+import FormPenitipan from './pages/FormPenitipan';
+import FormKebiri from './pages/FormKebiri';
+import FormVaksinasi from './pages/FormVaksinasi';
 
 function App() {
   return (
     <Routes>
-      {/* Halaman depan & login di luar layout utama */}
+      {/* Halaman publik */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/homeuser" element={<HomeUser />} />
 
-      {/* Halaman yang memakai layout utama dan butuh autentikasi */}
+      {/* ✅ Rute form layanan untuk user */}
+      <Route path="/form-penitipan" element={<FormPenitipan />} />
+      <Route path="/form-kebiri" element={<FormKebiri />} />
+      <Route path="/form-vaksinasi" element={<FormVaksinasi />} />
+
+      {/* Halaman admin dengan layout dan autentikasi */}
       <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/penitipan" element={<Penitipan />} />
