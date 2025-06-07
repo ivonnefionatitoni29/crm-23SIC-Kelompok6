@@ -82,40 +82,13 @@ const Dashboard = () => {
   }, []);
 
   const stats = [
-    {
-      label: "Pelanggan Baru",
-      value: 312,
-      percent: 12,
-      colorFrom: "from-blue-500",
-      colorTo: "to-blue-700",
-      icon: <User className="w-7 h-7 text-white" />,
-    },
-    {
-      label: "Reservasi Bulan Ini",
-      value: 985,
-      percent: 8,
-      colorFrom: "from-green-400",
-      colorTo: "to-green-600",
-      icon: <PawPrint className="w-7 h-7 text-white" />,
-    },
-    {
-      label: "Produk Terjual",
-      value: 1240,
-      percent: 10,
-      colorFrom: "from-purple-500",
-      colorTo: "to-purple-700",
-      icon: <ShoppingBag className="w-7 h-7 text-white" />,
-    },
-    {
-      label: "Rata-rata Poin Loyalitas",
-      value: 145,
-      percent: 5,
-      colorFrom: "from-yellow-400",
-      colorTo: "to-yellow-600",
-      icon: <Star className="w-7 h-7 text-white" />,
-    },
-  ];
+    { label: "Pendapatan Hari Ini", value: "$53,000", percent: "+55%", color: "green" },
+    { label: "Pengguna Hari Ini", value: "2,300", percent: "+3%", color: "blue" },
+    { label: "Klien Baru", value: "+3,462", percent: "-2%", color: "red" },
+    { label: "Penjualan", value: "$103,430", percent: "+5%", color: "purple" },
+  ]
 
+  // Data untuk grafik Penjualan Bulanan (Bar Chart)
   const barData = {
     labels: [
       "Jan",
@@ -133,13 +106,9 @@ const Dashboard = () => {
     ],
     datasets: [
       {
-        label: "Total Reservasi",
-        data: [
-          430, 520, 610, 700, 760, 850, 910, 980, 1020, 1110, 1190, 1250,
-        ],
-        backgroundColor: "rgba(34, 197, 94, 0.8)",
-        borderRadius: 8,
-        maxBarThickness: 20,
+        label: "Penjualan (dalam ribuan $)",
+        data: [12, 19, 14, 17, 22, 30, 28, 26, 32, 35, 40, 45],
+        backgroundColor: "rgba(99, 102, 241, 0.7)", // purple-600
       },
     ],
   };
@@ -148,33 +117,12 @@ const Dashboard = () => {
     responsive: true,
     interaction: { mode: "nearest", axis: "x", intersect: false },
     plugins: {
-      legend: { position: "top", labels: { font: { weight: "bold" } } },
-      title: {
-        display: true,
-        text: "Reservasi Layanan per Bulan",
-        font: { size: 18, weight: "bold" },
-        padding: { bottom: 20 },
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: "#111827",
-        titleFont: { weight: "bold" },
-        bodyFont: { weight: "medium" },
-      },
+      legend: { position: 'top' },
+      title: { display: true, text: 'Penjualan Bulanan Tahun Ini' },
     },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { stepSize: 200, color: "#4B5563" },
-        grid: { color: "#E5E7EB", borderDash: [5, 5] },
-      },
-      x: {
-        ticks: { color: "#4B5563" },
-        grid: { display: false },
-      },
-    },
-  };
+  }
 
+  // Data untuk grafik Pertumbuhan Pelanggan (Line Chart)
   const lineData = {
     labels: [
       "Jan",
@@ -192,15 +140,13 @@ const Dashboard = () => {
     ],
     datasets: [
       {
-        label: "Pelanggan Terdaftar",
-        data: [120, 220, 310, 420, 530, 650, 770, 850, 920, 1000, 1100, 1230],
-        borderColor: "rgba(59, 130, 246, 1)",
-        backgroundColor: "rgba(59, 130, 246, 0.25)",
+        label: "Jumlah Pelanggan",
+        data: [50, 75, 120, 180, 220, 260, 300, 350, 400, 430, 460, 500],
+        borderColor: "rgba(59, 130, 246, 1)", // blue-500
+        backgroundColor: "rgba(59, 130, 246, 0.3)",
         fill: true,
-        tension: 0.4,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        borderWidth: 3,
+        tension: 0.3,
+        pointRadius: 4,
       },
     ],
   };
@@ -209,32 +155,10 @@ const Dashboard = () => {
     responsive: true,
     interaction: { mode: "nearest", axis: "x", intersect: false },
     plugins: {
-      legend: { position: "top", labels: { font: { weight: "bold" } } },
-      title: {
-        display: true,
-        text: "Pertumbuhan Pelanggan Groovy VetCare",
-        font: { size: 18, weight: "bold" },
-        padding: { bottom: 20 },
-      },
-      tooltip: {
-        enabled: true,
-        backgroundColor: "#111827",
-        titleFont: { weight: "bold" },
-        bodyFont: { weight: "medium" },
-      },
+      legend: { position: 'top' },
+      title: { display: true, text: 'Pertumbuhan Pelanggan Tahun Ini' },
     },
-    scales: {
-      y: {
-        beginAtZero: true,
-        ticks: { color: "#4B5563" },
-        grid: { color: "#E5E7EB", borderDash: [5, 5] },
-      },
-      x: {
-        ticks: { color: "#4B5563" },
-        grid: { display: false },
-      },
-    },
-  };
+  }
 
   return (
     <div className="p-8 min-h-screen bg-gradient-to-br from-indigo-50 to-white space-y-10">
