@@ -82,13 +82,40 @@ const Dashboard = () => {
   }, []);
 
   const stats = [
-    { label: "Pendapatan Hari Ini", value: "$53,000", percent: "+55%", color: "green" },
-    { label: "Pengguna Hari Ini", value: "2,300", percent: "+3%", color: "blue" },
-    { label: "Klien Baru", value: "+3,462", percent: "-2%", color: "red" },
-    { label: "Penjualan", value: "$103,430", percent: "+5%", color: "purple" },
-  ]
+    {
+      label: "Pelanggan Baru",
+      value: 312,
+      percent: 12,
+      colorFrom: "from-blue-500",
+      colorTo: "to-blue-700",
+      icon: <User className="w-7 h-7 text-white" />,
+    },
+    {
+      label: "Reservasi Bulan Ini",
+      value: 985,
+      percent: 8,
+      colorFrom: "from-green-400",
+      colorTo: "to-green-600",
+      icon: <PawPrint className="w-7 h-7 text-white" />,
+    },
+    {
+      label: "Produk Terjual",
+      value: 1240,
+      percent: 10,
+      colorFrom: "from-purple-500",
+      colorTo: "to-purple-700",
+      icon: <ShoppingBag className="w-7 h-7 text-white" />,
+    },
+    {
+      label: "Rata-rata Poin Loyalitas",
+      value: 145,
+      percent: 5,
+      colorFrom: "from-yellow-400",
+      colorTo: "to-yellow-600",
+      icon: <Star className="w-7 h-7 text-white" />,
+    },
+  ];
 
-  // Data untuk grafik Penjualan Bulanan (Bar Chart)
   const barData = {
     labels: [
       "Jan",
