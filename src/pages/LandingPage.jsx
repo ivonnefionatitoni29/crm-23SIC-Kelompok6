@@ -5,7 +5,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    navigate("/Dashboard"); 
+    navigate("/homeuser"); 
   };
 
   return (
@@ -37,7 +37,7 @@ export default function HomePage() {
             onClick={handleLogin}
             className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-800 transition"
           >
-            Masuk ke Dashboard
+            Masuk ke Home
           </button>
         </div>
 
