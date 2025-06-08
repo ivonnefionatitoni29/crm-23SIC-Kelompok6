@@ -1,35 +1,51 @@
-import { Search, User } from 'lucide-react'
+import { useLocation } from 'react-router-dom';
+import { Search, User } from 'lucide-react';
 
 const Header = () => {
+  const location = useLocation();
+
+  // Fungsi buat breadcrumb dinamis dari path
+  const generateBreadcrumb = () => {
+    const pathParts = location.pathname.split('/').filter(Boolean);
+
+    if (pathParts.length === 0) return 'Dashboard';
+
+    return pathParts.map((part, idx) => {
+      // Ganti dash (-) dengan spasi, huruf pertama kapital
+      const label = part
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+
+      return (
+        <span key={idx}>
+          {label}
+          {idx < pathParts.length - 1 && ' / '}
+        </span>
+      );
+    });
+  };
+
   return (
-    <header className="flex justify-between items-center px-6 py-4 bg-white shadow-sm border-b sticky top-0 z-10">
-      <div className="text-sm text-gray-500">Pages / <span className="text-gray-900 font-semibold">Dashboard</span></div>
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Type here..."
-            className="px-4 py-2 pl-10 text-sm border rounded-full focus:outline-none"
-          />
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-        </div>
-        <div className="flex items-center gap-2 text-sm cursor-pointer text-gray-700 hover:text-purple-700">
-          <User className="w-4 h-4" />
-          Sign In
-        </div>
+    <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md border-b sticky top-0 z-20">
+      {/* Breadcrumb / Page Title */}
+      <div className="text-sm text-gray-600">
+        Pages / <span className="text-green-700 font-semibold">{generateBreadcrumb()}</span>
       </div>
+
+
+      {/* Logout button */}
       <button
         onClick={() => {
           localStorage.removeItem("isLoggedIn");
           window.location.href = "/login";
         }}
-        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        className="ml-6 px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 shadow-md transition"
+        aria-label="Logout"
       >
         Logout
       </button>
-
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

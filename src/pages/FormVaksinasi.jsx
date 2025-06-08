@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const FormVaksinasi = () => {
+const FormVaksinasi = ({ onSubmit }) => {
   const [form, setForm] = useState({
     namaHewan: '',
     namaVaksin: '',
@@ -13,7 +13,14 @@ const FormVaksinasi = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log('Data Vaksinasi:', form)
+    if (onSubmit) {
+      onSubmit(form)
+    }
+    setForm({
+      namaHewan: '',
+      namaVaksin: '',
+      tanggal: '',
+    })
   }
 
   return (
@@ -23,11 +30,32 @@ const FormVaksinasi = () => {
           Form Vaksinasi Hewan
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <input name="namaHewan" placeholder="Nama Hewan" className="w-full p-2 border rounded" onChange={handleChange} />
-          <input name="namaVaksin" placeholder="Nama Vaksin" className="w-full p-2 border rounded" onChange={handleChange} />
-          <input name="tanggal" type="date" className="w-full p-2 border rounded" onChange={handleChange} />
+          <input
+            name="namaHewan"
+            placeholder="Nama Hewan"
+            className="w-full p-2 border rounded"
+            value={form.namaHewan}
+            onChange={handleChange}
+          />
+          <input
+            name="namaVaksin"
+            placeholder="Nama Vaksin"
+            className="w-full p-2 border rounded"
+            value={form.namaVaksin}
+            onChange={handleChange}
+          />
+          <input
+            name="tanggal"
+            type="date"
+            className="w-full p-2 border rounded"
+            value={form.tanggal}
+            onChange={handleChange}
+          />
 
-          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700"
+          >
             Kirim
           </button>
         </form>

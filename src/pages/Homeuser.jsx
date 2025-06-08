@@ -28,7 +28,18 @@ const HomeUser = () => {
   }, []);
 
   const userPoints = 150;
+  const maxPoints = 200; // Max poin untuk Gold
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
+
+  // Warna dan style badge sesuai level
+  const loyaltyColors = {
+    Bronze: 'bg-yellow-500 text-yellow-900',
+    Silver: 'bg-gray-300 text-gray-800',
+    Gold: 'bg-yellow-400 text-yellow-900',
+  };
+
+  // Persentase progress bar
+  const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
 
   return (
     <div className="font-sans text-gray-800">
@@ -50,7 +61,7 @@ const HomeUser = () => {
         </div>
       </header>
 
-      {/* Hero Image */}
+      {/* Hero Section */}
       <section className="relative">
         <img
           src={images[currentSlide]}
@@ -66,16 +77,39 @@ const HomeUser = () => {
         </div>
       </section>
 
-      {/* Loyalty Info */}
-      <section className="bg-white py-6 border-b border-gray-200">
-        <div className="container mx-auto text-center">
-          <h3 className="text-xl font-bold">Poin Loyalitas Kamu</h3>
-          <p className="text-lg">Total Poin: <span className="font-semibold text-green-600">{userPoints}</span></p>
-          <p className="text-base">Status: <span className="font-semibold">{loyaltyLevel}</span></p>
+      {/* Loyalty Info - Diperbarui */}
+      <section className="bg-white py-8 border-b border-gray-200">
+        <div className="container mx-auto max-w-md mx-auto text-center">
+          <h3 className="text-2xl font-bold mb-4 text-green-700">Poin Loyalitas Kamu</h3>
+          <div className="mb-4 text-6xl font-extrabold text-green-600">
+            {userPoints} <span className="text-2xl font-medium text-gray-500">pts</span>
+          </div>
+          <div className="mb-4">
+            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
+              <div
+                className={`h-6 rounded-full transition-all duration-1000 ease-in-out ${loyaltyColors[loyaltyLevel]}`}
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <p className="mt-2 text-gray-700">
+              Kamu sedang berada di level{' '}
+              <span className={`font-semibold px-3 py-1 rounded ${loyaltyColors[loyaltyLevel]}`}>
+                {loyaltyLevel}
+              </span>
+            </p>
+            {loyaltyLevel !== 'Gold' && (
+              <p className="mt-1 text-sm text-gray-500">
+                Kumpulkan <strong>{maxPoints - userPoints}</strong> poin lagi untuk naik ke level berikutnya!
+              </p>
+            )}
+            {loyaltyLevel === 'Gold' && (
+              <p className="mt-1 text-sm text-yellow-700 font-semibold">Selamat! Kamu sudah di level tertinggi 🎉</p>
+            )}
+          </div>
         </div>
       </section>
 
-      {/* Layanan Cards */}
+      {/* Layanan */}
       <section id="layanan" className="py-12 bg-gray-50">
         <div className="container mx-auto text-center">
           <h3 className="text-2xl font-bold mb-8">Layanan Kami</h3>
@@ -117,28 +151,111 @@ const HomeUser = () => {
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
-          <h3 className="text-2xl font-bold text-center mb-8">Pertanyaan Umum (FAQ)</h3>
-          <div className="space-y-6 text-left">
-            <div>
-              <h4 className="font-semibold">Apa saja jenis hewan yang bisa ditangani?</h4>
-              <p>Kami melayani berbagai jenis hewan peliharaan seperti anjing, kucing, kelinci, dan hewan kecil lainnya.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold">Apakah bisa reservasi tanpa login?</h4>
-              <p>Reservasi memerlukan akun agar data hewan dan layanan dapat tercatat dengan baik.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold">Apakah tersedia layanan darurat?</h4>
-              <p>Saat ini layanan darurat tersedia khusus untuk pelanggan loyal. Hubungi kami untuk info lebih lanjut.</p>
-            </div>
+          <h3 className="text-3xl font-bold text-center mb-8 text-green-700">Pertanyaan Umum (FAQ)</h3>
+          <div className="space-y-4 text-left">
+            {[
+              {
+                question: "Apa saja jenis hewan yang bisa ditangani?",
+                answer: "Kami melayani berbagai jenis hewan peliharaan seperti anjing, kucing, kelinci, dan hewan kecil lainnya.",
+              },
+              {
+                question: "Apakah bisa reservasi tanpa login?",
+                answer: "Reservasi memerlukan akun agar data hewan dan layanan dapat tercatat dengan baik.",
+              },
+              {
+                question: "Apakah tersedia layanan darurat?",
+                answer: "Saat ini layanan darurat tersedia khusus untuk pelanggan loyal. Hubungi kami untuk info lebih lanjut.",
+              },
+            ].map(({ question, answer }, idx) => (
+              <details
+                key={idx}
+                className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
+              >
+                <summary className="cursor-pointer font-semibold text-green-800 flex items-center gap-2">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                  </svg>
+                  {question}
+                </summary>
+                <p className="mt-2 text-green-900 text-sm leading-relaxed">{answer}</p>
+              </details>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-100 text-center py-6 text-sm">
-        <p>&copy; 2025 Groovy VetCare. All rights reserved.</p>
-        <p className="mt-1">Kontak: 08xx-xxxx-xxxx | Jl. Kesehatan No.123</p>
+      <footer className="bg-green-700 text-white py-10 px-6 text-sm">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+
+          {/* Info Klinik */}
+          <div>
+            <h3 className="text-xl font-bold mb-3">Groovy Vetcare Clinic</h3>
+            <p className="mb-1">Ruko Galeri Niaga No. 9F-G</p>
+            <p className="mb-1">Jl. Haji Nawi Raya, Kel. Gandaria Selatan,</p>
+            <p className="mb-2">Kec. Cilandak, Jakarta Selatan</p>
+            <div className="space-y-1">
+              <p>📞 +6221-7280-0617</p>
+              <p>📱 +62 811-4110-440</p>
+              <p>📧 groovyvetcare@medivet.pet</p>
+            </div>
+            <a
+              href="https://maps.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-pink-600 mt-4 px-4 py-2 rounded-full font-semibold hover:bg-pink-700 transition"
+            >
+              📍 Google Maps Direction
+            </a>
+          </div>
+
+          {/* Tentang Kami */}
+          <div className="md:col-span-2">
+            <h3 className="text-xl font-bold mb-3">Tentang Kami</h3>
+            <p className="mb-3">Groovy Vetcare Clinic adalah bagian dari jaringan MEDIVET Pet Hospital & Clinic Network.</p>
+            <p>
+              Kami juga bagian dari Groovy Group yang berfokus pada layanan hewan seperti Pet Shop, Klinik, Transportasi Hewan,
+              Pet Hotel, dan Cat Cafe.
+            </p>
+          </div>
+
+          {/* Jam Layanan */}
+          <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
+            <h3 className="text-2xl font-bold text-green-700 mb-4 flex items-center justify-center gap-2">
+              🕒 Service Hours
+            </h3>
+            <ul className="text-sm divide-y divide-gray-200">
+              <li className="flex justify-between py-2">
+                <span className="font-medium">📅 Monday – Saturday</span>
+                <span className="text-gray-700">09:00 - 19:30 WIB</span>
+              </li>
+              <li className="flex justify-between py-2">
+                <span className="font-medium">📅 Sunday</span>
+                <span className="text-gray-700">10:00 - 15:30 WIB</span>
+              </li>
+              <li className="flex justify-between py-2">
+                <span className="font-medium">📅 National Holidays</span>
+                <span className="text-gray-700">10:00 - 15:30 WIB</span>
+              </li>
+            </ul>
+            <div className="mt-5 bg-red-600 text-white text-center p-4 rounded-lg">
+              <p className="font-bold text-base">🚨 Emergency Service 24 Hours</p>
+              <p className="text-sm mt-1 italic text-gray-100">Temporarily Unavailable</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Credit */}
+        <div className="mt-8 text-center text-xs text-white/80">
+          &copy; 2025 Groovy Vetcare. All rights reserved.
+        </div>
       </footer>
     </div>
   );

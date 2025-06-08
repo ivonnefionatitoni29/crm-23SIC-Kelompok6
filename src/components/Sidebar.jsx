@@ -1,12 +1,6 @@
 import { RiHospitalFill, RiHotelFill } from "react-icons/ri";
 import { GiRoyalLove } from "react-icons/gi";
-import {
-  LayoutDashboard,
-  Settings,
-  User,
-  LogIn,
-  UserPlus,
-} from 'lucide-react';
+import { LayoutDashboard, User } from 'lucide-react';
 
 import iconKebiri from '../assets/iconKebiri.png';
 import cart from '../assets/cart.png';
@@ -22,12 +16,6 @@ const menuItems = [
   { name: 'Jual Beli', icon: <img src={cart} alt="jual beli" className="w-5 h-5" />, path: '/jualbeli' },
 ];
 
-const accountItems = [
-  { name: 'Pengaturan Akun', icon: <Settings />, path: '/akun' },
-  { name: 'Sign In', icon: <LogIn />, path: '/signin' },
-  { name: 'Sign Up', icon: <UserPlus />, path: '/signup' },
-];
-
 const Sidebar = () => {
   const location = useLocation();
   const isActive = (path) => location.pathname === path;
@@ -41,27 +29,9 @@ const Sidebar = () => {
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-purple-100 transition ${
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-green-100 transition ${
               isActive(item.path)
-                ? 'bg-purple-200 text-purple-800 font-semibold'
-                : 'text-gray-700'
-            }`}
-          >
-            <span className="w-5 h-5">{item.icon}</span>
-            {item.name}
-          </Link>
-        ))}
-      </nav>
-
-      <div className="mt-8 text-xs font-semibold text-gray-500">AKUN</div>
-      <nav className="mt-2 space-y-1">
-        {accountItems.map((item) => (
-          <Link
-            key={item.name}
-            to={item.path}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-purple-100 transition ${
-              isActive(item.path)
-                ? 'bg-purple-200 text-purple-800 font-semibold'
+                ? 'bg-green-200 text-green-800 font-semibold'
                 : 'text-gray-700'
             }`}
           >

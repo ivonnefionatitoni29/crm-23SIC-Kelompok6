@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white text-gray-800 font-sans">
       <header className="bg-green-700 text-white py-6 shadow-md">
         <div className="max-w-6xl mx-auto px-4">
-          <h1 className="text-3xl font-bold">Klinik Hewan Groovy Petcare</h1>
+          <h1 className="text-3xl font-bold">Klinik Hewan Groovy Vetcare</h1>
         </div>
       </header>
 

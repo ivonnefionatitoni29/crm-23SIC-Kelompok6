@@ -7,15 +7,14 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-  // validasi login
-  if (username === "admin" && password === "1234") {
-    localStorage.setItem("isLoggedIn", "true");
-    navigate("/dashboard"); // arahkan ke dashboard
-  } else {
-    alert("Username atau password salah!");
-  }
-};
-
+    // validasi login
+    if (username === "admin" && password === "1234") {
+      localStorage.setItem("isLoggedIn", "true");
+      navigate("/dashboard"); // arahkan ke dashboard
+    } else {
+      alert("Username atau password salah!");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -24,20 +23,20 @@ export default function LoginPage() {
         <input
           type="text"
           placeholder="Username"
-          className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
           placeholder="Password"
-          className="w-full mb-6 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full mb-6 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
         <button
           onClick={handleLogin}
-          className="w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 transition"
+          className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
         >
           Masuk
         </button>
