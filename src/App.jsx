@@ -12,6 +12,8 @@ import Loyalitaspelanggan from './pages/Loyalitaspelanggan';
 import Kebiri from './pages/Kebiri';
 import Beli from './pages/Beli';
 import HomeUser from './pages/Homeuser';
+import PelangganJB from './pages/PelangganJB';
+
 
 // ✅ Tambahkan import untuk form user
 import FormPenitipan from './pages/FormPenitipan';
@@ -25,6 +27,8 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/homeuser" element={<HomeUser />} />
+      <Route path="/pelangganjb" element={<PelangganJB />} />
+
 
       {/* ✅ Rute form layanan untuk user */}
       <Route path="/form-penitipan" element={<FormPenitipan />} />
