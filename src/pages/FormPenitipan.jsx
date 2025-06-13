@@ -17,7 +17,6 @@ const FormPenitipan = () => {
     setData(stored)
   }, [])
 
-  // update otomatis jika ada perubahan localStorage dari tab lain
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === 'dataPenitipan') {
@@ -59,20 +58,41 @@ const FormPenitipan = () => {
         <div className="bg-green-600 text-white px-6 py-4 text-xl font-semibold">
           Form Penitipan Hewan
         </div>
+        <div className="px-6 pt-4 pb-2 text-gray-700 text-sm">
+          Silakan isi form penitipan hewan dengan lengkap. Setelah dikirim, reservasi Anda akan diproses oleh admin dan statusnya dapat Anda lihat di bawah form ini.
+        </div>
+
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <input name="nama" placeholder="Nama Hewan" className="w-full p-2 border rounded" value={form.nama} onChange={handleChange} />
-          <input name="jenis" placeholder="Jenis Hewan" className="w-full p-2 border rounded" value={form.jenis} onChange={handleChange} />
-          <input name="ras" placeholder="Ras Hewan" className="w-full p-2 border rounded" value={form.ras} onChange={handleChange} />
-          <input name="pemilik" placeholder="Nama Pemilik" className="w-full p-2 border rounded" value={form.pemilik} onChange={handleChange} />
+          <div>
+            <label className="block text-sm font-medium mb-1">Nama Hewan</label>
+            <input name="nama" className="w-full p-2 border rounded" value={form.nama} onChange={handleChange} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Jenis Hewan</label>
+            <input name="jenis" className="w-full p-2 border rounded" value={form.jenis} onChange={handleChange} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Ras Hewan</label>
+            <input name="ras" className="w-full p-2 border rounded" value={form.ras} onChange={handleChange} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Nama Pemilik</label>
+            <input name="pemilik" className="w-full p-2 border rounded" value={form.pemilik} onChange={handleChange} />
+          </div>
           <div className="flex gap-4">
-            <input name="checkIn" type="date" className="w-full p-2 border rounded" value={form.checkIn} onChange={handleChange} />
-            <input name="checkOut" type="date" className="w-full p-2 border rounded" value={form.checkOut} onChange={handleChange} />
+            <div className="w-1/2">
+              <label className="block text-sm font-medium mb-1">Tanggal Check-in</label>
+              <input name="checkIn" type="date" className="w-full p-2 border rounded" value={form.checkIn} onChange={handleChange} />
+            </div>
+            <div className="w-1/2">
+              <label className="block text-sm font-medium mb-1">Tanggal Check-out</label>
+              <input name="checkOut" type="date" className="w-full p-2 border rounded" value={form.checkOut} onChange={handleChange} />
+            </div>
           </div>
           <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Kirim</button>
         </form>
       </div>
 
-      {/* TABEL DATA */}
       <div className="max-w-5xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
         <h2 className="text-xl font-bold mb-4 text-green-700">Data Reservasi Saya</h2>
         <div className="overflow-x-auto">

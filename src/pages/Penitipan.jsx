@@ -26,6 +26,15 @@ export default function PetBoardingManagement() {
     localStorage.setItem("dataPenitipan", JSON.stringify(updated));
   };
 
+  const handleDelete = (id) => {
+    const confirmed = confirm("Yakin ingin menghapus data ini?");
+    if (!confirmed) return;
+
+    const updated = dataPenitipan.filter((item) => item.id !== id);
+    setDataPenitipan(updated);
+    localStorage.setItem("dataPenitipan", JSON.stringify(updated));
+  };
+
   return (
     <div className="min-h-screen bg-green-100 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
@@ -67,12 +76,18 @@ export default function PetBoardingManagement() {
                     {item.status}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-center">
+                <td className="px-4 py-2 text-center space-x-2">
                   <button
                     onClick={() => handleStatusChange(item.id)}
                     className="px-3 py-1 rounded text-white bg-green-600 hover:bg-green-700"
                   >
                     Ubah Status
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700"
+                  >
+                    Hapus
                   </button>
                 </td>
               </tr>

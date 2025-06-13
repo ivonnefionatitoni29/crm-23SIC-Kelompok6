@@ -4,10 +4,9 @@ const FormVaksinasi = () => {
   const [form, setForm] = useState({
     nama: '',
     jenis: '',
-    usia: '',
-    pemilik: '',
-    tanggal: '',
     vaksin: '',
+    jam: '',
+    tanggal: '',
   })
 
   const [data, setData] = useState([])
@@ -45,10 +44,9 @@ const FormVaksinasi = () => {
     setForm({
       nama: '',
       jenis: '',
-      usia: '',
-      pemilik: '',
-      tanggal: '',
       vaksin: '',
+      jam: '',
+      tanggal: '',
     })
   }
 
@@ -58,16 +56,67 @@ const FormVaksinasi = () => {
         <div className="bg-green-600 text-white px-6 py-4 text-xl font-semibold">
           Form Vaksinasi Hewan
         </div>
+        <div className="px-6 pt-4 pb-2 text-gray-700 text-sm">
+          Silakan isi form vaksinasi hewan dengan lengkap. Setelah dikirim, reservasi Anda akan diproses oleh admin dan statusnya dapat Anda lihat di bawah form ini.
+        </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <input name="nama" placeholder="Nama Hewan" className="w-full p-2 border rounded" value={form.nama} onChange={handleChange} />
-          <input name="jenis" placeholder="Jenis Hewan" className="w-full p-2 border rounded" value={form.jenis} onChange={handleChange} />
-          <input name="usia" placeholder="Usia Hewan" className="w-full p-2 border rounded" value={form.usia} onChange={handleChange} />
-          <input name="pemilik" placeholder="Nama Pemilik" className="w-full p-2 border rounded" value={form.pemilik} onChange={handleChange} />
-          <div className="flex gap-4">
-            <input name="tanggal" type="date" className="w-full p-2 border rounded" value={form.tanggal} onChange={handleChange} />
-            <input name="vaksin" placeholder="Jenis Vaksin" className="w-full p-2 border rounded" value={form.vaksin} onChange={handleChange} />
+          <div>
+            <label className="block mb-1 font-medium">Nama Hewan</label>
+            <input
+              name="nama"
+              className="w-full p-2 border rounded"
+              value={form.nama}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Kirim</button>
+          <div>
+            <label className="block mb-1 font-medium">Jenis Hewan</label>
+            <input
+              name="jenis"
+              className="w-full p-2 border rounded"
+              value={form.jenis}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">Jenis Vaksin</label>
+            <input
+              name="vaksin"
+              className="w-full p-2 border rounded"
+              value={form.vaksin}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="w-1/2">
+              <label className="block mb-1 font-medium">Jam Vaksin</label>
+              <input
+                name="jam"
+                type="time"
+                className="w-full p-2 border rounded"
+                value={form.jam}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="w-1/2">
+              <label className="block mb-1 font-medium">Tanggal Vaksin</label>
+              <input
+                name="tanggal"
+                type="date"
+                className="w-full p-2 border rounded"
+                value={form.tanggal}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+            Kirim
+          </button>
         </form>
       </div>
 
@@ -79,27 +128,25 @@ const FormVaksinasi = () => {
               <tr>
                 <th className="py-2 px-4 text-left">Nama</th>
                 <th className="py-2 px-4 text-left">Jenis</th>
-                <th className="py-2 px-4 text-left">Usia</th>
-                <th className="py-2 px-4 text-left">Pemilik</th>
-                <th className="py-2 px-4 text-left">Tanggal</th>
                 <th className="py-2 px-4 text-left">Vaksin</th>
+                <th className="py-2 px-4 text-left">Jam</th>
+                <th className="py-2 px-4 text-left">Tanggal</th>
                 <th className="py-2 px-4 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
               {data.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="text-center py-4 text-gray-500">Belum ada data vaksinasi.</td>
+                  <td colSpan="6" className="text-center py-4 text-gray-500">Belum ada data vaksinasi.</td>
                 </tr>
               )}
               {data.map((item) => (
                 <tr key={item.id} className="border-t">
                   <td className="py-2 px-4">{item.nama}</td>
                   <td className="py-2 px-4">{item.jenis}</td>
-                  <td className="py-2 px-4">{item.usia}</td>
-                  <td className="py-2 px-4">{item.pemilik}</td>
-                  <td className="py-2 px-4">{item.tanggal}</td>
                   <td className="py-2 px-4">{item.vaksin}</td>
+                  <td className="py-2 px-4">{item.jam}</td>
+                  <td className="py-2 px-4">{item.tanggal}</td>
                   <td className="py-2 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                       item.status === 'Diterima' ? 'bg-green-100 text-green-700'
