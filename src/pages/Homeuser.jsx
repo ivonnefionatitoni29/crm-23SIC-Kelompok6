@@ -21,11 +21,11 @@ const HomeUser = () => {
     navigate(path);
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
+   useEffect(() => {
+    const storedFaqs = localStorage.getItem("faqs");
+    if (storedFaqs) {
+      setFaqs(JSON.parse(storedFaqs));
+    }
   }, []);
 
   const userPoints = 150;
@@ -149,25 +149,19 @@ const HomeUser = () => {
         </div>
       </section>
 
+      
+
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
-        <div className="container mx-auto max-w-3xl">
-          <h3 className="text-3xl font-bold text-center mb-8 text-green-700">Pertanyaan Umum (FAQ)</h3>
-          <div className="space-y-4 text-left">
-            {[
-              {
-                question: "Apa saja jenis hewan yang bisa ditangani?",
-                answer: "Kami melayani berbagai jenis hewan peliharaan seperti anjing, kucing, kelinci, dan hewan kecil lainnya.",
-              },
-              {
-                question: "Apakah bisa reservasi tanpa login?",
-                answer: "Reservasi memerlukan akun agar data hewan dan layanan dapat tercatat dengan baik.",
-              },
-              {
-                question: "Apakah tersedia layanan darurat?",
-                answer: "Saat ini layanan darurat tersedia khusus untuk pelanggan loyal. Hubungi kami untuk info lebih lanjut.",
-              },
-            ].map(({ question, answer }, idx) => (
+      <div className="container mx-auto max-w-3xl">
+        <h3 className="text-3xl font-bold text-center mb-8 text-green-700">
+          Pertanyaan Umum (FAQ)
+        </h3>
+        <div className="space-y-4 text-left">
+          {faqs.length === 0 ? (
+            <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+          ) : (
+            faqs.map(({ question, answer }, idx) => (
               <details
                 key={idx}
                 className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
@@ -181,16 +175,23 @@ const HomeUser = () => {
                     stroke="currentColor"
                     strokeWidth={2}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                    />
                   </svg>
                   {question}
                 </summary>
-                <p className="mt-2 text-green-900 text-sm leading-relaxed">{answer}</p>
+                <p className="mt-2 text-green-900 text-sm leading-relaxed">
+                  {answer}
+                </p>
               </details>
-            ))}
-          </div>
+            ))
+          )}
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Footer */}
       <footer className="bg-green-700 text-white py-10 px-6 text-sm">

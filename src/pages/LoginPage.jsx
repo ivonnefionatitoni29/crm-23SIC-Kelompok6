@@ -7,45 +7,51 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-  // validasi login
-  if (username === "admin" && password === "1234") {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("username", username);
-    navigate("/dashboard"); // halaman admin
-  } else if (username === "user" && password === "1234") {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("username", username);
-    navigate("/homeuserlogin"); // halaman user
-  } else {
-    alert("Username atau password salah!");
-  }
-};
-
+    if (username === "admin" && password === "1234") {
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("username", username);
+      navigate("/dashboard");
+    } else if (username === "user" && password === "1234") {
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("username", username);
+      navigate("/homeuserlogin");
+    } else {
+      alert("Username atau password salah!");
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full mb-4 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full mb-6 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button
-          onClick={handleLogin}
-          className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition"
-        >
-          Masuk
-        </button>
+    <div className="min-h-screen bg-gradient-to-tr from-green-100 via-white to-green-200 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-green-100">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-green-700">Selamat Datang</h2>
+          <p className="text-sm text-gray-500 mt-2">Silakan login untuk melanjutkan</p>
+        </div>
+        <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Username"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            onClick={handleLogin}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"
+          >
+            Masuk
+          </button>
+        </div>
+        <p className="text-xs text-gray-400 text-center">
+          &copy; 2025 Groovy VetCare. All rights reserved.
+        </p>
       </div>
     </div>
   );
