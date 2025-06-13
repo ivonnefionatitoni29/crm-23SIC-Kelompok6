@@ -1,26 +1,53 @@
 import React, { useState } from "react";
 
 export default function RekapPembelian() {
-  const [dataPembelian, setDataPembelian] = useState([
-    {
-      id: 1,
-      namaItem: "Royal Canin Kitten",
+  const [dataPembelian, setDataPembelian] = useState([]);
+  const [formData, setFormData] = useState({
+    namaItem: "",
+    jenis: "Makanan",
+    tanggal: "",
+    harga: "",
+    jumlah: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleTambah = () => {
+    const { namaItem, jenis, tanggal, harga, jumlah } = formData;
+    if (!namaItem || !jenis || !tanggal || !harga || !jumlah) {
+      alert("Mohon lengkapi semua data pembelian!");
+      return;
+    }
+
+    const total = parseFloat(harga) * parseInt(jumlah);
+
+    setDataPembelian((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        namaItem,
+        jenis,
+        tanggal,
+        harga: parseFloat(harga),
+        jumlah: parseInt(jumlah),
+        total,
+      },
+    ]);
+
+    setFormData({
+      namaItem: "",
       jenis: "Makanan",
-      tanggal: "2025-06-10",
-      harga: 75000,
-      jumlah: 2,
-      total: 150000,
-    },
-    {
-      id: 2,
-      namaItem: "Obat Cacing Kucing",
-      jenis: "Obat",
-      tanggal: "2025-06-11",
-      harga: 30000,
-      jumlah: 1,
-      total: 30000,
-    },
-  ]);
+      tanggal: "",
+      harga: "",
+      jumlah: "",
+    });
+  };
 
   const handleHapus = (id) => {
     setDataPembelian(dataPembelian.filter((item) => item.id !== id));
@@ -30,8 +57,79 @@ export default function RekapPembelian() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Rekapan Pembelian Makanan & Obat Hewan</h1>
+      <h1 className="text-2xl font-bold mb-4">Rekapan Pembelian Makanan & Obat Hewan</h1>
 
+      {/* Form Input */}
+      <div className="mb-6 p-4 bg-white border rounded shadow">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium mb-1">Nama Item</label>
+            <input
+              type="text"
+              name="namaItem"
+              value={formData.namaItem}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded"
+              placeholder="Contoh: Obat Cacing"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Jenis</label>
+            <select
+              name="jenis"
+              value={formData.jenis}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded"
+            >
+              <option value="Makanan">Makanan</option>
+              <option value="Obat">Obat</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Tanggal Pembelian</label>
+            <input
+              type="date"
+              name="tanggal"
+              value={formData.tanggal}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Harga (Rp)</label>
+            <input
+              type="number"
+              name="harga"
+              value={formData.harga}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">Jumlah</label>
+            <input
+              type="number"
+              name="jumlah"
+              value={formData.jumlah}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded"
+            />
+          </div>
+        </div>
+
+        <button
+          onClick={handleTambah}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          Tambah ke Rekapan
+        </button>
+      </div>
+
+      {/* Tabel Rekapan */}
       <div className="overflow-x-auto bg-white rounded shadow">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -69,7 +167,7 @@ export default function RekapPembelian() {
             {dataPembelian.length === 0 && (
               <tr>
                 <td colSpan={8} className="text-center py-4 text-gray-500">
-                  Tidak ada data pembelian.
+                  Belum ada data pembelian.
                 </td>
               </tr>
             )}
