@@ -13,6 +13,7 @@ import Kebiri from './pages/Kebiri';
 import Beli from './pages/Beli';
 import HomeUser from './pages/Homeuser';
 import HomeUserLogin from './pages/HomeUserLogin';
+import PelangganJB from './pages/PelangganJB';
 
 // ✅ Tambahkan import untuk form user
 import FormPenitipan from './pages/FormPenitipan';
@@ -27,6 +28,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
+      <Route path="/pelangganjb" element={<PelangganJB />} />
+
 
       {/* ✅ Rute form layanan untuk user */}
       <Route path="/form-penitipan" element={<FormPenitipan />} />

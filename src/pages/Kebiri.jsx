@@ -1,203 +1,100 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function SalesManagement() {
-  const [sales, setSales] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    namaHewan: "",
-    jenis: "",
-    pemilik: "",
-    tanggalKebiri: "",
-    status: "Diterima",
-  });
+export default function AdminKebiri() {
+  const [dataKebiri, setDataKebiri] = useState([]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("dataKebiri")) || [];
+    setDataKebiri(stored);
+  }, []);
 
-  const handleAddSale = () => {
-    const { namaHewan, jenis, pemilik, tanggalKebiri, status } = formData;
-    if (!namaHewan || !jenis || !pemilik || !tanggalKebiri) {
-      alert("Semua field wajib diisi!");
-      return;
-    }
-    const newSale = {
-      id: Date.now(), // gunakan timestamp sebagai ID unik
-      ...formData,
-    };
-    setSales([...sales, newSale]);
-    setFormData({
-      namaHewan: "",
-      jenis: "",
-      pemilik: "",
-      tanggalKebiri: "",
-      status: "Diterima",
-    });
-    setShowForm(false);
+  const handleStatusChange = (id) => {
+    const updated = dataKebiri.map((item) =>
+      item.id === id
+        ? {
+            ...item,
+            status:
+              item.status === "Pending"
+                ? "Diterima"
+                : item.status === "Diterima"
+                ? "Ditolak"
+                : "Pending",
+          }
+        : item
+    );
+    setDataKebiri(updated);
+    localStorage.setItem("dataKebiri", JSON.stringify(updated));
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Yakin ingin menghapus reservasi ini?")) {
-      setSales(sales.filter((s) => s.id !== id));
-    }
+    const confirmed = confirm("Yakin ingin menghapus data ini?");
+    if (!confirmed) return;
+
+    const updated = dataKebiri.filter((item) => item.id !== id);
+    setDataKebiri(updated);
+    localStorage.setItem("dataKebiri", JSON.stringify(updated));
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Jadwal Reservasi Kebiri</h1>
-
-      <button
-        onClick={() => setShowForm((prev) => !prev)}
-        className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-      >
-        {showForm ? "Batal Reservasi Kebiri" : "Tambah Reservasi"}
-      </button>
-
-      {showForm && (
-        <div className="mb-6 p-4 border border-gray-300 rounded shadow-sm bg-white">
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Nama Hewan</label>
-            <input
-              type="text"
-              name="namaHewan"
-              value={formData.namaHewan}
-              onChange={handleInputChange}
-              placeholder="Misal: Kucing"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Jenis</label>
-            <input
-              type="text"
-              name="jenis"
-              value={formData.jenis}
-              onChange={handleInputChange}
-              placeholder="Misal: Anggora"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Pemilik</label>
-            <input
-              type="text"
-              name="pemilik"
-              value={formData.pemilik}
-              onChange={handleInputChange}
-              placeholder="Masukkan nama pemilik"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Tanggal Kebiri</label>
-            <input
-              type="date"
-              name="tanggalKebiri"
-              value={formData.tanggalKebiri}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Status</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              <option value="Diterima">Diterima</option>
-              <option value="Ditolak">Ditolak</option>
-            </select>
-          </div>
-
-          <button
-            onClick={handleAddSale}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-          >
-            Simpan
-          </button>
-        </div>
-      )}
-
-      <div className="overflow-x-auto bg-white rounded shadow">
+    <div className="min-h-screen bg-green-100 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-bold text-green-700 mb-4">
+          Manajemen Data Kebiri
+        </h2>
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                No
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nama Hewan
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Jenis
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Pemilik
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tanggal Kebiri
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Aksi
-              </th>
+              <th className="px-4 py-2 text-left">Nama</th>
+              <th className="px-4 py-2 text-left">Jenis Hewan</th>
+              <th className="px-4 py-2 text-left">Tanggal</th>
+              <th className="px-4 py-2 text-left">Jam</th>
+              <th className="px-4 py-2 text-center">Status</th>
+              <th className="px-4 py-2 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {sales.map((sale, index) => (
-              <tr key={sale.id} className="hover:bg-gray-50">
-                <td className="px-4 py-4 whitespace-nowrap">{index + 1}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{sale.namaHewan}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{sale.jenis}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{sale.pemilik}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  {sale.tanggalKebiri}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  <span
-                    className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
-                      sale.status === "Diterima"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {sale.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 font-semibold"
-                    onClick={() => alert("Fitur Edit belum tersedia")}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-900 font-semibold"
-                    onClick={() => handleDelete(sale.id)}
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {sales.length === 0 && (
+          <tbody className="divide-y divide-gray-100">
+            {dataKebiri.length === 0 ? (
               <tr>
-                <td colSpan={7} className="text-center py-4 text-gray-500">
-                  Tidak ada data reservasi kebiri
+                <td colSpan="6" className="text-center py-4 text-gray-500">
+                  Tidak ada data reservasi.
                 </td>
               </tr>
+            ) : (
+              dataKebiri.map((data) => (
+                <tr key={data.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-2">{data.nama}</td>
+                  <td className="px-4 py-2">{data.jenis}</td>
+                  <td className="px-4 py-2">{data.tanggal}</td>
+                  <td className="px-4 py-2">{data.jam}</td>
+                  <td className="px-4 py-2 text-center">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        data.status === "Diterima"
+                          ? "bg-green-100 text-green-700"
+                          : data.status === "Ditolak"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {data.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-center space-x-2">
+                    <button
+                      onClick={() => handleStatusChange(data.id)}
+                      className="px-3 py-1 rounded text-white bg-green-600 hover:bg-green-700"
+                    >
+                      Ubah Status
+                    </button>
+                    <button
+                      onClick={() => handleDelete(data.id)}
+                      className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700"
+                    >
+                      Hapus
+                    </button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>

@@ -1,46 +1,39 @@
 import { useLocation } from 'react-router-dom';
-import { Search, User } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
 
-  // Fungsi buat breadcrumb dinamis dari path
   const generateBreadcrumb = () => {
     const pathParts = location.pathname.split('/').filter(Boolean);
 
     if (pathParts.length === 0) return 'Dashboard';
 
-    return pathParts.map((part, idx) => {
-      // Ganti dash (-) dengan spasi, huruf pertama kapital
-      const label = part
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-
-      return (
-        <span key={idx}>
-          {label}
-          {idx < pathParts.length - 1 && ' / '}
-        </span>
-      );
-    });
+    return pathParts
+      .map((part) =>
+        part
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, (char) => char.toUpperCase())
+      )
+      .join(' / ');
   };
 
+  const currentPage = generateBreadcrumb();
+
   return (
-    <header className="flex justify-between items-center px-8 py-4 bg-white shadow-md border-b sticky top-0 z-20">
-      {/* Breadcrumb / Page Title */}
-      <div className="text-sm text-gray-600">
-        Pages / <span className="text-green-700 font-semibold">{generateBreadcrumb()}</span>
+    <header className="flex justify-between items-end px-8 py-4 bg-white shadow-md border-b sticky top-0 z-20">
+      {/* Breadcrumb as Title */}
+      <div className="flex flex-col">
+        <span className="text-sm text-gray-400">Pages</span>
+        <h1 className="text-xl font-semibold text-green-800">{currentPage}</h1>
       </div>
 
-
-      {/* Logout button */}
+      {/* Logout Button */}
       <button
         onClick={() => {
           localStorage.removeItem("isLoggedIn");
           window.location.href = "/login";
         }}
-        className="ml-6 px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 shadow-md transition"
-        aria-label="Logout"
+        className="px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 shadow transition"
       >
         Logout
       </button>

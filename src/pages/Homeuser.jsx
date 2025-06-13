@@ -118,7 +118,7 @@ const HomeUser = () => {
 
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage('/jualbeli')}
+              onClick={() => goToPage('/pelangganjb')}
               className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png" alt="Produk" className="w-20 mb-4" />

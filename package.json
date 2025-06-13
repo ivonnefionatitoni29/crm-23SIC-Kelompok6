@@ -36,6 +36,7 @@
     "postcss": "^8.5.4",
     "rollup": "^3.29.5",
     "tailwindcss": "^4.1.8",
+    "tailwindcss": "^4.1.10",
     "vite": "^6.3.5"
   }
 }
