@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
-export default function Kebiri() {
-  const [reservasi, setReservasi] = useState([]);
+export default function SalesManagement() {
+  const [sales, setSales] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     namaHewan: "",
@@ -19,17 +19,17 @@ export default function Kebiri() {
     }));
   };
 
-  const handleAddReservasi = () => {
+  const handleAddSale = () => {
     const { namaHewan, jenis, pemilik, tanggalKebiri, status } = formData;
     if (!namaHewan || !jenis || !pemilik || !tanggalKebiri) {
       alert("Semua field wajib diisi!");
       return;
     }
-    const newReservasi = {
-      id: Date.now(),
+    const newSale = {
+      id: Date.now(), // gunakan timestamp sebagai ID unik
       ...formData,
     };
-    setReservasi([...reservasi, newReservasi]);
+    setSales([...sales, newSale]);
     setFormData({
       namaHewan: "",
       jenis: "",
@@ -42,144 +42,162 @@ export default function Kebiri() {
 
   const handleDelete = (id) => {
     if (window.confirm("Yakin ingin menghapus reservasi ini?")) {
-      setReservasi(reservasi.filter((item) => item.id !== id));
+      setSales(sales.filter((s) => s.id !== id));
     }
   };
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <h1 className="text-3xl font-bold text-green-800 mb-6">Jadwal Reservasi Kebiri</h1>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h1 className="text-2xl font-semibold mb-4">Jadwal Reservasi Kebiri</h1>
 
       <button
         onClick={() => setShowForm((prev) => !prev)}
-        className="mb-6 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow"
+        className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
       >
-        {showForm ? "Batal Tambah Reservasi" : "Tambah Reservasi"}
+        {showForm ? "Batal Reservasi Kebiri" : "Tambah Reservasi"}
       </button>
 
       {showForm && (
-        <div className="mb-8 p-6 bg-white border border-gray-200 rounded-lg shadow-md space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <label className="block text-sm font-medium mb-1">Nama Hewan</label>
-              <input
-                type="text"
-                name="namaHewan"
-                value={formData.namaHewan}
-                onChange={handleInputChange}
-                placeholder="Contoh: Kucing"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Jenis</label>
-              <input
-                type="text"
-                name="jenis"
-                value={formData.jenis}
-                onChange={handleInputChange}
-                placeholder="Contoh: Persia"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Pemilik</label>
-              <input
-                type="text"
-                name="pemilik"
-                value={formData.pemilik}
-                onChange={handleInputChange}
-                placeholder="Nama Pemilik"
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Tanggal Kebiri</label>
-              <input
-                type="date"
-                name="tanggalKebiri"
-                value={formData.tanggalKebiri}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Status</label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              >
-                <option value="Diterima">Diterima</option>
-                <option value="Ditolak">Ditolak</option>
-              </select>
-            </div>
+        <div className="mb-6 p-4 border border-gray-300 rounded shadow-sm bg-white">
+          <div className="mb-2">
+            <label className="block font-medium mb-1">Nama Hewan</label>
+            <input
+              type="text"
+              name="namaHewan"
+              value={formData.namaHewan}
+              onChange={handleInputChange}
+              placeholder="Misal: Kucing"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
           </div>
+
+          <div className="mb-2">
+            <label className="block font-medium mb-1">Jenis</label>
+            <input
+              type="text"
+              name="jenis"
+              value={formData.jenis}
+              onChange={handleInputChange}
+              placeholder="Misal: Anggora"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          <div className="mb-2">
+            <label className="block font-medium mb-1">Pemilik</label>
+            <input
+              type="text"
+              name="pemilik"
+              value={formData.pemilik}
+              onChange={handleInputChange}
+              placeholder="Masukkan nama pemilik"
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          <div className="mb-2">
+            <label className="block font-medium mb-1">Tanggal Kebiri</label>
+            <input
+              type="date"
+              name="tanggalKebiri"
+              value={formData.tanggalKebiri}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            />
+          </div>
+
+          <div className="mb-4">
+            <label className="block font-medium mb-1">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            >
+              <option value="Diterima">Diterima</option>
+              <option value="Ditolak">Ditolak</option>
+            </select>
+          </div>
+
           <button
-            onClick={handleAddReservasi}
-            className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow"
+            onClick={handleAddSale}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
           >
-            Simpan Reservasi
+            Simpan
           </button>
         </div>
       )}
 
-      <div className="overflow-x-auto bg-white rounded-lg shadow">
-        <table className="min-w-full table-auto divide-y divide-gray-200">
-          <thead className="bg-gray-50 text-gray-700 text-sm">
+      <div className="overflow-x-auto bg-white rounded shadow">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left font-semibold">No</th>
-              <th className="px-6 py-3 text-left font-semibold">Nama Hewan</th>
-              <th className="px-6 py-3 text-left font-semibold">Jenis</th>
-              <th className="px-6 py-3 text-left font-semibold">Pemilik</th>
-              <th className="px-6 py-3 text-left font-semibold">Tanggal Kebiri</th>
-              <th className="px-6 py-3 text-center font-semibold">Status</th>
-              <th className="px-6 py-3 text-center font-semibold">Aksi</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                No
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Nama Hewan
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Jenis
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Pemilik
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Tanggal Kebiri
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Aksi
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 text-sm">
-            {reservasi.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="text-center py-6 text-gray-500">
-                  Tidak ada data reservasi kebiri.
+          <tbody className="divide-y divide-gray-200">
+            {sales.map((sale, index) => (
+              <tr key={sale.id} className="hover:bg-gray-50">
+                <td className="px-4 py-4 whitespace-nowrap">{index + 1}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{sale.namaHewan}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{sale.jenis}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{sale.pemilik}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-right">
+                  {sale.tanggalKebiri}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <span
+                    className={`inline-flex px-2 text-xs leading-5 font-semibold rounded-full ${
+                      sale.status === "Diterima"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {sale.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
+                  <button
+                    className="text-indigo-600 hover:text-indigo-900 font-semibold"
+                    onClick={() => alert("Fitur Edit belum tersedia")}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="text-red-600 hover:text-red-900 font-semibold"
+                    onClick={() => handleDelete(sale.id)}
+                  >
+                    Hapus
+                  </button>
                 </td>
               </tr>
-            ) : (
-              reservasi.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4">{item.namaHewan}</td>
-                  <td className="px-6 py-4">{item.jenis}</td>
-                  <td className="px-6 py-4">{item.pemilik}</td>
-                  <td className="px-6 py-4">{item.tanggalKebiri}</td>
-                  <td className="px-6 py-4 text-center">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        item.status === "Diterima"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center space-x-2">
-                    <button
-                      onClick={() => alert("Fitur edit belum tersedia.")}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item.id)}
-                      className="text-red-600 hover:underline font-medium"
-                    >
-                      Hapus
-                    </button>
-                  </td>
-                </tr>
-              ))
+            ))}
+            {sales.length === 0 && (
+              <tr>
+                <td colSpan={7} className="text-center py-4 text-gray-500">
+                  Tidak ada data reservasi kebiri
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
