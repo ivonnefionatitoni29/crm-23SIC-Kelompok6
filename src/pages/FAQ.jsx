@@ -1,54 +1,61 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const initialFAQs = [
-  {
-    id: 1,
-    question: "Bagaimana cara memesan produk?",
-    answer: "Anda bisa memesan produk melalui halaman pemesanan di website kami.",
-  },
-  {
-    id: 2,
-    question: "Apakah produk bergaransi?",
-    answer: "Ya, semua produk memiliki garansi resmi selama 1 tahun.",
-  },
-];
+const getInitialFaqs = () => {
+  const storedFaqs = localStorage.getItem("faqs");
+  return storedFaqs
+    ? JSON.parse(storedFaqs)
+    : [
+        {
+          id: 1,
+          question: "Bagaimana cara memesan produk?",
+          answer:
+            "Anda bisa memesan produk melalui halaman pemesanan di website kami.",
+        },
+        {
+          id: 2,
+          question: "Apakah produk bergaransi?",
+          answer: "Ya, semua produk memiliki garansi resmi selama 1 tahun.",
+        },
+      ];
+};
 
 export default function FAQ() {
-  const [faqs, setFaqs] = useState(initialFAQs);
+  const [faqs, setFaqs] = useState(getInitialFaqs);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    question: "",
-    answer: "",
-  });
+  const [formData, setFormData] = useState({ question: "", answer: "" });
   const [editId, setEditId] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem("faqs", JSON.stringify(faqs));
+  }, [faqs]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleAddFAQ = () => {
-    if (!formData.question || !formData.answer) {
-      alert("Pertanyaan dan jawaban harus diisi");
+    const trimmedQuestion = formData.question.trim();
+    const trimmedAnswer = formData.answer.trim();
+
+    if (!trimmedQuestion || !trimmedAnswer) {
+      alert("Pertanyaan dan jawaban harus diisi.");
       return;
     }
 
     if (editId !== null) {
-      // Edit mode: update existing FAQ
-      setFaqs((prev) =>
-        prev.map((faq) =>
-          faq.id === editId ? { ...faq, question: formData.question, answer: formData.answer } : faq
-        )
+      const updatedFaqs = faqs.map((faq) =>
+        faq.id === editId
+          ? { ...faq, question: trimmedQuestion, answer: trimmedAnswer }
+          : faq
       );
+      setFaqs(updatedFaqs);
       setEditId(null);
     } else {
-      // Add mode: tambah FAQ baru
       const newFAQ = {
-        ...formData,
         id: faqs.length > 0 ? Math.max(...faqs.map((f) => f.id)) + 1 : 1,
+        question: trimmedQuestion,
+        answer: trimmedAnswer,
       };
       setFaqs([...faqs, newFAQ]);
     }
@@ -59,8 +66,9 @@ export default function FAQ() {
 
   const handleDelete = (id) => {
     if (window.confirm("Yakin ingin menghapus FAQ ini?")) {
-      setFaqs(faqs.filter((f) => f.id !== id));
-      // Jika sedang edit item yang dihapus, batalkan edit
+      const updatedFaqs = faqs.filter((f) => f.id !== id);
+      setFaqs(updatedFaqs);
+
       if (editId === id) {
         setEditId(null);
         setShowForm(false);
@@ -105,6 +113,7 @@ export default function FAQ() {
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded focus:ring-indigo-400 focus:outline-none"
               placeholder="Masukkan pertanyaan"
+              autoFocus
             />
           </div>
           <div className="mb-4">
@@ -115,19 +124,20 @@ export default function FAQ() {
               onChange={handleChange}
               className="w-full px-3 py-2 border rounded focus:ring-indigo-400 focus:outline-none"
               placeholder="Masukkan jawaban"
+              rows={3}
             />
           </div>
 
           <div className="space-x-2">
             <button
               onClick={handleAddFAQ}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
             >
               {editId !== null ? "Simpan Perubahan" : "Simpan FAQ"}
             </button>
             <button
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
+              className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 transition"
             >
               Batal
             </button>
@@ -136,28 +146,29 @@ export default function FAQ() {
       )}
 
       <div className="bg-white shadow rounded divide-y">
-        {faqs.map((faq) => (
-          <div key={faq.id} className="p-4">
-            <h2 className="font-semibold text-lg">{faq.question}</h2>
-            <p className="text-gray-700 mt-1">{faq.answer}</p>
-            <div className="mt-2 text-sm text-right space-x-2">
-              <button
-                onClick={() => handleEdit(faq)}
-                className="text-indigo-600 hover:text-indigo-900"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(faq.id)}
-                className="text-red-600 hover:text-red-900"
-              >
-                Hapus
-              </button>
-            </div>
-          </div>
-        ))}
-        {faqs.length === 0 && (
+        {faqs.length === 0 ? (
           <div className="text-center py-4 text-gray-500">Belum ada FAQ.</div>
+        ) : (
+          faqs.map((faq) => (
+            <div key={faq.id} className="p-4">
+              <h2 className="font-semibold text-lg">{faq.question}</h2>
+              <p className="text-gray-700 mt-1">{faq.answer}</p>
+              <div className="mt-2 text-sm text-right space-x-2">
+                <button
+                  onClick={() => handleEdit(faq)}
+                  className="text-indigo-600 hover:text-indigo-900 transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={() => handleDelete(faq.id)}
+                  className="text-red-600 hover:text-red-900 transition"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>
