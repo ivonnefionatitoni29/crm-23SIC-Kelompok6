@@ -1,26 +1,37 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const initialFAQs = [
-  {
-    id: 1,
-    question: "Bagaimana cara memesan produk?",
-    answer: "Anda bisa memesan produk melalui halaman pemesanan di website kami.",
-  },
-  {
-    id: 2,
-    question: "Apakah produk bergaransi?",
-    answer: "Ya, semua produk memiliki garansi resmi selama 1 tahun.",
-  },
-];
+const getInitialFaqs = () => {
+  const storedFaqs = localStorage.getItem("faqs");
+  return storedFaqs
+    ? JSON.parse(storedFaqs)
+    : [
+        {
+          id: 1,
+          question: "Bagaimana cara memesan produk?",
+          answer:
+            "Anda bisa memesan produk melalui halaman pemesanan di website kami.",
+        },
+        {
+          id: 2,
+          question: "Apakah produk bergaransi?",
+          answer: "Ya, semua produk memiliki garansi resmi selama 1 tahun.",
+        },
+      ];
+};
 
 export default function FAQ() {
-  const [faqs, setFaqs] = useState(initialFAQs);
+  const [faqs, setFaqs] = useState(getInitialFaqs);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
     question: "",
     answer: "",
   });
   const [editId, setEditId] = useState(null);
+
+  // Simpan ke localStorage setiap kali faqs berubah
+  useEffect(() => {
+    localStorage.setItem("faqs", JSON.stringify(faqs));
+  }, [faqs]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,15 +48,16 @@ export default function FAQ() {
     }
 
     if (editId !== null) {
-      // Edit mode: update existing FAQ
-      setFaqs((prev) =>
-        prev.map((faq) =>
-          faq.id === editId ? { ...faq, question: formData.question, answer: formData.answer } : faq
-        )
+      // Edit mode
+      const updatedFaqs = faqs.map((faq) =>
+        faq.id === editId
+          ? { ...faq, question: formData.question, answer: formData.answer }
+          : faq
       );
+      setFaqs(updatedFaqs);
       setEditId(null);
     } else {
-      // Add mode: tambah FAQ baru
+      // Tambah mode
       const newFAQ = {
         ...formData,
         id: faqs.length > 0 ? Math.max(...faqs.map((f) => f.id)) + 1 : 1,
@@ -59,8 +71,8 @@ export default function FAQ() {
 
   const handleDelete = (id) => {
     if (window.confirm("Yakin ingin menghapus FAQ ini?")) {
-      setFaqs(faqs.filter((f) => f.id !== id));
-      // Jika sedang edit item yang dihapus, batalkan edit
+      const updatedFaqs = faqs.filter((f) => f.id !== id);
+      setFaqs(updatedFaqs);
       if (editId === id) {
         setEditId(null);
         setShowForm(false);

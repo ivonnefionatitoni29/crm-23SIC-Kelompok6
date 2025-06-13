@@ -7,14 +7,20 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    // validasi login
-    if (username === "admin" && password === "1234") {
-      localStorage.setItem("isLoggedIn", "true");
-      navigate("/dashboard"); // arahkan ke dashboard
-    } else {
-      alert("Username atau password salah!");
-    }
-  };
+  // validasi login
+  if (username === "admin" && password === "1234") {
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("username", username);
+    navigate("/dashboard"); // halaman admin
+  } else if (username === "user" && password === "1234") {
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("username", username);
+    navigate("/homeuserlogin"); // halaman user
+  } else {
+    alert("Username atau password salah!");
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

@@ -12,7 +12,7 @@
   "dependencies": {
     "chart.js": "^4.4.9",
     "date-fns": "^4.1.0",
-    "framer-motion": "^12.16.0",
+    "framer-motion": "^12.17.3",
     "icons": "^1.0.0",
     "lucide-react": "^0.511.0",
     "react": "^19.1.0",
