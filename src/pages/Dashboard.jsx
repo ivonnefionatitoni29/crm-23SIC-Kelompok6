@@ -17,7 +17,6 @@ import {
   PawPrint,
   ShoppingBag,
   Star,
-  Activity,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -135,7 +134,7 @@ const Dashboard = () => {
       {
         label: "Penjualan (dalam ribuan $)",
         data: [12, 19, 14, 17, 22, 30, 28, 26, 32, 35, 40, 45],
-        backgroundColor: "rgba(99, 102, 241, 0.7)", // purple-600
+        backgroundColor: "rgba(99, 102, 241, 0.7)",
       },
     ],
   };
@@ -144,12 +143,11 @@ const Dashboard = () => {
     responsive: true,
     interaction: { mode: "nearest", axis: "x", intersect: false },
     plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Penjualan Bulanan Tahun Ini' },
+      legend: { position: "top" },
+      title: { display: true, text: "Penjualan Bulanan Tahun Ini" },
     },
-  }
+  };
 
-  // Data untuk grafik Pertumbuhan Pelanggan (Line Chart)
   const lineData = {
     labels: [
       "Jan",
@@ -169,7 +167,7 @@ const Dashboard = () => {
       {
         label: "Jumlah Pelanggan",
         data: [50, 75, 120, 180, 220, 260, 300, 350, 400, 430, 460, 500],
-        borderColor: "rgba(59, 130, 246, 1)", // blue-500
+        borderColor: "rgba(59, 130, 246, 1)",
         backgroundColor: "rgba(59, 130, 246, 0.3)",
         fill: true,
         tension: 0.3,
@@ -182,13 +180,13 @@ const Dashboard = () => {
     responsive: true,
     interaction: { mode: "nearest", axis: "x", intersect: false },
     plugins: {
-      legend: { position: 'top' },
-      title: { display: true, text: 'Pertumbuhan Pelanggan Tahun Ini' },
+      legend: { position: "top" },
+      title: { display: true, text: "Pertumbuhan Pelanggan Tahun Ini" },
     },
-  }
+  };
 
   return (
-    <div className="p-8 min-h-screen bg-gradient-to-br from-indigo-50 to-white space-y-10">
+    <div className="p-8 min-h-screen bg-green-100 space-y-10">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
@@ -220,7 +218,6 @@ const Dashboard = () => {
               <p className="text-sm font-medium opacity-90">{label}</p>
               <div className="p-2 rounded-full bg-white/25">{icon}</div>
             </div>
-            {/* Ubah posisi angka dan persen */}
             <div className="flex items-center gap-4">
               <h2 className="text-3xl font-bold drop-shadow-lg leading-none">
                 <AnimatedNumber value={value} />

@@ -29,33 +29,39 @@ export default function RekapPembelian() {
   const totalKeseluruhan = dataPembelian.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Rekapan Pembelian Makanan & Obat Hewan</h1>
+    <div className="min-h-screen bg-green-100 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 className="text-2xl font-bold text-green-700 mb-4">
+          Rekapan Pembelian Makanan & Obat Hewan
+        </h1>
 
-      <div className="overflow-x-auto bg-white rounded shadow">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3 text-left text-sm font-semibold">No</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Nama Item</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Jenis</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold">Tanggal</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold">Harga (Rp)</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold">Jumlah</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold">Total (Rp)</th>
-              <th className="px-4 py-3 text-center text-sm font-semibold">Aksi</th>
+              <th className="px-4 py-2 text-left">No</th>
+              <th className="px-4 py-2 text-left">Nama Item</th>
+              <th className="px-4 py-2 text-left">Jenis</th>
+              <th className="px-4 py-2 text-left">Tanggal</th>
+              <th className="px-4 py-2 text-right">Harga (Rp)</th>
+              <th className="px-4 py-2 text-right">Jumlah</th>
+              <th className="px-4 py-2 text-right">Total (Rp)</th>
+              <th className="px-4 py-2 text-center">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {dataPembelian.map((item, index) => (
               <tr key={item.id} className="hover:bg-gray-50">
                 <td className="px-4 py-2">{index + 1}</td>
                 <td className="px-4 py-2">{item.namaItem}</td>
                 <td className="px-4 py-2">{item.jenis}</td>
                 <td className="px-4 py-2">{item.tanggal}</td>
-                <td className="px-4 py-2 text-right">Rp {item.harga.toLocaleString()}</td>
+                <td className="px-4 py-2 text-right">
+                  Rp {item.harga.toLocaleString()}
+                </td>
                 <td className="px-4 py-2 text-right">{item.jumlah}</td>
-                <td className="px-4 py-2 text-right font-semibold">Rp {item.total.toLocaleString()}</td>
+                <td className="px-4 py-2 text-right font-medium">
+                  Rp {item.total.toLocaleString()}
+                </td>
                 <td className="px-4 py-2 text-center">
                   <button
                     onClick={() => handleHapus(item.id)}
