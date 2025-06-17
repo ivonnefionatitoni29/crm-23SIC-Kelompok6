@@ -13,6 +13,7 @@ const menuItems = [
   { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
   { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
   { name: 'Jual Beli', icon: <FaStore size={18} />, path: '/jualbeli' },
+  { name: 'Prediksi Kesehatan', icon: <FaStore size={18} />, path: '/prediksi-kesehatan' },
 ];
 
 const Sidebar = () => {
