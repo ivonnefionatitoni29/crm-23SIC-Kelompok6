@@ -28,11 +28,10 @@ const Sidebar = () => {
           <Link
             key={item.name}
             to={item.path}
-            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${
-              isActive(item.path)
-                ? 'bg-green-300 text-green-900 font-semibold'
-                : 'text-green-800 hover:bg-green-200'
-            }`}
+            className={`flex items-center gap-3 px-3 py-2 rounded-lg transition ${isActive(item.path)
+              ? 'bg-green-300 text-green-900 font-semibold'
+              : 'text-green-800 hover:bg-green-200'
+              }`}
           >
             <span className="w-[18px] h-[18px] flex items-center justify-center">{item.icon}</span>
             {item.name}
