@@ -52,6 +52,9 @@ const HomeUser = () => {
             <a href="#" className="hover:underline">Beranda</a>
             <a href="#layanan" className="hover:underline">Layanan</a>
             <a href="#faq" className="hover:underline">FAQ</a>
+
+           
+
             <button
               onClick={() => goToPage('/login')}
               className="ml-4 bg-white text-green-600 font-semibold px-4 py-1 rounded hover:bg-green-100 transition"
@@ -118,7 +121,7 @@ const HomeUser = () => {
 
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage('/pelangganjb')}
+              onClick={() => goToPage('/login')}
               className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png" alt="Produk" className="w-20 mb-4" />

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
+import { BrowserRouter } from 'react-router-dom';
 
 import Dashboard from './pages/Dashboard';
 import Penitipan from './pages/Penitipan';
