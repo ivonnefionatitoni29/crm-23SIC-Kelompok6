@@ -9,9 +9,9 @@ const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/dashboard' },
   { name: 'Penitipan Hewan', icon: <FaDog size={18} />, path: '/penitipan' },
   { name: 'Vaksinasi', icon: <MdVaccines size={18} />, path: '/vaksinasi' },
-  { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
-  { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
   { name: 'Kebiri', icon: <GiScalpel size={18} />, path: '/kebiri' },
+  { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
+  { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
   { name: 'Jual Beli', icon: <FaStore size={18} />, path: '/jualbeli' },
 ];
 
