@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 const HomeUserLogin = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [faqs, setFaqs] = useState([]);
   const navigate = useNavigate();
 
   const images = [
@@ -21,11 +22,11 @@ const HomeUserLogin = () => {
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+      const storedFaqs = localStorage.getItem("faqs");
+      if (storedFaqs) {
+        setFaqs(JSON.parse(storedFaqs));
+      }
+    }, []);
 
   const userPoints = 150;
   const maxPoints = 200; // Max poin untuk Gold
@@ -76,7 +77,7 @@ const HomeUserLogin = () => {
         onClick={() => {
           localStorage.removeItem("isLoggedIn");
           localStorage.removeItem("username");
-          window.location.href = "/login";
+          window.location.href = "/homeuser";
         }}
         className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
       >
@@ -177,42 +178,48 @@ const HomeUserLogin = () => {
             <div className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
               <div
                 onClick={handleReservasiClick}
-                className="cursor-pointer text-center"
+                className="cursor-pointer text-center flex flex-col items-center"
               >
                 <img
                   src="https://cdn-icons-png.flaticon.com/512/7586/7586970.png"
                   alt="Reservasi"
-                  className="w-20 mx-auto mb-4"
+                  className="w-20 mb-3 transition-transform duration-300 hover:scale-105"
                 />
-                <h4 className="font-semibold text-lg mb-2">
-                  Reservasi Layanan ▼
+                <h4 className="font-semibold text-lg flex items-center gap-2">
+                  Reservasi Layanan
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-4 w-4 transform transition-transform duration-300 ${showReservasiMenu ? "rotate-180" : "rotate-0"
+                      }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
                 </h4>
-                <p className="text-sm text-gray-600">
-                  Klik untuk memilih jenis layanan reservasi.
-                </p>
+                <p className="text-sm text-gray-600">Klik untuk memilih jenis layanan reservasi.</p>
               </div>
+
               {showReservasiMenu && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-4 bg-white border rounded shadow z-10 w-full text-left">
-                  <button
-                    onClick={() => goToPage("/form-penitipan")}
-                    className="block w-full px-4 py-2 hover:bg-green-50"
-                  >
-                    Penitipan Hewan
-                  </button>
-                  <button
-                    onClick={() => goToPage("/form-kebiri")}
-                    className="block w-full px-4 py-2 hover:bg-green-50"
-                  >
-                    Kebiri
-                  </button>
-                  <button
-                    onClick={() => goToPage("/form-vaksinasi")}
-                    className="block w-full px-4 py-2 hover:bg-green-50"
-                  >
-                    Vaksinasi
-                  </button>
-                </div>
-              )}
+  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-green-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+    {[
+      { label: "Penitipan Hewan", path: "/form-penitipan" },
+      { label: "Kebiri", path: "/form-kebiri" },
+      { label: "Vaksinasi", path: "/form-vaksinasi" },
+    ].map((layanan) => (
+      <button
+        key={layanan.label}
+        onClick={() => goToPage(layanan.path)}
+        className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+      >
+        {layanan.label}
+      </button>
+    ))}
+  </div>
+)}
+
             </div>
           </div>
         </div>
@@ -225,49 +232,37 @@ const HomeUserLogin = () => {
             Pertanyaan Umum (FAQ)
           </h3>
           <div className="space-y-4 text-left">
-            {[
-              {
-                question: "Apa saja jenis hewan yang bisa ditangani?",
-                answer:
-                  "Kami melayani berbagai jenis hewan peliharaan seperti anjing, kucing, kelinci, dan hewan kecil lainnya.",
-              },
-              {
-                question: "Apakah bisa reservasi tanpa login?",
-                answer:
-                  "Reservasi memerlukan akun agar data hewan dan layanan dapat tercatat dengan baik.",
-              },
-              {
-                question: "Apakah tersedia layanan darurat?",
-                answer:
-                  "Saat ini layanan darurat tersedia khusus untuk pelanggan loyal. Hubungi kami untuk info lebih lanjut.",
-              },
-            ].map(({ question, answer }, idx) => (
-              <details
-                key={idx}
-                className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
-              >
-                <summary className="cursor-pointer font-semibold text-green-800 flex items-center gap-2">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-green-600"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M8 9l4-4 4 4m0 6l-4 4-4-4"
-                    />
-                  </svg>
-                  {question}
-                </summary>
-                <p className="mt-2 text-green-900 text-sm leading-relaxed">
-                  {answer}
-                </p>
-              </details>
-            ))}
+            {faqs.length === 0 ? (
+              <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+            ) : (
+              faqs.map(({ question, answer }, idx) => (
+                <details
+                  key={idx}
+                  className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
+                >
+                  <summary className="cursor-pointer font-semibold text-green-800 flex items-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-green-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                      />
+                    </svg>
+                    {question}
+                  </summary>
+                  <p className="mt-2 text-green-900 text-sm leading-relaxed">
+                    {answer}
+                  </p>
+                </details>
+              ))
+            )}
           </div>
         </div>
       </section>
