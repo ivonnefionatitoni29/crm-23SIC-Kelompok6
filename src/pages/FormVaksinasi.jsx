@@ -51,9 +51,9 @@ const FormVaksinasi = () => {
   }
 
   return (
-    <div className="min-h-screen bg-green-100 p-6">
+    <div className="min-h-screen bg-blue-100 p-6">
       <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-green-600 text-white px-6 py-4 text-xl font-semibold">
+        <div className="bg-blue-600 text-white px-6 py-4 text-xl font-semibold">
           Form Vaksinasi Hewan
         </div>
         <div className="px-6 pt-4 pb-2 text-gray-700 text-sm">
@@ -114,17 +114,17 @@ const FormVaksinasi = () => {
               />
             </div>
           </div>
-          <button type="submit" className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">
+          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             Kirim
           </button>
         </form>
       </div>
 
       <div className="max-w-5xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-xl font-bold mb-4 text-green-700">Data Vaksinasi Saya</h2>
+        <h2 className="text-xl font-bold mb-4 text-blue-700">Data Vaksinasi Saya</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="bg-green-200 text-green-800">
+            <thead className="bg-blue-200 text-blue-800">
               <tr>
                 <th className="py-2 px-4 text-left">Nama</th>
                 <th className="py-2 px-4 text-left">Jenis</th>
@@ -149,7 +149,7 @@ const FormVaksinasi = () => {
                   <td className="py-2 px-4">{item.tanggal}</td>
                   <td className="py-2 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      item.status === 'Diterima' ? 'bg-green-100 text-green-700'
+                      item.status === 'Diterima' ? 'bg-blue-100 text-blue-700'
                       : item.status === 'Ditolak' ? 'bg-red-100 text-red-700'
                       : 'bg-yellow-100 text-yellow-800'
                     }`}>

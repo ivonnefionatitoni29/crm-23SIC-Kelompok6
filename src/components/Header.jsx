@@ -24,7 +24,7 @@ const Header = () => {
       {/* Breadcrumb as Title */}
       <div className="flex flex-col">
         <span className="text-sm text-gray-400">Pages</span>
-        <h1 className="text-xl font-semibold text-green-800">{currentPage}</h1>
+        <h1 className="text-xl font-semibold text-blue-800">{currentPage}</h1>
       </div>
 
       {/* Logout Button */}
@@ -33,7 +33,7 @@ const Header = () => {
           localStorage.removeItem("isLoggedIn");
           window.location.href = "/login";
         }}
-        className="px-5 py-2 bg-green-600 text-white rounded-full hover:bg-green-700 shadow transition"
+        className="px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow transition"
       >
         Logout
       </button>

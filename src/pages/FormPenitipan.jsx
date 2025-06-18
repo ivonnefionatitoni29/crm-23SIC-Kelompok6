@@ -53,9 +53,9 @@ const FormPenitipan = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
       <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div className="bg-green-600 text-white px-6 py-4 text-2xl font-bold">
+        <div className="bg-blue-600 text-white px-6 py-4 text-2xl font-bold">
           Form Penitipan Hewan
         </div>
         <div className="px-6 pt-3 pb-2 text-gray-600 text-sm italic">
@@ -75,7 +75,7 @@ const FormPenitipan = () => {
               </label>
               <input
                 name={field.name}
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-300 focus:outline-none"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                 value={form[field.name]}
                 onChange={handleChange}
                 required
@@ -91,7 +91,7 @@ const FormPenitipan = () => {
               <input
                 name="checkIn"
                 type="date"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-300 focus:outline-none"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                 value={form.checkIn}
                 onChange={handleChange}
                 required
@@ -104,7 +104,7 @@ const FormPenitipan = () => {
               <input
                 name="checkOut"
                 type="date"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-300 focus:outline-none"
+                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:outline-none"
                 value={form.checkOut}
                 onChange={handleChange}
                 required
@@ -114,7 +114,7 @@ const FormPenitipan = () => {
 
           <button
             type="submit"
-            className="w-full bg-green-600 hover:bg-green-700 transition duration-200 text-white font-semibold py-2 rounded-lg"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 text-white font-semibold py-2 rounded-lg"
           >
             Kirim Reservasi
           </button>
@@ -122,12 +122,12 @@ const FormPenitipan = () => {
       </div>
 
       <div className="max-w-5xl mx-auto mt-10 bg-white p-6 rounded-2xl shadow-xl">
-        <h2 className="text-2xl font-bold text-green-700 mb-4">
+        <h2 className="text-2xl font-bold text-blue-700 mb-4">
           Data Reservasi Saya
         </h2>
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm text-left text-gray-700">
-            <thead className="bg-green-100 text-green-800 uppercase text-xs tracking-wider">
+            <thead className="bg-blue-100 text-blue-800 uppercase text-xs tracking-wider">
               <tr>
                 {[
                   "Nama",
@@ -156,7 +156,7 @@ const FormPenitipan = () => {
                 </tr>
               ) : (
                 data.map((item) => (
-                  <tr key={item.id} className="hover:bg-green-50">
+                  <tr key={item.id} className="hover:bg-blue-50">
                     <td className="py-2 px-4">{item.nama}</td>
                     <td className="py-2 px-4">{item.jenis}</td>
                     <td className="py-2 px-4">{item.ras}</td>
@@ -167,7 +167,7 @@ const FormPenitipan = () => {
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-medium shadow ${
                           item.status === "Diterima"
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-blue-100 text-blue-700"
                             : item.status === "Ditolak"
                             ? "bg-red-100 text-red-700"
                             : "bg-yellow-100 text-yellow-800"
