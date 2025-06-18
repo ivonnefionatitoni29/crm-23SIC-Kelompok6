@@ -21,6 +21,8 @@ import FormPenitipan from './pages/FormPenitipan';
 import FormKebiri from './pages/FormKebiri';
 import FormVaksinasi from './pages/FormVaksinasi';
 
+import PrediksiPenyakitHewan from './pages/PrediksiPenyakitHewan';
+
 function App() {
   return (
     <Routes>
@@ -30,6 +32,7 @@ function App() {
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
+      <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
 
 
       {/* ✅ Rute form layanan untuk user */}
