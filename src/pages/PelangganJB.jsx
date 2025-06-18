@@ -1,12 +1,30 @@
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
-import { Crown, BarChart2, TrendingUp, TrendingDown } from "lucide-react";
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  Heart,
+  Star,
+  Filter,
+  Search,
+  MapPin,
+  Phone,
+  Mail,
+} from "lucide-react";
 
-export default function RekapLoyalitas() {
-  const [dataLoyalitas, setDataLoyalitas] = useState([]);
-  const [sortOrder, setSortOrder] = useState("desc");
+const PetStoreApp = () => {
+  const [products, setProducts] = useState([]);
+  const [cart, setCart] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showCart, setShowCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [favorites, setFavorites] = useState([]);
 
+  // Data produk
   useEffect(() => {
-
     const initialProducts = [
       {
         id: 1,
@@ -88,30 +106,70 @@ export default function RekapLoyalitas() {
       },
     ];
     setProducts(initialProducts);
-
-    const savedData = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
-    const sortedData = [...savedData].sort((a, b) => b.poinLoyalitas - a.poinLoyalitas);
-    setDataLoyalitas(sortedData);
-
   }, []);
 
-  const handleSort = () => {
-    const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
-    setSortOrder(newSortOrder);
-    const sortedData = [...dataLoyalitas].sort((a, b) => {
-      return newSortOrder === "desc"
-        ? b.poinLoyalitas - a.poinLoyalitas
-        : a.poinLoyalitas - b.poinLoyalitas;
+  const categories = [
+    { id: "all", name: "Semua Produk" },
+    { id: "makanan", name: "Makanan Hewan" },
+    { id: "obat", name: "Obat & Vitamin" },
+  ];
+
+  const filteredProducts = products.filter((product) => {
+    const matchesCategory =
+      activeCategory === "all" || product.category === activeCategory;
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  const addToCart = (product) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.id === product.id);
+      if (existingItem) {
+        return prevCart.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      return [...prevCart, { ...product, quantity: 1 }];
     });
-    setDataLoyalitas(sortedData);
   };
 
-  const formatRupiah = (angka) => {
+  const updateQuantity = (id, newQuantity) => {
+    if (newQuantity === 0) {
+      setCart((prevCart) => prevCart.filter((item) => item.id !== id));
+    } else {
+      setCart((prevCart) =>
+        prevCart.map((item) =>
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
+    }
+  };
+
+  const toggleFavorite = (productId) => {
+    setFavorites((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const getTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const getTotalItems = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  const formatPrice = (price) => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
       currency: "IDR",
       minimumFractionDigits: 0,
-
     }).format(price);
   };
 
@@ -497,74 +555,57 @@ export default function RekapLoyalitas() {
               Logout
             </button>
           </nav>
+        </div>
+      </header>
 
-    }).format(angka);
-  };
+      {/* Search & Filter */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Cari produk makanan atau obat hewan..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+              />
+            </div>
 
-  return (
-    <div className="min-h-screen bg-blue-50 p-6">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-blue-800 flex items-center">
-            <Crown className="mr-3 text-blue-500" />
-            Rekapitulasi Loyalitas Pelanggan
-          </h1>
-          <button
-            onClick={handleSort}
-            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-          >
-            {sortOrder === "desc" ? (
-              <TrendingDown className="mr-2 h-4 w-4" />
-            ) : (
-              <TrendingUp className="mr-2 h-4 w-4" />
-            )}
-            Urutkan Poin
-          </button>
-
+            <div className="flex gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setActiveCategory(category.id)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                    activeCategory === category.id
+                      ? "bg-[#08a43c] text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-blue-200">
-            <thead className="bg-blue-100">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-blue-700">Peringkat</th>
-                <th className="px-4 py-3 text-left font-semibold text-blue-700">Nama Pelanggan</th>
-                <th className="px-4 py-3 text-left font-semibold text-blue-700">Nomor Telepon</th>
-                <th className="px-4 py-3 text-right font-semibold text-blue-700">Poin Loyalitas</th>
-                <th className="px-4 py-3 text-right font-semibold text-blue-700">Total Belanja</th>
-                <th className="px-4 py-3 text-center font-semibold text-blue-700">Jumlah Transaksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-blue-100 bg-white">
-              {dataLoyalitas.length > 0 ? (
-                dataLoyalitas.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-blue-50">
-                    <td className="px-4 py-3 text-center">
-                      <span className={`font-bold text-lg ${index < 3 ? 'text-blue-700' : 'text-blue-500'}`}>
-                        {index + 1}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-blue-900">{item.namaPelanggan}</td>
-                    <td className="px-4 py-3 text-blue-700">{item.id}</td>
-                    <td className="px-4 py-3 text-right font-bold text-blue-700">{item.poinLoyalitas.toLocaleString()} Poin</td>
-                    <td className="px-4 py-3 text-right text-blue-600">{formatRupiah(item.totalBelanja)}</td>
-                    <td className="px-4 py-3 text-center text-blue-600">{item.jumlahTransaksi} kali</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-center py-10 text-blue-400">
-                    <BarChart2 className="mx-auto h-12 w-12 text-blue-300" />
-                    <p className="mt-2">Belum ada data loyalitas pelanggan.</p>
-                    <p className="text-sm">Data akan muncul setelah ada transaksi pertama.</p>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          {filteredProducts.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
         </div>
+
+        {filteredProducts.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">
+              Tidak ada produk yang ditemukan
+            </p>
+          </div>
+        )}
       </div>
-
 
       {/* Footer */}
       <footer className="bg-green-700 text-white py-10 px-6 text-sm">
@@ -648,8 +689,3 @@ export default function RekapLoyalitas() {
 };
 
 export default PetStoreApp;
-
-    </div>
-  );
-}
-
