@@ -20,31 +20,33 @@ export default function LoginPage() {
     }
   };
 
+// data akun di login , data tabel loyalitas di admin, pelanggan jb
+
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-green-100 via-white to-green-200 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-green-100">
+    <div className="min-h-screen bg-gradient-to-tr from-blue-100 via-white to-blue-200 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-blue-100">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-green-700">Selamat Datang</h2>
+          <h2 className="text-3xl font-bold text-blue-700">Selamat Datang</h2>
           <p className="text-sm text-gray-500 mt-2">Silakan login untuk melanjutkan</p>
         </div>
         <div className="space-y-4">
           <input
             type="text"
             placeholder="Username"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
           />
           <input
             type="password"
             placeholder="Password"
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
             onClick={handleLogin}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition"
           >
             Masuk
           </button>

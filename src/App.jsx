@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
+import { BrowserRouter } from 'react-router-dom';
 
 import Dashboard from './pages/Dashboard';
 import Penitipan from './pages/Penitipan';
@@ -14,6 +15,7 @@ import Beli from './pages/Beli';
 import HomeUser from './pages/Homeuser';
 import HomeUserLogin from './pages/HomeUserLogin';
 import PelangganJB from './pages/PelangganJB';
+import LoyaltyPage from './pages/LoyaltyPage';
 
 // ✅ Tambahkan import untuk form user
 import FormPenitipan from './pages/FormPenitipan';
@@ -33,6 +35,8 @@ function App() {
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
       <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
+      <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
+
 
 
       {/* ✅ Rute form layanan untuk user */}

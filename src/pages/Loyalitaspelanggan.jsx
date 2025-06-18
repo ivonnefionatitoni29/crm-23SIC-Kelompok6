@@ -1,260 +1,126 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Crown, BarChart2, TrendingUp, TrendingDown, Trash2 } from "lucide-react"; // Import Trash2 icon
 
-const dummyCustomers = [
-  { id: 1, name: "Budi Santoso" },
-  { id: 2, name: "Siti Aminah" },
-  { id: 3, name: "Andi Wijaya" },
-];
+export default function RekapLoyalitas() {
+  const [dataLoyalitas, setDataLoyalitas] = useState([]);
+  const [sortOrder, setSortOrder] = useState("desc");
 
-const initialSales = [
-  {
-    id: 1,
-    invoice: "INV-001",
-    customerId: 1,
-    date: "2025-05-10",
-    total: 1500000,
-    status: "Lunas",
-  },
-  {
-    id: 2,
-    invoice: "INV-002",
-    customerId: 2,
-    date: "2025-05-11",
-    total: 250000,
-    status: "Belum Lunas",
-  },
-];
+  useEffect(() => {
+    const savedData = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+    const sortedData = [...savedData].sort((a, b) => b.poinLoyalitas - a.poinLoyalitas);
+    setDataLoyalitas(sortedData);
+  }, []);
 
-function formatCurrency(num) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-  }).format(num);
-}
-
-export default function LoyalitasPelanggan() {
-  const [sales, setSales] = useState(initialSales);
-  const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
-    invoice: "",
-    customerId: "",
-    date: "",
-    total: "",
-    status: "Belum Lunas",
-  });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleAddSale = () => {
-    if (
-      !formData.invoice ||
-      !formData.customerId ||
-      !formData.date ||
-      !formData.total
-    ) {
-      alert("Semua field wajib diisi!");
-      return;
-    }
-    const newSale = {
-      id: sales.length + 1,
-      invoice: formData.invoice,
-      customerId: Number(formData.customerId),
-      date: formData.date,
-      total: Number(formData.total),
-      status: formData.status,
-    };
-    setSales([...sales, newSale]);
-    setFormData({
-      invoice: "",
-      customerId: "",
-      date: "",
-      total: "",
-      status: "Belum Lunas",
+  const handleSort = () => {
+    const newSortOrder = sortOrder === "desc" ? "asc" : "desc";
+    setSortOrder(newSortOrder);
+    const sortedData = [...dataLoyalitas].sort((a, b) => {
+      return newSortOrder === "desc"
+        ? b.poinLoyalitas - a.poinLoyalitas
+        : a.poinLoyalitas - b.poinLoyalitas;
     });
-    setShowForm(false);
+    setDataLoyalitas(sortedData);
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Yakin ingin menghapus data loyalitas ini?")) {
-      setSales(sales.filter((s) => s.id !== id));
-    }
+  const handleDelete = (idToDelete) => {
+    const updatedData = dataLoyalitas.filter(item => item.id !== idToDelete);
+    setDataLoyalitas(updatedData);
+    localStorage.setItem("dataLoyalitas", JSON.stringify(updatedData)); // Update localStorage
   };
 
-  const getCustomerName = (id) => {
-    const cust = dummyCustomers.find((c) => c.id === id);
-    return cust ? cust.name : "-";
+  const formatRupiah = (angka) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(angka);
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-4">Loyalitas Pelanggan</h1>
-
-      <button
-        onClick={() => setShowForm((prev) => !prev)}
-        className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-      >
-        {showForm ? "Batal Tambah Loyalitas" : "Tambah Loyalitas"}
-      </button>
-
-      {showForm && (
-        <div className="mb-6 p-4 border border-gray-300 rounded shadow-sm bg-white">
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Nomor Transaksi</label>
-            <input
-              type="text"
-              name="invoice"
-              value={formData.invoice}
-              onChange={handleInputChange}
-              placeholder="Misal: INV-003"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Pelanggan</label>
-            <select
-              name="customerId"
-              value={formData.customerId}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              <option value="">-- Pilih Pelanggan --</option>
-              {dummyCustomers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Tanggal</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            />
-          </div>
-
-          <div className="mb-2">
-            <label className="block font-medium mb-1">Total Belanja (Rp)</label>
-            <input
-              type="number"
-              name="total"
-              value={formData.total}
-              onChange={handleInputChange}
-              placeholder="Jumlah total belanja"
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              min="0"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block font-medium mb-1">Status Pembayaran</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            >
-              <option value="Belum Lunas">Belum Lunas</option>
-              <option value="Lunas">Lunas</option>
-              <option value="Batal">Batal</option>
-            </select>
-          </div>
-
+    <div className="min-h-screen bg-blue-50 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-blue-700 flex items-center">
+            <Crown className="mr-3 text-blue-400" />
+            Rekapitulasi Loyalitas Pelanggan
+          </h1>
           <button
-            onClick={handleAddSale}
-            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+            onClick={handleSort}
+            className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
           >
-            Simpan
+            {sortOrder === "desc" ? (
+              <TrendingDown className="mr-2 h-4 w-4" />
+            ) : (
+              <TrendingUp className="mr-2 h-4 w-4" />
+            )}
+            Urutkan Poin
           </button>
         </div>
-      )}
 
-      <div className="overflow-x-auto bg-white rounded shadow">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Transaksi
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Pelanggan
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tanggal
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Aksi
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {sales.map((sale) => (
-              <tr key={sale.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">{sale.invoice}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  {getCustomerName(sale.customerId)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">{sale.date}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-right">
-                  {formatCurrency(sale.total)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center">
-                  {sale.status === "Lunas" ? (
-                    <span className="inline-flex px-2 text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                      Lunas
-                    </span>
-                  ) : sale.status === "Belum Lunas" ? (
-                    <span className="inline-flex px-2 text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                      Belum Lunas
-                    </span>
-                  ) : (
-                    <span className="inline-flex px-2 text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                      Batal
-                    </span>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-center space-x-2">
-                  <button
-                    className="text-indigo-600 hover:text-indigo-900 font-semibold"
-                    onClick={() => alert("Fitur Edit belum tersedia")}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-900 font-semibold"
-                    onClick={() => handleDelete(sale.id)}
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {sales.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-blue-100">
               <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  Tidak ada data loyalitas pelanggan
-                </td>
+
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Peringkat</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Nama Pelanggan</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Nomor Telepon</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">Poin Loyalitas</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">Total Belanja</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-600">Jumlah Transaksi</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-600">Aksi</th> {/* New column for actions */}
+
+                <th className="px-4 py-3 text-left font-semibold text-blue-700">Peringkat</th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-700">Nama Pelanggan</th>
+                <th className="px-4 py-3 text-left font-semibold text-blue-700">Nomor Telepon</th>
+                <th className="px-4 py-3 text-right font-semibold text-blue-700">Poin Loyalitas</th>
+                <th className="px-4 py-3 text-right font-semibold text-blue-700">Total Belanja</th>
+                <th className="px-4 py-3 text-center font-semibold text-blue-700">Jumlah Transaksi</th>
+
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {dataLoyalitas.length > 0 ? (
+                dataLoyalitas.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-blue-50">
+                    <td className="px-4 py-3 text-center">
+                      <span className={`font-bold text-lg ${index < 3 ? 'text-blue-600' : 'text-gray-500'}`}>
+                        {index + 1}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-gray-900">{item.namaPelanggan}</td>
+                    <td className="px-4 py-3 text-gray-700">{item.id}</td>
+                    <td className="px-4 py-3 text-right font-bold text-blue-600">{item.poinLoyalitas.toLocaleString()} Poin</td>
+                    <td className="px-4 py-3 text-right text-blue-500">{formatRupiah(item.totalBelanja)}</td>
+                    <td className="px-4 py-3 text-center text-gray-700">{item.jumlahTransaksi} kali</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                        title="Hapus Pelanggan"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+
+                  <td colSpan={7} className="text-center py-10 text-gray-500"> {/* colspan changed to 7 */}
+                    <BarChart2 className="mx-auto h-12 w-12 text-gray-400" />
+
+                  <td colSpan={6} className="text-center py-10 text-gray-500">
+                    <BarChart2 className="mx-auto h-12 w-12 text-blue-400" />
+
+                    <p className="mt-2">Belum ada data loyalitas pelanggan.</p>
+                    <p className="text-sm">Data akan muncul setelah ada transaksi pertama.</p>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
