@@ -22,11 +22,11 @@ const HomeUserLogin = () => {
   };
 
   useEffect(() => {
-      const storedFaqs = localStorage.getItem("faqs");
-      if (storedFaqs) {
-        setFaqs(JSON.parse(storedFaqs));
-      }
-    }, []);
+    const storedFaqs = localStorage.getItem("faqs");
+    if (storedFaqs) {
+      setFaqs(JSON.parse(storedFaqs));
+    }
+  }, []);
 
   const userPoints = 150;
   const maxPoints = 200; // Max poin untuk Gold
@@ -46,46 +46,46 @@ const HomeUserLogin = () => {
   return (
     <div className="font-sans text-gray-800">
       <header className="bg-green-600 text-white p-4 shadow-md">
-  <div className="container mx-auto flex justify-between items-center">
-    {/* Logo */}
-    <h1 className="text-2xl font-bold">Groovy VetCare</h1>
+        <div className="container mx-auto flex justify-between items-center">
+          {/* Logo */}
+          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
 
-    {/* Navigation */}
-    <nav className="space-x-6 flex items-center">
-      <a href="#" className="hover:underline">
-        Beranda
-      </a>
-      <a href="#layanan" className="hover:underline">
-        Layanan
-      </a>
-      <a href="#faq" className="hover:underline">
-        FAQ
-      </a>
+          {/* Navigation */}
+          <nav className="space-x-6 flex items-center">
+            <a href="#" className="hover:underline">
+              Beranda
+            </a>
+            <a href="#layanan" className="hover:underline">
+              Layanan
+            </a>
+            <a href="#faq" className="hover:underline">
+              FAQ
+            </a>
 
-      {/* Profil + Username */}
-      <div className="flex items-center space-x-2">
-        <img
-          src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-          alt="Profil"
-          className="w-8 h-8 rounded-full"
-        />
-        <span>{localStorage.getItem("username") || "Pengguna"}</span>
-      </div>
+            {/* Profil + Username */}
+            <div className="flex items-center space-x-2">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                alt="Profil"
+                className="w-8 h-8 rounded-full"
+              />
+              <span>{localStorage.getItem("username") || "Pengguna"}</span>
+            </div>
 
-      {/* Tombol Logout */}
-      <button
-        onClick={() => {
-          localStorage.removeItem("isLoggedIn");
-          localStorage.removeItem("username");
-          window.location.href = "/homeuser";
-        }}
-        className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
-      >
-        Logout
-      </button>
-    </nav>
-  </div>
-</header>
+            {/* Tombol Logout */}
+            <button
+              onClick={() => {
+                localStorage.removeItem("isLoggedIn");
+                localStorage.removeItem("username");
+                window.location.href = "/homeuser";
+              }}
+              className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
+            >
+              Logout
+            </button>
+          </nav>
+        </div>
+      </header>
 
 
       {/* Hero Section */}
@@ -102,51 +102,38 @@ const HomeUserLogin = () => {
           <p className="text-lg mb-4 text-center max-w-xl">
             Periksa dan rawat hewan kesayanganmu bersama dokter terbaik kami.
           </p>
-          <button
-            onClick={() => goToPage("/login")}
-            className="bg-green-500 px-6 py-2 rounded-lg hover:bg-green-600 transition"
-          >
-            Buat Janji
-          </button>
         </div>
       </section>
 
-      {/* Loyalty Info - Diperbarui */}
-      <section className="bg-white py-8 border-b border-gray-200">
-        <div className="container mx-auto max-w-md mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-4 text-green-700">
-            Poin Loyalitas Kamu
-          </h3>
-          <div className="mb-4 text-6xl font-extrabold text-green-600">
-            {userPoints}{" "}
-            <span className="text-2xl font-medium text-gray-500">pts</span>
+
+      {/* Prediksi Kesehatan Hewan */}
+      <section className="py-16 bg-gradient-to-r from-green-50 to-white">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
+          {/* Ilustrasi */}
+          <div className="md:w-1/2 flex justify-center">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
+              alt="Health Prediction"
+              className="w-64 md:w-80 drop-shadow-xl"
+            />
           </div>
-          <div className="mb-4">
-            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
-              <div
-                className={`h-6 rounded-full transition-all duration-1000 ease-in-out ${loyaltyColors[loyaltyLevel]}`}
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <p className="mt-2 text-gray-700">
-              Kamu sedang berada di level{" "}
-              <span
-                className={`font-semibold px-3 py-1 rounded ${loyaltyColors[loyaltyLevel]}`}
-              >
-                {loyaltyLevel}
-              </span>
+
+          {/* Konten Teks */}
+          <div className="md:w-1/2 text-center md:text-left">
+            <h2 className="text-4xl font-bold text-green-700 mb-4 leading-snug">
+              Prediksi Kesehatan Hewanmu
+            </h2>
+            <p className="text-gray-700 text-base mb-6 leading-relaxed">
+              Manfaatkan kecerdasan buatan (AI) untuk membantu mendiagnosis kondisi
+              awal kesehatan hewan peliharaanmu. Jawab beberapa pertanyaan sederhana
+              dan dapatkan hasil prediksi dalam hitungan detik!
             </p>
-            {loyaltyLevel !== "Gold" && (
-              <p className="mt-1 text-sm text-gray-500">
-                Kumpulkan <strong>{maxPoints - userPoints}</strong> poin lagi
-                untuk naik ke level berikutnya!
-              </p>
-            )}
-            {loyaltyLevel === "Gold" && (
-              <p className="mt-1 text-sm text-yellow-700 font-semibold">
-                Selamat! Kamu sudah di level tertinggi 🎉
-              </p>
-            )}
+            <button
+              onClick={() => navigate("/prediksi")}
+              className="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
+            >
+              🔍 Mulai Prediksi Sekarang
+            </button>
           </div>
         </div>
       </section>
@@ -203,22 +190,22 @@ const HomeUserLogin = () => {
               </div>
 
               {showReservasiMenu && (
-  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-green-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
-    {[
-      { label: "Penitipan Hewan", path: "/form-penitipan" },
-      { label: "Kebiri", path: "/form-kebiri" },
-      { label: "Vaksinasi", path: "/form-vaksinasi" },
-    ].map((layanan) => (
-      <button
-        key={layanan.label}
-        onClick={() => goToPage(layanan.path)}
-        className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
-      >
-        {layanan.label}
-      </button>
-    ))}
-  </div>
-)}
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-green-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                  {[
+                    { label: "Penitipan Hewan", path: "/form-penitipan" },
+                    { label: "Kebiri", path: "/form-kebiri" },
+                    { label: "Vaksinasi", path: "/form-vaksinasi" },
+                  ].map((layanan) => (
+                    <button
+                      key={layanan.label}
+                      onClick={() => goToPage(layanan.path)}
+                      className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                    >
+                      {layanan.label}
+                    </button>
+                  ))}
+                </div>
+              )}
 
             </div>
           </div>
@@ -233,9 +220,11 @@ const HomeUserLogin = () => {
           </h3>
           <div className="space-y-4 text-left">
             {faqs.length === 0 ? (
-              <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+              <p className="text-center text-gray-500">
+                Belum ada FAQ yang tersedia.
+              </p>
             ) : (
-              faqs.map(({ question, answer }, idx) => (
+              faqs.slice(0, 3).map(({ question, answer }, idx) => (
                 <details
                   key={idx}
                   className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
@@ -264,6 +253,18 @@ const HomeUserLogin = () => {
               ))
             )}
           </div>
+
+          {/* Tombol Lihat Semua */}
+          {faqs.length > 3 && (
+            <div className="text-center mt-6">
+              <button
+                onClick={() => navigate("/faq-page")}
+                className="text-green-700 hover:underline font-medium"
+              >
+                ➕ Lihat Semua FAQ
+              </button>
+            </div>
+          )}
         </div>
       </section>
 

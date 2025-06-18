@@ -21,6 +21,7 @@ import FormKebiri from './pages/FormKebiri';
 import FormVaksinasi from './pages/FormVaksinasi';
 
 import PrediksiPenyakitHewan from './pages/PrediksiPenyakitHewan';
+import FaqPage from './pages/FaqPage';
 
 function App() {
   return (
@@ -49,6 +50,8 @@ function App() {
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
       </Route>
+
+       <Route path="/faq-page" element={<FaqPage />} />
     </Routes>
   );
 }

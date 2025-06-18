@@ -51,7 +51,7 @@ const HomeUser = () => {
           <nav className="space-x-4 flex items-center">
             <a href="#" className="hover:underline">Beranda</a>
             <a href="#layanan" className="hover:underline">Layanan</a>
-            <a href="#faq" className="hover:underline">FAQ</a>
+            <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage('/login')}
               className="ml-4 bg-white text-green-600 font-semibold px-4 py-1 rounded hover:bg-green-100 transition"
@@ -78,34 +78,34 @@ const HomeUser = () => {
         </div>
       </section>
 
-      {/* Loyalty Info - Diperbarui */}
-      <section className="bg-white py-8 border-b border-gray-200">
-        <div className="container mx-auto max-w-md mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-4 text-green-700">Poin Loyalitas Kamu</h3>
-          <div className="mb-4 text-6xl font-extrabold text-green-600">
-            {userPoints} <span className="text-2xl font-medium text-gray-500">pts</span>
+      {/* Prediksi Kesehatan Hewan */}
+      <section className="py-16 bg-gradient-to-r from-green-50 to-white">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
+          {/* Ilustrasi */}
+          <div className="md:w-1/2 flex justify-center">
+            <img
+              src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
+              alt="Health Prediction"
+              className="w-64 md:w-80 drop-shadow-xl"
+            />
           </div>
-          <div className="mb-4">
-            <div className="w-full bg-gray-200 rounded-full h-6 overflow-hidden shadow-inner">
-              <div
-                className={`h-6 rounded-full transition-all duration-1000 ease-in-out ${loyaltyColors[loyaltyLevel]}`}
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <p className="mt-2 text-gray-700">
-              Kamu sedang berada di level{' '}
-              <span className={`font-semibold px-3 py-1 rounded ${loyaltyColors[loyaltyLevel]}`}>
-                {loyaltyLevel}
-              </span>
+
+          {/* Konten Teks */}
+          <div className="md:w-1/2 text-center md:text-left">
+            <h2 className="text-4xl font-bold text-green-700 mb-4 leading-snug">
+              Prediksi Kesehatan Hewanmu
+            </h2>
+            <p className="text-gray-700 text-base mb-6 leading-relaxed">
+              Manfaatkan kecerdasan buatan (AI) untuk membantu mendiagnosis kondisi
+              awal kesehatan hewan peliharaanmu. Jawab beberapa pertanyaan sederhana
+              dan dapatkan hasil prediksi dalam hitungan detik!
             </p>
-            {loyaltyLevel !== 'Gold' && (
-              <p className="mt-1 text-sm text-gray-500">
-                Kumpulkan <strong>{maxPoints - userPoints}</strong> poin lagi untuk naik ke level berikutnya!
-              </p>
-            )}
-            {loyaltyLevel === 'Gold' && (
-              <p className="mt-1 text-sm text-yellow-700 font-semibold">Selamat! Kamu sudah di level tertinggi 🎉</p>
-            )}
+            <button
+              onClick={() => navigate("/login")}
+              className="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
+            >
+              🔍 Mulai Prediksi Sekarang
+            </button>
           </div>
         </div>
       </section>
@@ -174,8 +174,6 @@ const HomeUser = () => {
         </div>
       </section>
 
-
-
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
@@ -184,9 +182,11 @@ const HomeUser = () => {
           </h3>
           <div className="space-y-4 text-left">
             {faqs.length === 0 ? (
-              <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+              <p className="text-center text-gray-500">
+                Belum ada FAQ yang tersedia.
+              </p>
             ) : (
-              faqs.map(({ question, answer }, idx) => (
+              faqs.slice(0, 3).map(({ question, answer }, idx) => (
                 <details
                   key={idx}
                   className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
@@ -215,8 +215,21 @@ const HomeUser = () => {
               ))
             )}
           </div>
+
+          {/* Tombol Lihat Semua */}
+          {faqs.length > 3 && (
+            <div className="text-center mt-6">
+              <button
+                onClick={() => navigate("/faq-page")}
+                className="text-green-700 hover:underline font-medium"
+              >
+                ➕ Lihat Semua FAQ
+              </button>
+            </div>
+          )}
         </div>
       </section>
+
 
       {/* Footer */}
       <footer className="bg-green-700 text-white py-10 px-6 text-sm">
