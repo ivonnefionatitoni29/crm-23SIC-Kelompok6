@@ -36,27 +36,27 @@ export default function PetBoardingManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-green-100 p-6">
+    <div className="min-h-screen bg-blue-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-green-700 mb-4">
+        <h2 className="text-2xl font-bold text-blue-800 mb-4">
           Manajemen Penitipan Hewan
         </h2>
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-100">
+        <table className="min-w-full divide-y divide-blue-200">
+          <thead className="bg-blue-100">
             <tr>
-              <th className="px-4 py-2 text-left">Nama</th>
-              <th className="px-4 py-2 text-left">Jenis</th>
-              <th className="px-4 py-2 text-left">Ras</th>
-              <th className="px-4 py-2 text-left">Pemilik</th>
-              <th className="px-4 py-2 text-left">Check-in</th>
-              <th className="px-4 py-2 text-left">Check-out</th>
-              <th className="px-4 py-2 text-center">Status</th>
-              <th className="px-4 py-2 text-center">Aksi</th>
+              <th className="px-4 py-2 text-left text-blue-800">Nama</th>
+              <th className="px-4 py-2 text-left text-blue-800">Jenis</th>
+              <th className="px-4 py-2 text-left text-blue-800">Ras</th>
+              <th className="px-4 py-2 text-left text-blue-800">Pemilik</th>
+              <th className="px-4 py-2 text-left text-blue-800">Check-in</th>
+              <th className="px-4 py-2 text-left text-blue-800">Check-out</th>
+              <th className="px-4 py-2 text-center text-blue-800">Status</th>
+              <th className="px-4 py-2 text-center text-blue-800">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-blue-100 bg-white">
             {dataPenitipan.map((item) => (
-              <tr key={item.id} className="hover:bg-gray-50">
+              <tr key={item.id} className="hover:bg-blue-50">
                 <td className="px-4 py-2">{item.nama}</td>
                 <td className="px-4 py-2">{item.jenis}</td>
                 <td className="px-4 py-2">{item.ras}</td>
@@ -65,9 +65,9 @@ export default function PetBoardingManagement() {
                 <td className="px-4 py-2">{item.checkOut}</td>
                 <td className="px-4 py-2 text-center">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
                       item.status === "Diterima"
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-blue-100 text-blue-800"
                         : item.status === "Ditolak"
                         ? "bg-red-100 text-red-700"
                         : "bg-yellow-100 text-yellow-800"
@@ -79,13 +79,13 @@ export default function PetBoardingManagement() {
                 <td className="px-4 py-2 text-center space-x-2">
                   <button
                     onClick={() => handleStatusChange(item.id)}
-                    className="px-3 py-1 rounded text-white bg-green-600 hover:bg-green-700"
+                    className="px-3 py-1 rounded text-white bg-blue-600 hover:bg-blue-700 transition"
                   >
                     Ubah Status
                   </button>
                   <button
                     onClick={() => handleDelete(item.id)}
-                    className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700"
+                    className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700 transition"
                   >
                     Hapus
                   </button>
@@ -94,7 +94,7 @@ export default function PetBoardingManagement() {
             ))}
             {dataPenitipan.length === 0 && (
               <tr>
-                <td colSpan="8" className="text-center py-4 text-gray-500">
+                <td colSpan="8" className="text-center py-4 text-blue-500">
                   Tidak ada data penitipan.
                 </td>
               </tr>

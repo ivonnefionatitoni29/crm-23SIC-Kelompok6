@@ -3,18 +3,14 @@ import React, { useState, useEffect } from "react";
 export default function RekapPembelian() {
   const [dataPembelian, setDataPembelian] = useState([]);
 
-  // useEffect untuk memuat data dari localStorage saat komponen pertama kali dirender
   useEffect(() => {
     const savedData = JSON.parse(localStorage.getItem("dataPembelian")) || [];
     setDataPembelian(savedData);
-  }, []); // Array dependensi kosong berarti efek ini hanya berjalan sekali
+  }, []);
 
   const handleHapus = (id) => {
-    // Filter data di state
     const newData = dataPembelian.filter((item) => item.id !== id);
     setDataPembelian(newData);
-
-    // Update juga data di localStorage
     localStorage.setItem("dataPembelian", JSON.stringify(newData));
   };
 
@@ -24,35 +20,35 @@ export default function RekapPembelian() {
   );
 
   return (
-    <div className="min-h-screen bg-green-100 p-6">
+    <div className="min-h-screen bg-blue-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h1 className="text-2xl font-bold text-green-700 mb-4">
+        <h1 className="text-2xl font-bold text-blue-800 mb-4">
           Rekapan Pembelian Makanan & Obat Hewan
         </h1>
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
+          <table className="min-w-full divide-y divide-blue-200">
+            <thead className="bg-blue-100">
               <tr>
-                <th className="px-4 py-2 text-left">No</th>
-                <th className="px-4 py-2 text-left">Nama Item</th>
-                <th className="px-4 py-2 text-left">Jenis</th>
-                <th className="px-4 py-2 text-left">Tanggal</th>
-                <th className="px-4 py-2 text-left">Nama Pelanggan</th> {/* Kolom Baru */}
-                <th className="px-4 py-2 text-right">Harga (Rp)</th>
-                <th className="px-4 py-2 text-right">Jumlah</th>
-                <th className="px-4 py-2 text-right">Total (Rp)</th>
-                <th className="px-4 py-2 text-center">Aksi</th>
+                <th className="px-4 py-2 text-left text-blue-800">No</th>
+                <th className="px-4 py-2 text-left text-blue-800">Nama Item</th>
+                <th className="px-4 py-2 text-left text-blue-800">Jenis</th>
+                <th className="px-4 py-2 text-left text-blue-800">Tanggal</th>
+                <th className="px-4 py-2 text-left text-blue-800">Nama Pelanggan</th>
+                <th className="px-4 py-2 text-right text-blue-800">Harga (Rp)</th>
+                <th className="px-4 py-2 text-right text-blue-800">Jumlah</th>
+                <th className="px-4 py-2 text-right text-blue-800">Total (Rp)</th>
+                <th className="px-4 py-2 text-center text-blue-800">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-blue-100 bg-white">
               {dataPembelian.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50">
+                <tr key={item.id} className="hover:bg-blue-50">
                   <td className="px-4 py-2">{index + 1}</td>
                   <td className="px-4 py-2">{item.namaItem}</td>
                   <td className="px-4 py-2">{item.jenis}</td>
                   <td className="px-4 py-2">{item.tanggal}</td>
-                  <td className="px-4 py-2">{item.pelanggan?.nama || 'N/A'}</td> {/* Tampilkan nama pelanggan */}
+                  <td className="px-4 py-2">{item.pelanggan?.nama || "N/A"}</td>
                   <td className="px-4 py-2 text-right">
                     Rp {item.harga.toLocaleString()}
                   </td>
@@ -72,19 +68,19 @@ export default function RekapPembelian() {
               ))}
               {dataPembelian.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="text-center py-4 text-gray-500">
+                  <td colSpan={9} className="text-center py-4 text-blue-500">
                     Tidak ada data pembelian.
                   </td>
                 </tr>
               )}
             </tbody>
             {dataPembelian.length > 0 && (
-              <tfoot className="bg-gray-100">
+              <tfoot className="bg-blue-100">
                 <tr>
-                  <td colSpan={7} className="px-4 py-2 text-right font-bold">
+                  <td colSpan={7} className="px-4 py-2 text-right font-bold text-blue-800">
                     Total Keseluruhan:
                   </td>
-                  <td className="px-4 py-2 text-right font-bold text-green-700">
+                  <td className="px-4 py-2 text-right font-bold text-blue-800">
                     Rp {totalKeseluruhan.toLocaleString()}
                   </td>
                   <td></td>
