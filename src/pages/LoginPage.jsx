@@ -20,6 +20,8 @@ export default function LoginPage() {
     }
   };
 
+// data akun di login , data tabel loyalitas di admin, pelanggan jb
+
   return (
     <div className="min-h-screen bg-gradient-to-tr from-blue-100 via-white to-blue-200 flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-blue-100">

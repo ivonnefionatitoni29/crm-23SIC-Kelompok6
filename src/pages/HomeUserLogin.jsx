@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const HomeUserLogin = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
+  const [username, setUsername] = useState('');
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0); // State untuk poin loyalitas
   const navigate = useNavigate();
 
   const images = [
@@ -26,6 +28,69 @@ const HomeUserLogin = () => {
     if (storedFaqs) {
       setFaqs(JSON.parse(storedFaqs));
     }
+
+
+    // Ambil username dari localStorage
+    const storedUsername = localStorage.getItem('username');
+    if (storedUsername) {
+      setUsername(storedUsername);
+
+      // Ambil data loyalitas dari localStorage
+      const storedLoyaltyData = JSON.parse(localStorage.getItem('dataLoyalitas')) || [];
+
+      // Cari data loyalitas untuk user yang sedang login
+      const currentUserLoyalty = storedLoyaltyData.find(
+        (customer) => customer.namaPelanggan === storedUsername
+      );
+
+      // Jika ditemukan, set poin loyalitas
+      if (currentUserLoyalty) {
+        setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
+      }
+    }
+
+    // Carousel auto-slide
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => clearInterval(slideInterval); // Clean up the interval on component unmount
+  }, [images.length]);
+
+  // Fungsi untuk format angka poin (opsional, tapi bagus untuk konsistensi)
+  const formatPoints = (points) => {
+    return points.toLocaleString('id-ID');
+  };
+
+  return (
+    <div className="font-sans text-gray-800 min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+      <header className="bg-green-600 text-white p-4 shadow-md">
+        <div className="container mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
+          <nav className="space-x-6 flex items-center">
+            <Link to="/homeuserlogin" className="hover:underline">Beranda</Link>
+            <a href="#layanan" className="hover:underline">Layanan</a>
+            <a href="#faq" className="hover:underline">FAQ</a>
+
+            {/* Profil + Username */}
+            <div className="flex items-center space-x-2">
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                alt="Profil"
+                className="w-8 h-8 rounded-full"
+              />
+              <span>{username || "Pengguna"}</span>
+            </div>
+
+            {/* Tampilkan Poin Loyalitas di sini, sekarang sebagai Link */}
+            {username && ( // Hanya tampilkan jika user sudah login
+              <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
+                Poin: {formatPoints(loyaltyPoints)} ⭐
+              </Link>
+            )}
+
+            {/* Tombol Logout */}
+
   }, []);
 
   const userPoints = 150;
@@ -54,13 +119,20 @@ const HomeUserLogin = () => {
               <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profil" className="w-8 h-8 rounded-full" />
               <span>{localStorage.getItem("username") || "Pengguna"}</span>
             </div>
+
             <button
               onClick={() => {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("username");
+
+                window.location.href = "/login";
+              }}
+              className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
+
                 window.location.href = "/homeuser";
               }}
               className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"
+
             >
               Logout
             </button>
@@ -76,6 +148,9 @@ const HomeUserLogin = () => {
           <button onClick={() => goToPage("/login")} className="bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 transition">Buat Janji</button>
         </div>
       </section>
+
+
+      {/* Layanan */}
 
       <section className="bg-white py-8 border-b border-gray-200">
         <div className="container mx-auto max-w-md mx-auto text-center">
@@ -96,6 +171,7 @@ const HomeUserLogin = () => {
         </div>
       </section>
 
+
       <section id="layanan" className="py-12 bg-gray-50">
         <div className="container mx-auto text-center">
           <h3 className="text-2xl font-bold mb-8">Layanan Kami</h3>
@@ -112,9 +188,23 @@ const HomeUserLogin = () => {
                 <h4 className="font-semibold text-lg flex items-center gap-2">Reservasi Layanan</h4>
               </div>
               {showReservasiMenu && (
+
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-green-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                  {[
+                    { label: "Penitipan Hewan", path: "/form-penitipan" },
+                    { label: "Kebiri", path: "/form-kebiri" },
+                    { label: "Vaksinasi", path: "/form-vaksinasi" },
+                  ].map((layanan) => (
+                    <button
+                      key={layanan.label}
+                      onClick={() => goToPage(layanan.path)}
+                      className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                    >
+
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
                   {[{ label: "Penitipan Hewan", path: "/form-penitipan" }, { label: "Kebiri", path: "/form-kebiri" }, { label: "Vaksinasi", path: "/form-vaksinasi" }].map((layanan) => (
                     <button key={layanan.label} onClick={() => goToPage(layanan.path)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">
+
                       {layanan.label}
                     </button>
                   ))}
@@ -175,7 +265,15 @@ const HomeUserLogin = () => {
             </div>
           </div>
         </div>
+
+
+        {/* Footer Credit */}
+        <div className="mt-8 text-center text-xs text-white/80">
+          © 2025 Groovy Vetcare. All rights reserved.
+        </div>
+
         <div className="mt-8 text-center text-xs text-white/80">&copy; 2025 Groovy Vetcare. All rights reserved.</div>
+
       </footer>
     </div>
   );

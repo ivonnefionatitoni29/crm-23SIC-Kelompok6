@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Crown, BarChart2, TrendingUp, TrendingDown } from "lucide-react";
+import { Crown, BarChart2, TrendingUp, TrendingDown, Trash2 } from "lucide-react"; // Import Trash2 icon
 
 export default function RekapLoyalitas() {
   const [dataLoyalitas, setDataLoyalitas] = useState([]);
@@ -20,6 +20,12 @@ export default function RekapLoyalitas() {
         : a.poinLoyalitas - b.poinLoyalitas;
     });
     setDataLoyalitas(sortedData);
+  };
+
+  const handleDelete = (idToDelete) => {
+    const updatedData = dataLoyalitas.filter(item => item.id !== idToDelete);
+    setDataLoyalitas(updatedData);
+    localStorage.setItem("dataLoyalitas", JSON.stringify(updatedData)); // Update localStorage
   };
 
   const formatRupiah = (angka) => {
@@ -55,12 +61,22 @@ export default function RekapLoyalitas() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-blue-100">
               <tr>
+
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Peringkat</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Nama Pelanggan</th>
+                <th className="px-4 py-3 text-left font-semibold text-gray-600">Nomor Telepon</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">Poin Loyalitas</th>
+                <th className="px-4 py-3 text-right font-semibold text-gray-600">Total Belanja</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-600">Jumlah Transaksi</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-600">Aksi</th> {/* New column for actions */}
+
                 <th className="px-4 py-3 text-left font-semibold text-blue-700">Peringkat</th>
                 <th className="px-4 py-3 text-left font-semibold text-blue-700">Nama Pelanggan</th>
                 <th className="px-4 py-3 text-left font-semibold text-blue-700">Nomor Telepon</th>
                 <th className="px-4 py-3 text-right font-semibold text-blue-700">Poin Loyalitas</th>
                 <th className="px-4 py-3 text-right font-semibold text-blue-700">Total Belanja</th>
                 <th className="px-4 py-3 text-center font-semibold text-blue-700">Jumlah Transaksi</th>
+
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
@@ -77,12 +93,26 @@ export default function RekapLoyalitas() {
                     <td className="px-4 py-3 text-right font-bold text-blue-600">{item.poinLoyalitas.toLocaleString()} Poin</td>
                     <td className="px-4 py-3 text-right text-blue-500">{formatRupiah(item.totalBelanja)}</td>
                     <td className="px-4 py-3 text-center text-gray-700">{item.jumlahTransaksi} kali</td>
+                    <td className="px-4 py-3 text-center">
+                      <button
+                        onClick={() => handleDelete(item.id)}
+                        className="p-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition"
+                        title="Hapus Pelanggan"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
+
+                  <td colSpan={7} className="text-center py-10 text-gray-500"> {/* colspan changed to 7 */}
+                    <BarChart2 className="mx-auto h-12 w-12 text-gray-400" />
+
                   <td colSpan={6} className="text-center py-10 text-gray-500">
                     <BarChart2 className="mx-auto h-12 w-12 text-blue-400" />
+
                     <p className="mt-2">Belum ada data loyalitas pelanggan.</p>
                     <p className="text-sm">Data akan muncul setelah ada transaksi pertama.</p>
                   </td>
