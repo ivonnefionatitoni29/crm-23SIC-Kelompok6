@@ -280,6 +280,3 @@ export default HomeUserLogin;
 
 
 //asdasfasd
-
-export default HomeUserLogin;
-
