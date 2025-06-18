@@ -86,7 +86,7 @@ const PetStoreApp = () => {
         price: 195000,
         originalPrice: 220000,
         image:
-          "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit=crop",
+          "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit:crop",
         rating: 4.9,
         reviews: 134,
         description: "Makanan untuk anjing dengan DHA dan protein tinggi",
@@ -319,76 +319,83 @@ const PetStoreApp = () => {
   const CheckoutModal = () => {
     const navigate = useNavigate();
     const [customerInfo, setCustomerInfo] = useState({
-      name: "",
+      name: "", // Initialized empty, will be filled from localStorage
       phone: "",
       address: "",
       paymentMethod: "transfer",
     });
 
+    // Load username from localStorage when the modal mounts
+    useEffect(() => {
+      const storedUsername = localStorage.getItem("username");
+      if (storedUsername) {
+        setCustomerInfo(prevInfo => ({ ...prevInfo, name: storedUsername }));
+      }
+    }, []); // Empty dependency array means this runs once on mount
 
-const handleSubmit = () => {
-  if (!customerInfo.name || !customerInfo.phone || !customerInfo.address) {
-    alert("Mohon lengkapi semua data!");
-    return;
-  }
+    const handleSubmit = () => {
+      // Check if phone or address are empty (name is now auto-filled)
+      if (!customerInfo.phone || !customerInfo.address) {
+        alert("Mohon lengkapi Nomor Telepon dan Alamat!"); // Updated alert message
+        return;
+      }
 
-  const totalBelanjaSaatIni = getTotalPrice();
+      const totalBelanjaSaatIni = getTotalPrice();
 
-  // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
-  const existingPurchases = JSON.parse(localStorage.getItem("dataPembelian")) || [];
-  const newPurchases = cart.map((item, index) => ({
-    id: Date.now() + index, // Membuat ID unik berdasarkan waktu
-    namaItem: item.name,
-    jenis: item.category,
-    tanggal: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
-    harga: item.price,
-    jumlah: item.quantity,
-    total: item.price * item.quantity,
-    // Tambahan info pelanggan untuk setiap item
-    pelanggan: {
-      nama: customerInfo.name,
-      telepon: customerInfo.phone,
-      alamat: customerInfo.address,
-    },
-  }));
+      // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
+      const existingPurchases = JSON.parse(localStorage.getItem("dataPembelian")) || [];
+      const newPurchases = cart.map((item, index) => ({
+        id: Date.now() + index, // Membuat ID unik berdasarkan waktu
+        namaItem: item.name,
+        jenis: item.category,
+        tanggal: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
+        harga: item.price,
+        jumlah: item.quantity,
+        total: item.price * item.quantity,
+        // Tambahan info pelanggan untuk setiap item
+        pelanggan: {
+          nama: customerInfo.name, // Use the name from localStorage (which is hidden)
+          telepon: customerInfo.phone,
+          alamat: customerInfo.address,
+        },
+      }));
 
-  // Gabungkan data lama dengan data baru
-  const updatedPurchases = [...existingPurchases, ...newPurchases];
-  localStorage.setItem("dataPembelian", JSON.stringify(updatedPurchases));
-  // --- AKHIR BAGIAN 1 ---
+      // Gabungkan data lama dengan data baru
+      const updatedPurchases = [...existingPurchases, ...newPurchases];
+      localStorage.setItem("dataPembelian", JSON.stringify(updatedPurchases));
+      // --- AKHIR BAGIAN 1 ---
 
-  // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
-  let dataLoyalitas = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
-  const idPelanggan = customerInfo.phone;
-  const indexPelanggan = dataLoyalitas.findIndex(p => p.id === idPelanggan);
-  const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
+      // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
+      let dataLoyalitas = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
+      const indexPelanggan = dataLoyalitas.findIndex(p => p.id === idPelanggan);
+      const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
 
-  if (indexPelanggan > -1) {
-    // Jika pelanggan sudah ada
-    dataLoyalitas[indexPelanggan].poinLoyalitas += poinBaru;
-    dataLoyalitas[indexPelanggan].totalBelanja += totalBelanjaSaatIni;
-    dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
-    dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name;
-  } else {
-    // Jika pelanggan baru
-    dataLoyalitas.push({
-      id: idPelanggan,
-      namaPelanggan: customerInfo.name,
-      poinLoyalitas: poinBaru,
-      totalBelanja: totalBelanjaSaatIni,
-      jumlahTransaksi: 1,
-    });
-  }
+      if (indexPelanggan > -1) {
+        // Jika pelanggan sudah ada
+        dataLoyalitas[indexPelanggan].poinLoyalitas += poinBaru;
+        dataLoyalitas[indexPelanggan].totalBelanja += totalBelanjaSaatIni;
+        dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
+        dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name; // Ensure name is updated/consistent
+      } else {
+        // Jika pelanggan baru
+        dataLoyalitas.push({
+          id: idPelanggan,
+          namaPelanggan: customerInfo.name,
+          poinLoyalitas: poinBaru,
+          totalBelanja: totalBelanjaSaatIni,
+          jumlahTransaksi: 1,
+        });
+      }
 
-  localStorage.setItem("dataLoyalitas", JSON.stringify(dataLoyalitas));
-  // --- AKHIR BAGIAN 2 ---
+      localStorage.setItem("dataLoyalitas", JSON.stringify(dataLoyalitas));
+      // --- AKHIR BAGIAN 2 ---
 
-  alert("Pesanan berhasil! Poin loyalitas telah ditambahkan.");
-  setCart([]);
-  setShowCheckout(false);
-  navigate("/homeuserlogin"); // Navigasi ke halaman user login setelah checkout
-};
-
+      alert("Pesanan berhasil! Poin loyalitas telah ditambahkan.");
+      setCart([]);
+      setShowCheckout(false);
+      navigate("/homeuserlogin"); // Navigasi ke halaman user login setelah checkout
+    };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -407,20 +414,18 @@ const handleSubmit = () => {
 
           <div className="p-4">
             <div className="space-y-4">
-              <div>
+              {/* Bagian input Nama Lengkap dihilangkan dari tampilan */}
+              {/* <div>
                 <label className="block text-sm font-medium mb-1">
                   Nama Lengkap
                 </label>
                 <input
                   type="text"
-                  required
                   value={customerInfo.name}
-                  onChange={(e) =>
-                    setCustomerInfo({ ...customerInfo, name: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                  disabled
                 />
-              </div>
+              </div> */}
 
               <div>
                 <label className="block text-sm font-medium mb-1">
@@ -506,15 +511,15 @@ const handleSubmit = () => {
 
           {/* Navigation */}
           <nav className="space-x-6 flex items-center">
-             <Link to="/homeuserlogin" className="hover:underline">
-        Beranda
-      </Link>
-      <Link to="/homeuserlogin" className="hover:underline">
-        Layanan
-      </Link>
-      <Link to="/homeuserlogin" className="hover:underline">
-        FAQ
-      </Link>
+            <Link to="/homeuserlogin" className="hover:underline">
+              Beranda
+            </Link>
+            <Link to="/homeuserlogin" className="hover:underline">
+              Layanan
+            </Link>
+            <Link to="/homeuserlogin" className="hover:underline">
+              FAQ
+            </Link>
 
             {/* Profil + Username */}
             <div className="flex items-center space-x-2">
@@ -672,7 +677,7 @@ const handleSubmit = () => {
 
         {/* Footer Credit */}
         <div className="mt-8 text-center text-xs text-white/80">
-          &copy; 2025 Groovy Vetcare. All rights reserved.
+          © 2025 Groovy Vetcare. All rights reserved.
         </div>
       </footer>
 
