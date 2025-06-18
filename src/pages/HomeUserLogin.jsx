@@ -72,6 +72,8 @@ const HomeUserLogin = () => {
         <span>{localStorage.getItem("username") || "Pengguna"}</span>
       </div>
 
+      
+
       {/* Tombol Logout */}
       <button
         onClick={() => {
@@ -158,7 +160,7 @@ const HomeUserLogin = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage("/jualbeli")}
+              onClick={() => goToPage("/pelangganjb")}
               className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img
