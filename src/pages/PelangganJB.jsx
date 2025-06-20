@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import {
   ShoppingCart,
@@ -329,7 +329,7 @@ const PetStoreApp = () => {
     useEffect(() => {
       const storedUsername = localStorage.getItem("username");
       if (storedUsername) {
-        setCustomerInfo(prevInfo => ({ ...prevInfo, name: storedUsername }));
+        setCustomerInfo((prevInfo) => ({ ...prevInfo, name: storedUsername }));
       }
     }, []); // Empty dependency array means this runs once on mount
 
@@ -343,7 +343,8 @@ const PetStoreApp = () => {
       const totalBelanjaSaatIni = getTotalPrice();
 
       // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
-      const existingPurchases = JSON.parse(localStorage.getItem("dataPembelian")) || [];
+      const existingPurchases =
+        JSON.parse(localStorage.getItem("dataPembelian")) || [];
       const newPurchases = cart.map((item, index) => ({
         id: Date.now() + index, // Membuat ID unik berdasarkan waktu
         namaItem: item.name,
@@ -366,9 +367,12 @@ const PetStoreApp = () => {
       // --- AKHIR BAGIAN 1 ---
 
       // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
-      let dataLoyalitas = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      let dataLoyalitas =
+        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
       const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
-      const indexPelanggan = dataLoyalitas.findIndex(p => p.id === idPelanggan);
+      const indexPelanggan = dataLoyalitas.findIndex(
+        (p) => p.id === idPelanggan
+      );
       const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
 
       if (indexPelanggan > -1) {
@@ -507,8 +511,12 @@ const PetStoreApp = () => {
       <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           {/* Logo */}
-          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
-
+          <h1
+            onClick={() => navigate("/homeuser")}
+            className="text-2xl font-bold c ursor-pointer hover:text-blue-300 transition"
+          >
+            Groovy VetCare
+          </h1>
           {/* Navigation */}
           <nav className="space-x-6 flex items-center">
             <Link to="/homeuserlogin" className="hover:underline">

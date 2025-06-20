@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // untuk tombol login
+import { useNavigate } from "react-router-dom";
 
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);
@@ -20,15 +20,20 @@ const FaqPage = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
+      <header className="bg-blue-600 text-white p-4 shadow-md w-full">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <h1
+            onClick={() => navigate("/homeuser")}
+            className="text-2xl font-bold cursor-pointer hover:text-blue-300 transition"
+          >
+            Groovy VetCare
+          </h1>
           <nav className="space-x-4 flex items-center">
-            <a href="/" className="hover:underline">Beranda</a>
+            <a href="#" className="hover:underline">Beranda</a>
             <a href="#layanan" className="hover:underline">Layanan</a>
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
-              onClick={() => goToPage('/login')}
+              onClick={() => goToPage("/login")}
               className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
             >
               Login
@@ -37,8 +42,8 @@ const FaqPage = () => {
         </div>
       </header>
 
-      {/* Konten FAQ */}
-      <main className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 py-16 px-6">
+      {/* Main */}
+      <main className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 pt-16 px-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-center text-blue-700 mb-12">
             Pertanyaan Umum (FAQ)
@@ -57,7 +62,9 @@ const FaqPage = () => {
                     {question}
                     <ChevronDown className="h-5 w-5 text-blue-500 group-open:rotate-180 transition-transform duration-300" />
                   </summary>
-                  <p className="mt-3 text-blue-900 text-sm leading-relaxed">{answer}</p>
+                  <p className="mt-3 text-blue-900 text-sm leading-relaxed">
+                    {answer}
+                  </p>
                 </details>
               ))}
             </div>
@@ -91,11 +98,13 @@ const FaqPage = () => {
           <div className="md:col-span-2">
             <h3 className="text-xl font-bold mb-3">Tentang Kami</h3>
             <p className="mb-3">
-              Groovy Vetcare Clinic adalah bagian dari jaringan MEDIVET Pet Hospital & Clinic Network.
+              Groovy Vetcare Clinic adalah bagian dari jaringan MEDIVET Pet
+              Hospital & Clinic Network.
             </p>
             <p>
-              Kami juga bagian dari Groovy Group yang berfokus pada layanan hewan seperti Pet Shop, Klinik,
-              Transportasi Hewan, Pet Hotel, dan Cat Cafe.
+              Kami juga bagian dari Groovy Group yang berfokus pada layanan
+              hewan seperti Pet Shop, Klinik, Transportasi Hewan, Pet Hotel, dan
+              Cat Cafe.
             </p>
           </div>
 
@@ -118,8 +127,12 @@ const FaqPage = () => {
               </li>
             </ul>
             <div className="mt-5 bg-red-600 text-white text-center p-4 rounded-lg">
-              <p className="font-bold text-base">🚨 Emergency Service 24 Hours</p>
-              <p className="text-sm mt-1 italic text-gray-100">Temporarily Unavailable</p>
+              <p className="font-bold text-base">
+                🚨 Emergency Service 24 Hours
+              </p>
+              <p className="text-sm mt-1 italic text-gray-100">
+                Temporarily Unavailable
+              </p>
             </div>
           </div>
         </div>
