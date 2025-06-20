@@ -2,16 +2,73 @@ import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // untuk tombol login
 
+// SANGAT PENTING: Sila sesuaikan jalur import supabase ini mengikut struktur folder projek anda.
+// Ralat "Could not resolve" ini berterusan, menunjukkan bahawa fail 'supabase.js' anda TIDAK DITEMUI
+// pada jalur relatif yang telah dicuba setakat ini.
+//
+// Untuk menyelesaikan ini secara muktamad, anda perlu memberitahu LOKASI TEPAT fail 'supabase.js' anda.
+// Sila GANTI baris 'import { supabase } = ...' di bawah ini dengan jalur yang BETUL setelah anda mengesahkannya sendiri.
+//
+// Contoh:
+// - Jika jalur penuh fail anda ialah: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
+//   Maka, import yang BETUL adalah: import { supabase } from "../supabase";
+//
+// - Jika fail itu berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js (akar projek, satu folder di atas 'src')
+//   Maka, import yang BETUL adalah: import { supabase } from "../../supabase";
+//
+// - Jika di 'src/utils/supabase.js': import { supabase } from "../utils/supabase";
+// - Jika di 'src/config/supabase.js': import { supabase } from "../config/supabase";
+//
+// Sila pastikan anda memilih HANYA SATU daripada jalur di atas (atau jalur lain yang betul jika tiada yang sepadan)
+// dan gunakan ia. Saya akan meninggalkan yang paling umum sebagai lalai buat masa ini.
+import { supabase } from "../supabase"; // SILA GANTI BARIS INI DENGAN JALUR YANG BETUL!
+
+
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedFaqs = localStorage.getItem("faqs");
-    if (storedFaqs) {
-      setFaqs(JSON.parse(storedFaqs));
+  // Fungsi untuk mengambil FAQ dari Supabase
+  const fetchFaqs = async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false }); // Urutkan berdasarkan waktu pembuatan terbaru
+
+    if (error) {
+      console.error('Error fetching FAQs for public page:', error.message);
+      setError('Gagal memuat FAQ. Sila cuba lagi nanti.');
+    } else {
+      setFaqs(data);
     }
-  }, []);
+    setLoading(false);
+  };
+
+  // Efek untuk memuat FAQ saat komponen dipasang dan berlangganan pembaruan real-time
+  // Efek ini harus menangani pembaruan otomatis.
+  useEffect(() => {
+    fetchFaqs();
+
+    // Berlangganan perubahan real-time pada tabel 'faqs'
+    // Setiap kali ada INSERT, UPDATE, atau DELETE di tabel 'faqs',
+    // callback ini akan dipicu, dan 'fetchFaqs()' akan dipanggil ulang.
+    const channel = supabase
+      .channel('public:faqs_page_changes') // Nama channel unik untuk halaman publik
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for public FAQs:', payload);
+        fetchFaqs(); // Ambil ulang data setiap ada perubahan
+      })
+      .subscribe();
+
+    // Fungsi cleanup saat komponen dilepas untuk menghindari kebocoran memori
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []); // [] memastikan efek ini hanya berjalan sekali saat mount
 
   const goToPage = (path) => {
     navigate(path);
@@ -44,20 +101,31 @@ const FaqPage = () => {
             Pertanyaan Umum (FAQ)
           </h1>
 
-          {faqs.length === 0 ? (
-            <p className="text-center text-gray-500">Belum ada FAQ.</p>
+          {loading && (
+            <p className="text-center text-lg text-blue-600">Memuat FAQ...</p>
+          )}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 text-center" role="alert">
+              <strong className="font-bold">Error!</strong>
+              <span className="block sm:inline"> {error}</span>
+            </div>
+          )}
+
+          {!loading && !error && faqs.length === 0 ? (
+            <p className="text-center text-gray-500">Tiada FAQ yang tersedia buat masa ini.</p>
           ) : (
             <div className="space-y-4">
-              {faqs.map(({ question, answer }, idx) => (
+              {faqs.map((faq) => ( // Iterasi langsung objek faq
                 <details
-                  key={idx}
+                  key={faq.id} // Gunakan ID unik dari Supabase sebagai key
                   className="group border border-blue-200 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <summary className="flex items-center justify-between cursor-pointer text-lg font-medium text-blue-800">
-                    {question}
+                    {faq.question}
                     <ChevronDown className="h-5 w-5 text-blue-500 group-open:rotate-180 transition-transform duration-300" />
                   </summary>
-                  <p className="mt-3 text-blue-900 text-sm leading-relaxed">{answer}</p>
+                  <p className="mt-3 text-blue-900 text-sm leading-relaxed">{faq.answer}</p>
                 </details>
               ))}
             </div>
