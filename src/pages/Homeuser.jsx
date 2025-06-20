@@ -54,7 +54,7 @@ const HomeUser = () => {
   return (
     <div className="font-sans text-gray-800">
       {/* Header */}
-      <header className="bg-green-600 text-white p-4 shadow-md">
+      <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
@@ -63,7 +63,7 @@ const HomeUser = () => {
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage('/login')}
-              className="ml-4 bg-white text-green-600 font-semibold px-4 py-1 rounded hover:bg-green-100 transition"
+              className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
             >
               Login
             </button>
@@ -82,7 +82,7 @@ const HomeUser = () => {
         <div className="absolute top-0 left-0 w-full h-full bg-black/40 flex flex-col justify-center items-center text-white px-4">
           <h2 className="text-4xl font-bold mb-2 text-center">Selamat Datang di Groovy VetCare</h2>
           <p className="text-lg mb-4 text-center max-w-xl">Periksa dan rawat hewan kesayanganmu bersama dokter terbaik kami.</p>
-          <button onClick={() => goToPage('/login')} className="bg-green-500 px-6 py-2 rounded-lg hover:bg-green-600 transition">
+          <button onClick={() => goToPage('/login')} className="bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 transition">
             Buat Janji
           </button>
         </div>
@@ -90,7 +90,7 @@ const HomeUser = () => {
 
 
       {/* Prediksi Kesehatan Hewan */}
-      <section className="py-16 bg-gradient-to-r from-green-50 to-white">
+      <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
           {/* Ilustrasi */}
           <div className="md:w-1/2 flex justify-center">
@@ -104,7 +104,7 @@ const HomeUser = () => {
 
           {/* Konten Teks */}
           <div className="md:w-1/2 text-center md:text-left">
-            <h2 className="text-4xl font-bold text-green-700 mb-4 leading-snug">
+            <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
               Prediksi Kesehatan Hewanmu
             </h2>
             <p className="text-gray-700 text-base mb-6 leading-relaxed">
@@ -114,7 +114,7 @@ const HomeUser = () => {
             </p>
             <button
               onClick={() => navigate("/login")}
-              className="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
+              className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
             >
               🔍 Mulai Prediksi Sekarang
             </button>
@@ -133,7 +133,7 @@ const HomeUser = () => {
             {/* Pembelian Produk */}
             <div
               onClick={() => goToPage('/pelangganjb')}
-              className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
+              className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png" alt="Produk" className="w-20 mb-4" />
               <h4 className="font-semibold text-lg mb-2">Pembelian Obat & Makanan</h4>
@@ -142,7 +142,7 @@ const HomeUser = () => {
 
 
             {/* Reservasi */}
-            <div className="bg-white border hover:border-green-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
+            <div className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
               <div
                 onClick={handleReservasiClick}
                 className="cursor-pointer text-center flex flex-col items-center"
@@ -171,12 +171,12 @@ const HomeUser = () => {
 
 
               {showReservasiMenu && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-green-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
                   {["Penitipan Hewan", "Kebiri", "Vaksinasi"].map((layanan) => (
                     <button
                       key={layanan}
                       onClick={() => goToPage('/login')}
-                      className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-green-50 hover:text-green-700 transition"
+                      className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
                     >
                       {layanan}
                     </button>
@@ -196,7 +196,7 @@ const HomeUser = () => {
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
-          <h3 className="text-3xl font-bold text-center mb-8 text-green-700">
+          <h3 className="text-3xl font-bold text-center mb-8 text-blue-700">
             Pertanyaan Umum (FAQ)
           </h3>
           <div className="space-y-4 text-left">
@@ -208,12 +208,12 @@ const HomeUser = () => {
               faqs.slice(0, 3).map(({ question, answer }, idx) => (
                 <details
                   key={idx}
-                  className="border border-green-300 rounded-lg p-4 bg-green-50 hover:bg-green-100 transition"
+                  className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition"
                 >
-                  <summary className="cursor-pointer font-semibold text-green-800 flex items-center gap-2">
+                  <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-green-600"
+                      className="h-5 w-5 text-blue-600"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -227,7 +227,7 @@ const HomeUser = () => {
                     </svg>
                     {question}
                   </summary>
-                  <p className="mt-2 text-green-900 text-sm leading-relaxed">
+                  <p className="mt-2 text-blue-900 text-sm leading-relaxed">
                     {answer}
                   </p>
                 </details>
@@ -241,7 +241,7 @@ const HomeUser = () => {
             <div className="text-center mt-6">
               <button
                 onClick={() => navigate("/faq-page")}
-                className="text-green-700 hover:underline font-medium"
+                className="text-blue-700 hover:underline font-medium"
               >
                 ➕ Lihat Semua FAQ
               </button>
@@ -254,7 +254,7 @@ const HomeUser = () => {
 
 
       {/* Footer */}
-      <footer className="bg-green-700 text-white py-10 px-6 text-sm">
+      <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
 
 
@@ -293,7 +293,7 @@ const HomeUser = () => {
 
           {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
-            <h3 className="text-2xl font-bold text-green-700 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2">
               🕒 Service Hours
             </h3>
             <ul className="text-sm divide-y divide-gray-200">

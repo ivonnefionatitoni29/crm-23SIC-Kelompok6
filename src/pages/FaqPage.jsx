@@ -20,7 +20,7 @@ const FaqPage = () => {
   return (
     <>
       {/* Header */}
-      <header className="bg-green-600 text-white p-4 shadow-md">
+      <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
@@ -29,7 +29,7 @@ const FaqPage = () => {
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage('/login')}
-              className="ml-4 bg-white text-green-600 font-semibold px-4 py-1 rounded hover:bg-green-100 transition"
+              className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
             >
               Login
             </button>
@@ -38,9 +38,9 @@ const FaqPage = () => {
       </header>
 
       {/* Konten FAQ */}
-      <main className="min-h-screen bg-gradient-to-b from-white via-green-50 to-green-100 py-16 px-6">
+      <main className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-4xl font-bold text-center text-green-700 mb-12">
+          <h1 className="text-4xl font-bold text-center text-blue-700 mb-12">
             Pertanyaan Umum (FAQ)
           </h1>
 
@@ -51,13 +51,13 @@ const FaqPage = () => {
               {faqs.map(({ question, answer }, idx) => (
                 <details
                   key={idx}
-                  className="group border border-green-200 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
+                  className="group border border-blue-200 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
                 >
-                  <summary className="flex items-center justify-between cursor-pointer text-lg font-medium text-green-800">
+                  <summary className="flex items-center justify-between cursor-pointer text-lg font-medium text-blue-800">
                     {question}
-                    <ChevronDown className="h-5 w-5 text-green-500 group-open:rotate-180 transition-transform duration-300" />
+                    <ChevronDown className="h-5 w-5 text-blue-500 group-open:rotate-180 transition-transform duration-300" />
                   </summary>
-                  <p className="mt-3 text-green-900 text-sm leading-relaxed">{answer}</p>
+                  <p className="mt-3 text-blue-900 text-sm leading-relaxed">{answer}</p>
                 </details>
               ))}
             </div>
@@ -66,7 +66,7 @@ const FaqPage = () => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-green-700 text-white py-10 px-6 text-sm">
+      <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
           <div>
             <h3 className="text-xl font-bold mb-3">Groovy Vetcare Clinic</h3>
@@ -100,7 +100,7 @@ const FaqPage = () => {
           </div>
 
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
-            <h3 className="text-2xl font-bold text-green-700 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2">
               🕒 Service Hours
             </h3>
             <ul className="text-sm divide-y divide-gray-200">

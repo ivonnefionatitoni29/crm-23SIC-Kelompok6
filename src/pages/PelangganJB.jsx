@@ -217,7 +217,7 @@ const PetStoreApp = () => {
         </p>
 
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xl font-bold text-[#08a43c]">
+          <span className="text-xl font-bold text-[#2563EB]">
             {formatPrice(product.price)}
           </span>
           {product.originalPrice > product.price && (
@@ -229,7 +229,7 @@ const PetStoreApp = () => {
 
         <button
           onClick={() => addToCart(product)}
-          className="w-full bg-[#08a43c] hover:bg-[#067a2f] text-white py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-semibold"
+          className="w-full bg-blue-600 hover:bg-blue-500 text-white py-2 px-4 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 font-semibold"
         >
           <Plus className="w-4 h-4" />
           Tambah ke Keranjang
@@ -240,7 +240,7 @@ const PetStoreApp = () => {
 
   const CartModal = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-y-auto">
+      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         <div className="p-4 border-b">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Keranjang Belanja</h3>
@@ -270,7 +270,7 @@ const PetStoreApp = () => {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{item.name}</h4>
-                    <p className="text-[#08a43c] font-semibold">
+                    <p className="text-[#2563EB] font-semibold">
                       {formatPrice(item.price)}
                     </p>
                   </div>
@@ -284,7 +284,7 @@ const PetStoreApp = () => {
                     <span className="w-8 text-center">{item.quantity}</span>
                     <button
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-6 h-6 rounded-full bg-[#08a43c] text-white flex items-center justify-center hover:bg-[#067a2f] transition"
+                      className="w-6 h-6 rounded-full bg-[#2563EB] text-white flex items-center justify-center hover:bg-[#3B82F6] transition"
                     >
                       <Plus className="w-3 h-3" />
                     </button>
@@ -295,7 +295,7 @@ const PetStoreApp = () => {
               <div className="mt-4 pt-4 border-t">
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-semibold">Total:</span>
-                  <span className="font-bold text-xl text-[#08a43c]">
+                  <span className="font-bold text-xl text-[#2563EB]">
                     {formatPrice(getTotalPrice())}
                   </span>
                 </div>
@@ -304,7 +304,7 @@ const PetStoreApp = () => {
                     setShowCart(false);
                     setShowCheckout(true);
                   }}
-                  className="w-full bg-[#08a43c] hover:bg-[#067a2f] text-white py-3 rounded-lg font-semibold transition"
+                  className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-white py-3 rounded-lg font-semibold transition"
                 >
                   Checkout
                 </button>
@@ -438,7 +438,7 @@ const PetStoreApp = () => {
                   onChange={(e) =>
                     setCustomerInfo({ ...customerInfo, phone: e.target.value })
                   }
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
                 />
               </div>
 
@@ -456,7 +456,7 @@ const PetStoreApp = () => {
                     })
                   }
                   rows="3"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
                 />
               </div>
 
@@ -472,7 +472,7 @@ const PetStoreApp = () => {
                       paymentMethod: e.target.value,
                     })
                   }
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
                 >
                   <option value="transfer">Transfer Bank</option>
                   <option value="cod">Bayar di Tempat (COD)</option>
@@ -484,14 +484,14 @@ const PetStoreApp = () => {
             <div className="mt-6 pt-4 border-t">
               <div className="flex justify-between items-center mb-4">
                 <span className="font-semibold">Total Pembayaran:</span>
-                <span className="font-bold text-xl text-[#08a43c]">
+                <span className="font-bold text-xl text-[#2563EB]">
                   {formatPrice(getTotalPrice())}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="w-full bg-[#08a43c] hover:bg-[#067a2f] text-white py-3 rounded-lg font-semibold transition"
+                className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-white py-3 rounded-lg font-semibold transition"
               >
                 Konfirmasi Pesanan
               </button>
@@ -504,7 +504,7 @@ const PetStoreApp = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      <header className="bg-green-600 text-white p-4 shadow-md">
+      <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           {/* Logo */}
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
@@ -533,7 +533,7 @@ const PetStoreApp = () => {
 
             <button
               onClick={() => setShowCart(true)}
-              className="relative bg-[#08a43c] hover:bg-[#067a2f] text-white p-3 rounded-xl transition-all duration-300"
+              className="relative bg-blue-600 hover:bg-blue-500 text-white p-3 rounded-xl transition-all duration-300"
             >
               <ShoppingCart className="w-6 h-6" />
               {getTotalItems() > 0 && (
@@ -550,7 +550,7 @@ const PetStoreApp = () => {
                 localStorage.removeItem("username");
                 window.location.href = "/login";
               }}
-              className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
+              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"
             >
               Logout
             </button>
@@ -569,7 +569,7 @@ const PetStoreApp = () => {
                 placeholder="Cari produk makanan atau obat hewan..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#08a43c] focus:border-transparent"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
               />
             </div>
 
@@ -580,7 +580,7 @@ const PetStoreApp = () => {
                   onClick={() => setActiveCategory(category.id)}
                   className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                     activeCategory === category.id
-                      ? "bg-[#08a43c] text-white"
+                      ? "bg-[#2563EB] text-white"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }`}
                 >
@@ -608,7 +608,7 @@ const PetStoreApp = () => {
       </div>
 
       {/* Footer */}
-      <footer className="bg-green-700 text-white py-10 px-6 text-sm">
+      <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Info Klinik */}
           <div>
@@ -647,7 +647,7 @@ const PetStoreApp = () => {
 
           {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
-            <h3 className="text-2xl font-bold text-green-700 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2">
               🕒 Service Hours
             </h3>
             <ul className="text-sm divide-y divide-gray-200">
