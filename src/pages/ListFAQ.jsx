@@ -1,44 +1,10 @@
 import React, { useState, useEffect } from "react";
-// **********************************************************************************
-// SANGAT PENTING: SILA SESUAIKAN JALUR IMPORT SUPABASE INI MENGIKUT STRUKTUR FOLDER PROJEK ANDA.
-// Ralat "Could not resolve" ini berterusan dan merupakan PUNCA UTAMA masalah.
-// Fail 'supabase.js' anda TIDAK DITEMUI pada jalur relatif yang telah dicuba setakat ini.
-//
-// UNTUK MENYELESAIKAN INI SECARA MUKTAMAD, ANDA PERLU MEMBERITAHU LOKASI TEPAT FAIL 'supabase.js' ANDA.
-// Sila GANTI BARIS 'import { supabase } = ...' DI BAWAH INI DENGAN JALUR YANG BETUL
-// SETELAH ANDA MENGESAHKANNYA SENDIRI DARI STRUKTUR PROJEK ANDA.
-//
-// Anda boleh melihat jalur penuh fail `FAQ.jsx` anda adalah:
-// D:/project062025/crm-23SIC-Kelompok6/src/pages/FAQ.jsx
-//
-// Berikut adalah BEBERAPA CONTOH JALUR yang mungkin UNTUK FAIL `supabase.js` anda,
-// bergantung pada di mana ia disimpan RELATIF KEPADA `src/pages/FAQ.jsx`:
-//
-// CONTOH 1: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
-//           (iaitu, di dalam folder 'src', setingkat dengan folder 'pages')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../supabase"; // Ini adalah cubaan lalai saya yang terakhir.
-//
-// CONTOH 2: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js
-//           (iaitu, di akar projek anda, satu folder di atas folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../../supabase";
-//
-// CONTOH 3: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/utils/supabase.js
-//           (iaitu, di dalam folder 'utils' yang berada di dalam folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../utils/supabase";
-//
-// CONTOH 4: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/config/supabase.js
-//           (iaitu, di dalam folder 'config' yang berada di dalam folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../config/supabase";
-//
-// SILA GANTI BARIS DI BAWAH INI DENGAN JALUR YANG BETUL UNTUK PROJEK ANDA!
-import { supabase } from "../supabase"; // <<<<<<<<<<<<<<<<<<<<<<<<< JALUR INI MESTI DIBETULKAN SECARA MANUAL!
+// Assuming supabase client is configured and exported from this path
+// Adjusted path for common project structures. If this still causes an error,
+// please verify the exact path to your supabase.js file relative to this component.
+import { supabase } from "../supabase"; // Adjusted path from "./supabase" to "../supabase"
 
-
-export default function FAQ() {
+const ListFAQ = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -46,61 +12,60 @@ export default function FAQ() {
   const [formData, setFormData] = useState({ question: "", answer: "" });
   const [editId, setEditId] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalAction, setModalAction] = useState(null); // 'delete' or 'cancel'
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
 
-  // Fungsi untuk mengambil FAQ dari Supabase
+  // Fetch FAQs from Supabase
   const fetchFaqs = async () => {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
       .from('faqs')
       .select('*')
-      .order('created_at', { ascending: false }); // Urutkan berdasarkan waktu pembuatan terbaru
+      .order('created_at', { ascending: false }); // Order by creation date
 
     if (error) {
       console.error('Error fetching FAQs:', error.message);
-      setError('Gagal memuat FAQ. Sila cuba lagi.');
+      setError('Failed to load FAQs. Please try again.');
     } else {
       setFaqs(data);
     }
     setLoading(false);
   };
 
-  // Efek untuk memuat FAQ saat komponen dipasang dan berlangganan pembaruan real-time
-  // Efek ini akan menangani pembaruan otomatis setelah import supabase diperbaiki.
+  // Effect to fetch FAQs on component mount and subscribe to real-time updates
   useEffect(() => {
     fetchFaqs();
 
-    // Berlangganan perubahan real-time pada tabel 'faqs'
-    // Setiap kali ada INSERT, UPDATE, atau DELETE di tabel 'faqs',
-    // callback ini akan dipicu, dan 'fetchFaqs()' akan dipanggil ulang.
+    // Subscribe to real-time changes
     const channel = supabase
-      .channel('public:faqs_admin_changes') // Nama channel unik
+      .channel('public:faqs')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
-        console.log('Realtime change received for FAQs (Admin):', payload);
-        fetchFaqs(); // Ambil ulang data setiap ada perubahan
+        console.log('Realtime change received for FAQs:', payload);
+        fetchFaqs(); // Re-fetch data on any change
       })
       .subscribe();
 
-    // Fungsi cleanup saat komponen dilepas untuk menghindari kebocoran memori
+    // Cleanup subscription on component unmount
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []); // [] memastikan efek ini hanya berjalan sekali saat mount
+  }, []);
 
-  // Mengelola perubahan input form
+  // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Mengelola penambahan atau pembaruan FAQ
+  // Handle adding a new FAQ or saving an edited FAQ
   const handleAddOrUpdateFAQ = async () => {
     const trimmedQuestion = formData.question.trim();
     const trimmedAnswer = formData.answer.trim();
 
     if (!trimmedQuestion || !trimmedAnswer) {
-      setError("Pertanyaan dan jawapan harus diisi.");
+      // Using a simple message display instead of alert
+      setError("Question and answer cannot be empty.");
       return;
     }
 
@@ -108,7 +73,7 @@ export default function FAQ() {
     setError(null);
 
     if (editId !== null) {
-      // Perbarui FAQ yang sudah ada
+      // Update existing FAQ
       const { data, error } = await supabase
         .from('faqs')
         .update({ question: trimmedQuestion, answer: trimmedAnswer })
@@ -117,13 +82,12 @@ export default function FAQ() {
 
       if (error) {
         console.error('Error updating FAQ:', error.message);
-        setError('Gagal memperbarui FAQ. Sila cuba lagi.');
+        setError('Failed to update FAQ. Please try again.');
       } else {
-        console.log('FAQ diperbarui:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener
+        console.log('FAQ updated:', data);
       }
     } else {
-      // Tambah FAQ baru
+      // Add new FAQ
       const { data, error } = await supabase
         .from('faqs')
         .insert([{ question: trimmedQuestion, answer: trimmedAnswer }])
@@ -131,27 +95,26 @@ export default function FAQ() {
 
       if (error) {
         console.error('Error adding FAQ:', error.message);
-        setError('Gagal menambah FAQ. Sila cuba lagi.');
+        setError('Failed to add FAQ. Please try again.');
       } else {
-        console.log('FAQ ditambahkan:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener
+        console.log('FAQ added:', data);
       }
     }
 
-    // Reset form dan sembunyikan form setelah operasi selesai
     setFormData({ question: "", answer: "" });
     setShowForm(false);
     setEditId(null);
-    setLoading(false); // Selesai loading setelah operasi database
+    setLoading(false);
   };
 
-  // Tampilkan modal konfirmasi sebelum menghapus
+  // Prepare for delete action by showing confirmation modal
   const handleDeleteConfirm = (id) => {
     setItemIdToDelete(id);
+    setModalAction('delete');
     setShowConfirmModal(true);
   };
 
-  // Jalankan aksi penghapusan setelah konfirmasi
+  // Execute delete action
   const handleDelete = async () => {
     if (itemIdToDelete === null) return;
 
@@ -164,37 +127,39 @@ export default function FAQ() {
 
     if (error) {
       console.error('Error deleting FAQ:', error.message);
-      setError('Gagal menghapus data: ' + error.message);
+      setError('Failed to delete FAQ. Please try again.');
     } else {
-      console.log('FAQ dihapus:', itemIdToDelete);
-      // Pembaruan UI akan ditangani oleh real-time listener
+      console.log('FAQ deleted:', itemIdToDelete);
+      // Realtime subscription will handle UI update
     }
     setLoading(false);
-    setShowConfirmModal(false); // Tutup modal
-    setItemIdToDelete(null); // Reset ID untuk dihapus
-    if (editId === itemIdToDelete) { // Jika FAQ yang diedit dihapus
+    setShowConfirmModal(false);
+    setItemIdToDelete(null);
+    setModalAction(null);
+    if (editId === itemIdToDelete) {
       setEditId(null);
       setShowForm(false);
       setFormData({ question: "", answer: "" });
     }
   };
 
-  // Mengelola pengeditan FAQ
+  // Handle editing an FAQ
   const handleEdit = (faq) => {
     setFormData({ question: faq.question, answer: faq.answer });
     setEditId(faq.id);
     setShowForm(true);
-    setError(null); // Hapus error sebelumnya
+    setError(null); // Clear any previous errors
   };
 
-  // Mengelola pembatalan form atau modal
+  // Handle cancelling form or modal
   const handleCancel = () => {
     setShowConfirmModal(false);
+    setModalAction(null);
     setItemIdToDelete(null);
     setEditId(null);
     setShowForm(false);
     setFormData({ question: "", answer: "" });
-    setError(null); // Hapus error
+    setError(null); // Clear any errors
   };
 
   return (
@@ -245,7 +210,7 @@ export default function FAQ() {
             </div>
             <div className="mb-6">
               <label htmlFor="answer" className="block mb-2 font-medium text-blue-800">
-                Jawapan
+                Jawaban
               </label>
               <textarea
                 id="answer"
@@ -253,7 +218,7 @@ export default function FAQ() {
                 value={formData.answer}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="Masukkan jawapan FAQ"
+                placeholder="Masukkan jawaban FAQ"
                 rows={4}
               />
             </div>
@@ -278,7 +243,7 @@ export default function FAQ() {
         {!loading && !error && faqs.length === 0 ? (
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg relative mb-4 text-center">
             <strong className="font-bold">Info:</strong>
-            <span className="block sm:inline"> Tiada FAQ yang tersedia.</span>
+            <span className="block sm:inline"> Tidak ada FAQ yang tersedia.</span>
           </div>
         ) : (
           <div className="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
@@ -286,7 +251,7 @@ export default function FAQ() {
               <thead className="bg-blue-100">
                 <tr>
                   <th className="py-3 px-4 rounded-tl-xl text-blue-800 font-semibold">Pertanyaan</th>
-                  <th className="py-3 px-4 text-blue-800 font-semibold">Jawapan</th>
+                  <th className="py-3 px-4 text-blue-800 font-semibold">Jawaban</th>
                   <th className="py-3 px-4 rounded-tr-xl text-center text-blue-800 font-semibold">Aksi</th>
                 </tr>
               </thead>
@@ -317,20 +282,22 @@ export default function FAQ() {
         )}
       </div>
 
-      {/* Modal Konfirmasi Kustom */}
+      {/* Custom Confirmation Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
           <div className="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center border border-gray-200">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Konfirmasi</h3>
             <p className="text-gray-700 mb-6">
-              Adakah anda pasti ingin menghapus FAQ ini?
+              Apakah Anda yakin ingin {modalAction === 'delete' ? "menghapus FAQ ini" : "membatalkan"}?
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={handleDelete}
-                className="px-6 py-2 rounded-lg text-white font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200 ease-in-out transform hover:scale-105"
+                onClick={modalAction === 'delete' ? handleDelete : handleCancel}
+                className={`px-6 py-2 rounded-lg text-white font-semibold transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                  modalAction === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Ya, Hapus
+                Ya
               </button>
               <button
                 onClick={handleCancel}
@@ -344,4 +311,6 @@ export default function FAQ() {
       )}
     </div>
   );
-}
+};
+
+export default ListFAQ;

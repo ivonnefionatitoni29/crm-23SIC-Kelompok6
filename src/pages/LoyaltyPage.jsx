@@ -13,9 +13,9 @@ const LoyaltyPage = () => {
 
   // Warna dan style badge sesuai level
   const loyaltyColors = {
-    Bronze: "bg-yellow-500 text-yellow-900",
-    Silver: "bg-gray-300 text-gray-800",
-    Gold: "bg-yellow-400 text-yellow-900",
+    Bronze: "bg-orange-400 text-orange-900", // Adjusted for blue theme
+    Silver: "bg-sky-300 text-sky-800",       // Adjusted for blue theme
+    Gold: "bg-amber-400 text-amber-900",      // Adjusted for blue theme
   };
 
   // Persentase progress bar
@@ -50,7 +50,7 @@ const LoyaltyPage = () => {
   return (
     <div className="font-sans text-gray-800 min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
       {/* Header (from old code) */}
-      <header className="bg-green-600 text-white p-4 shadow-md">
+      <header className="bg-blue-600 text-white p-4 shadow-md"> {/* Changed to blue-600 */}
         <div className="container mx-auto flex justify-between items-center">
           {/* Logo */}
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
@@ -74,7 +74,7 @@ const LoyaltyPage = () => {
 
             {/* Tampilkan Poin Loyalitas di header LoyaltyPage (tetap clickable) */}
             {username && (
-              <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
+              <Link to="/loyalty" className="flex items-center bg-yellow-400 text-blue-900 px-3 py-1 rounded-full font-semibold hover:bg-yellow-500 transition-colors"> {/* Changed to yellow for points, text blue-900 */}
                 Poin: {formatPoints(userPoints)} ⭐
               </Link>
             )}
@@ -86,7 +86,7 @@ const LoyaltyPage = () => {
                 localStorage.removeItem("username");
                 window.location.href = "/login";
               }}
-              className="bg-white text-green-600 px-3 py-1 rounded hover:bg-gray-200"
+              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200" // Changed to text-blue-600
             >
               Logout
             </button>
@@ -96,15 +96,15 @@ const LoyaltyPage = () => {
 
       {/* Main Content for Loyalty Page */}
       <main className="container mx-auto py-12 px-4">
-        <section className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto text-center border border-green-200">
-          <h2 className="text-3xl font-bold mb-6 text-green-700">
+        <section className="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto text-center border border-blue-200"> {/* Changed to border-blue-200 */}
+          <h2 className="text-3xl font-bold mb-6 text-blue-700"> {/* Changed to text-blue-700 */}
             Program Poin Loyalitas Anda
           </h2>
           <p className="text-lg text-gray-700 mb-8">
             Terima kasih telah menjadi bagian dari Groovy VetCare! Berikut adalah detail poin dan level loyalitas Anda.
           </p>
 
-          <div className="mb-4 text-7xl font-extrabold text-green-600">
+          <div className="mb-4 text-7xl font-extrabold text-blue-600"> {/* Changed to text-blue-600 */}
             {formatPoints(userPoints)}{" "}
             <span className="text-3xl font-medium text-gray-500">pts</span>
           </div>
@@ -130,14 +130,14 @@ const LoyaltyPage = () => {
               </p>
             )}
             {loyaltyLevel === "Gold" && (
-              <p className="mt-2 text-md text-yellow-700 font-semibold">
+              <p className="mt-2 text-md text-amber-700 font-semibold"> {/* Adjusted for blue theme */}
                 Selamat! Anda sudah di level tertinggi 🎉 Nikmati semua keuntungan Gold Member!
               </p>
             )}
           </div>
 
           <div className="mt-8 text-left border-t pt-6 border-gray-200">
-            <h3 className="text-2xl font-bold mb-4 text-green-700">Keuntungan Loyalitas</h3>
+            <h3 className="text-2xl font-bold mb-4 text-blue-700">Keuntungan Loyalitas</h3> {/* Changed to text-blue-700 */}
             <ul className="list-disc list-inside space-y-2 text-gray-700">
               <li>**Bronze (0-99 Poin):** Diskon 5% untuk layanan vaksinasi.</li>
               <li>**Silver (100-199 Poin):** Diskon 10% untuk layanan vaksinasi dan gratis cek kesehatan dasar setiap 6 bulan.</li>
@@ -148,7 +148,7 @@ const LoyaltyPage = () => {
       </main>
 
       {/* Footer (from old code) */}
-      <footer className="bg-green-700 text-white py-10 px-6 text-sm">
+      <footer className="bg-blue-700 text-white py-10 px-6 text-sm"> {/* Changed to blue-700 */}
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Info Klinik */}
           <div>
@@ -187,7 +187,7 @@ const LoyaltyPage = () => {
 
           {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
-            <h3 className="text-2xl font-bold text-green-700 mb-4 flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2"> {/* Changed to text-blue-700 */}
               🕒 Service Hours
             </h3>
             <ul className="text-sm divide-y divide-gray-200">

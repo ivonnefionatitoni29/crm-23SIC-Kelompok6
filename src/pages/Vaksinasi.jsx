@@ -1,39 +1,64 @@
+// src/pages/VaccinationManagement.jsx
+
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabase'; // Pastikan path import ini benar
 
 const VaccinationManagement = () => {
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('dataVaksinasi')) || [];
-    setData(stored);
-  }, []);
+  // Fungsi untuk mengambil data dari Supabase
+  const fetchDataVaksinasi = async () => {
+    setLoading(true);
+    setError(null);
+    const { data, error } = await supabase
+      .from('vaksinasi')
+      .select('*')
+      .order('created_at', { ascending: false }); // Mengurutkan berdasarkan waktu pembuatan terbaru
 
-  const ubahStatus = (id) => {
-    const updated = data.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            status:
-              item.status === 'Pending'
-                ? 'Diterima'
-                : item.status === 'Diterima'
-                ? 'Ditolak'
-                : 'Pending',
-          }
-        : item
-    );
-    setData(updated);
-    localStorage.setItem('dataVaksinasi', JSON.stringify(updated));
+    if (error) {
+      console.error('Error fetching data vaksinasi:', error);
+      setError('Gagal mengambil data vaksinasi. Silakan coba lagi.');
+    } else {
+      setData(data);
+    }
+    setLoading(false);
   };
 
-  const hapusData = (id) => {
+  // Fungsi untuk menghapus data dari Supabase
+  const hapusData = async (id) => {
     const konfirmasi = confirm('Yakin ingin menghapus data ini?');
     if (!konfirmasi) return;
 
-    const updated = data.filter((item) => item.id !== id);
-    setData(updated);
-    localStorage.setItem('dataVaksinasi', JSON.stringify(updated));
+    const { error } = await supabase
+      .from('vaksinasi')
+      .delete()
+      .eq('id', id); // Menghapus baris yang sesuai berdasarkan ID
+
+    if (error) {
+      console.error('Error deleting data:', error);
+      alert('Gagal menghapus data: ' + error.message);
+    }
+    // Realtime Supabase akan secara otomatis memperbarui UI setelah ini.
   };
+
+  // useEffect untuk memuat data saat komponen di-mount dan berlangganan perubahan Realtime
+  useEffect(() => {
+    fetchDataVaksinasi();
+
+    const channel = supabase
+      .channel('public:vaksinasi_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vaksinasi' }, payload => {
+        console.log('Perubahan Realtime diterima (vaksinasi):', payload);
+        fetchDataVaksinasi();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-blue-50 p-6">
@@ -41,64 +66,65 @@ const VaccinationManagement = () => {
         <h2 className="text-2xl font-bold text-blue-800 mb-4">
           Manajemen Vaksinasi Hewan
         </h2>
-        <table className="min-w-full divide-y divide-blue-200">
-          <thead className="bg-blue-100">
-            <tr>
-              <th className="px-4 py-2 text-left text-blue-800">Nama Hewan</th>
-              <th className="px-4 py-2 text-left text-blue-800">Jenis Hewan</th>
-              <th className="px-4 py-2 text-left text-blue-800">Jenis Vaksin</th>
-              <th className="px-4 py-2 text-left text-blue-800">Jam Vaksin</th>
-              <th className="px-4 py-2 text-left text-blue-800">Tanggal</th>
-              <th className="px-4 py-2 text-center text-blue-800">Status</th>
-              <th className="px-4 py-2 text-center text-blue-800">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-blue-100 bg-white">
-            {data.map((item) => (
-              <tr key={item.id} className="hover:bg-blue-50">
-                <td className="px-4 py-2">{item.nama}</td>
-                <td className="px-4 py-2">{item.jenis}</td>
-                <td className="px-4 py-2">{item.vaksin}</td>
-                <td className="px-4 py-2">{item.jam}</td>
-                <td className="px-4 py-2">{item.tanggal}</td>
-                <td className="px-4 py-2 text-center">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      item.status === 'Diterima'
-                        ? 'bg-blue-100 text-blue-800'
-                        : item.status === 'Ditolak'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-center space-x-2">
-                  <button
-                    onClick={() => ubahStatus(item.id)}
-                    className="px-3 py-1 rounded text-white bg-blue-600 hover:bg-blue-700 transition"
-                  >
-                    Ubah Status
-                  </button>
-                  <button
-                    onClick={() => hapusData(item.id)}
-                    className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700 transition"
-                  >
-                    Hapus
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {data.length === 0 && (
-              <tr>
-                <td colSpan="7" className="text-center py-4 text-blue-500">
-                  Tidak ada data vaksinasi.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+
+        {loading && (
+          <p className="text-center text-lg text-blue-600">Memuat data...</p>
+        )}
+
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Error!</strong>
+            <span className="block sm:inline"> {error}</span>
+          </div>
+        )}
+
+        {!loading && !error && data.length === 0 && (
+          <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded relative mb-4" role="alert">
+            <strong className="font-bold">Info:</strong>
+            <span className="block sm:inline"> Tidak ada data vaksinasi yang tersedia.</span>
+          </div>
+        )}
+
+        {!loading && !error && data.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-blue-200">
+              <thead className="bg-blue-100">
+                <tr>
+                  <th className="px-4 py-2 text-left text-blue-800">Nama Hewan</th>
+                  <th className="px-4 py-2 text-left text-blue-800">Jenis Hewan</th>
+                  <th className="px-4 py-2 text-left text-blue-800">Jenis Vaksin</th>
+                  <th className="px-4 py-2 text-left text-blue-800">Jam Vaksin</th>
+                  <th className="px-4 py-2 text-left text-blue-800">Tanggal</th>
+                  {/* KOLOM STATUS DIHAPUS */}
+                  <th className="px-4 py-2 text-center text-blue-800">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-blue-100 bg-white">
+                {data.map((item) => (
+                  <tr key={item.id} className="hover:bg-blue-50">
+                    <td className="px-4 py-2">{item.nama_hewan}</td>
+                    <td className="px-4 py-2">{item.jenis_hewan}</td>
+                    <td className="px-4 py-2">{item.jenis_vaksin}</td>
+                    <td className="px-4 py-2">{item.jam_vaksin}</td>
+                    <td className="px-4 py-2">
+                      {item.tanggal ? new Date(item.tanggal).toLocaleDateString() : '-'}
+                    </td>
+                    {/* DATA STATUS DIHAPUS */}
+                    <td className="px-4 py-2 text-center space-x-2">
+                      {/* TOMBOL "UBAH STATUS" DIHAPUS */}
+                      <button
+                        onClick={() => hapusData(item.id)}
+                        className="px-3 py-1 rounded text-white bg-red-600 hover:bg-red-700 transition"
+                      >
+                        Hapus
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
