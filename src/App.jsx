@@ -54,8 +54,9 @@ function App() {
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
       </Route>
-
-       <Route path="/faq-page" element={<FaqPage />} />
+        
+        <Route path="/faq-page" element={<FaqPage />} />
+       
     </Routes>
   );
 }
