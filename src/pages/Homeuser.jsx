@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
+  const [showLayananMenu, setShowLayananMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
   const navigate = useNavigate();
-
 
   const images = [
     "https://bic.id/wp-content/uploads/2023/12/dokter-Hewan-Lulusan-Dari-Fakultas-Kedokteran-Hewan.webp",
@@ -15,16 +14,17 @@ const HomeUser = () => {
     "https://bolumenara.co.id/uploads/8/2023-10/dokter_hewan.png",
   ];
 
-
   const handleReservasiClick = () => {
     setShowReservasiMenu(!showReservasiMenu);
   };
 
+  const handleLayananHeaderClick = () => {
+    setShowLayananMenu(!showLayananMenu);
+  };
 
   const goToPage = (path) => {
     navigate(path);
   };
-
 
   useEffect(() => {
     const storedFaqs = localStorage.getItem("faqs");
@@ -33,23 +33,17 @@ const HomeUser = () => {
     }
   }, []);
 
-
   const userPoints = 150;
-  const maxPoints = 200; // Max poin untuk Gold
+  const maxPoints = 200;
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
 
-
-  // Warna dan style badge sesuai level
   const loyaltyColors = {
     Bronze: 'bg-yellow-500 text-yellow-900',
     Silver: 'bg-gray-300 text-gray-800',
     Gold: 'bg-yellow-400 text-yellow-900',
   };
 
-
-  // Persentase progress bar
   const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
-
 
   return (
     <div className="font-sans text-gray-800">
@@ -59,7 +53,51 @@ const HomeUser = () => {
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
             <a href="#" className="hover:underline">Beranda</a>
-            <a href="#layanan" className="hover:underline">Layanan</a>
+            
+            <div className="relative">
+              <button
+                onClick={handleLayananHeaderClick}
+                className="hover:underline flex items-center gap-1"
+              >
+                Layanan
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-4 w-4 transform transition-transform duration-300 ${
+                    showLayananMenu ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showLayananMenu && (
+                <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-20 animate-fade-down">
+                  <button
+                    onClick={() => goToPage('/login')}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
+                  >
+                    Penitipan Hewan
+                  </button>
+                  <button
+                    onClick={() => goToPage('/login')}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
+                  >
+                    Kebiri
+                  </button>
+                  <button
+                    onClick={() => goToPage('/login')}
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
+                  >
+                    Vaksinasi
+                  </button>
+                </div>
+              )}
+            </div>
+            
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage('/login')}
@@ -70,7 +108,6 @@ const HomeUser = () => {
           </nav>
         </div>
       </header>
-
 
       {/* Hero Section */}
       <section className="relative">
@@ -88,11 +125,9 @@ const HomeUser = () => {
         </div>
       </section>
 
-
       {/* Prediksi Kesehatan Hewan */}
       <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
-          {/* Ilustrasi */}
           <div className="md:w-1/2 flex justify-center">
             <img
               src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
@@ -100,9 +135,6 @@ const HomeUser = () => {
               className="w-64 md:w-80 drop-shadow-xl"
             />
           </div>
-
-
-          {/* Konten Teks */}
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
               Prediksi Kesehatan Hewanmu
@@ -122,24 +154,22 @@ const HomeUser = () => {
         </div>
       </section>
 
-
       {/* Layanan */}
       <section id="layanan" className="py-12 bg-gray-50">
         <div className="container mx-auto text-center">
           <h3 className="text-2xl font-bold mb-8">Layanan Kami</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
-
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage('/pelangganjb')}
+              // DIUBAH: Arah navigasi diubah dari '/pelangganjb' menjadi '/login'
+              onClick={() => goToPage('/login')}
               className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png" alt="Produk" className="w-20 mb-4" />
               <h4 className="font-semibold text-lg mb-2">Pembelian Obat & Makanan</h4>
               <p className="text-sm text-gray-600">Dapatkan produk terbaik untuk hewan kesayanganmu.</p>
             </div>
-
 
             {/* Reservasi */}
             <div className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
@@ -169,7 +199,6 @@ const HomeUser = () => {
                 <p className="text-sm text-gray-600">Klik untuk memilih jenis layanan reservasi.</p>
               </div>
 
-
               {showReservasiMenu && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
                   {["Penitipan Hewan", "Kebiri", "Vaksinasi"].map((layanan) => (
@@ -184,14 +213,9 @@ const HomeUser = () => {
                 </div>
               )}
             </div>
-
-
-
-
           </div>
         </div>
       </section>
-
 
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
@@ -234,9 +258,6 @@ const HomeUser = () => {
               ))
             )}
           </div>
-
-
-          {/* Tombol Lihat Semua */}
           {faqs.length > 3 && (
             <div className="text-center mt-6">
               <button
@@ -250,15 +271,9 @@ const HomeUser = () => {
         </div>
       </section>
 
-
-
-
       {/* Footer */}
       <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-
-
-          {/* Info Klinik */}
           <div>
             <h3 className="text-xl font-bold mb-3">Groovy Vetcare Clinic</h3>
             <p className="mb-1">Ruko Galeri Niaga No. 9F-G</p>
@@ -278,9 +293,6 @@ const HomeUser = () => {
               📍 Google Maps Direction
             </a>
           </div>
-
-
-          {/* Tentang Kami */}
           <div className="md:col-span-2">
             <h3 className="text-xl font-bold mb-3">Tentang Kami</h3>
             <p className="mb-3">Groovy Vetcare Clinic adalah bagian dari jaringan MEDIVET Pet Hospital & Clinic Network.</p>
@@ -289,9 +301,6 @@ const HomeUser = () => {
               Pet Hotel, dan Cat Cafe.
             </p>
           </div>
-
-
-          {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
             <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2">
               🕒 Service Hours
@@ -316,16 +325,12 @@ const HomeUser = () => {
             </div>
           </div>
         </div>
-
-
-        {/* Footer Credit */}
         <div className="mt-8 text-center text-xs text-white/80">
-          &copy; 2025 Groovy Vetcare. All rights reserved.
+          © 2025 Groovy Vetcare. All rights reserved.
         </div>
       </footer>
     </div>
   );
 };
-
 
 export default HomeUser;
