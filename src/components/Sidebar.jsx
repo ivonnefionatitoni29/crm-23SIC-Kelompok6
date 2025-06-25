@@ -1,5 +1,5 @@
 import { LayoutDashboard } from 'lucide-react';
-import { FaDog, FaQuestionCircle, FaStore } from 'react-icons/fa';
+import { FaDog, FaQuestionCircle, FaStore, FaUser, FaHeartbeat } from 'react-icons/fa'; // Tambahkan FaHeartbeat
 import { MdVaccines, MdEmojiEvents } from 'react-icons/md';
 import { GiScalpel } from 'react-icons/gi';
 import { Link, useLocation } from 'react-router-dom';
@@ -12,7 +12,9 @@ const menuItems = [
   { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
   { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
   { name: 'Jual Beli', icon: <FaStore size={18} />, path: '/jualbeli' },
-  { name: 'Prediksi Kesehatan', icon: <FaStore size={18} />, path: '/prediksi-kesehatan' },
+  // Ikon Prediksi Kesehatan diubah menjadi FaHeartbeat
+  { name: 'Prediksi Kesehatan', icon: <FaHeartbeat size={18} />, path: '/prediksi-kesehatan' },
+  { name: 'Tabel User', icon: <FaUser size={18} />, path: '/users' },
 ];
 
 const Sidebar = () => {

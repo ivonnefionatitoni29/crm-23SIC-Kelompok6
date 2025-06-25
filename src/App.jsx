@@ -16,6 +16,8 @@ import HomeUser from './pages/Homeuser';
 import HomeUserLogin from './pages/HomeUserLogin';
 import PelangganJB from './pages/PelangganJB';
 import LoyaltyPage from './pages/LoyaltyPage';
+import RegisterPage from './pages/RegisterPage';
+
 
 // ✅ Tambahkan import untuk form user
 import FormPenitipan from './pages/FormPenitipan';
@@ -25,18 +27,21 @@ import FormVaksinasi from './pages/FormVaksinasi';
 import PrediksiPenyakitHewan from './pages/PrediksiPenyakitHewan';
 import FaqPage from './pages/FaqPage';
 
+// IMPOR KOMPONEN USER TABLE YANG BARU
+import UserTable from './pages/UserTable'; // PASTIKAN PATH INI SESUAI
+
 function App() {
   return (
     <Routes>
       {/* Halaman publik */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/RegisterPage" element={<RegisterPage />} />
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
       <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
       <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
-
 
 
       {/* ✅ Rute form layanan untuk user */}
@@ -53,10 +58,11 @@ function App() {
         <Route path="/loyalitaspelanggan" element={<Loyalitaspelanggan />} />
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
+        {/* Rute baru untuk Tabel User */}
+        <Route path="/users" element={<UserTable />} />
       </Route>
-        
+
         <Route path="/faq-page" element={<FaqPage />} />
-       
     </Routes>
   );
 }

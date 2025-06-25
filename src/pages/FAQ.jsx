@@ -120,7 +120,7 @@ export default function FAQ() {
         setError('Gagal memperbarui FAQ. Sila cuba lagi.');
       } else {
         console.log('FAQ diperbarui:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener
+        // Pembaruan UI akan ditangani oleh realtime listener, jadi tidak perlu panggil fetchFaqs di sini.
       }
     } else {
       // Tambah FAQ baru
@@ -134,7 +134,7 @@ export default function FAQ() {
         setError('Gagal menambah FAQ. Sila cuba lagi.');
       } else {
         console.log('FAQ ditambahkan:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener
+        // Pembaruan UI akan ditangani oleh realtime listener, jadi tidak perlu panggil fetchFaqs di sini.
       }
     }
 
@@ -167,7 +167,7 @@ export default function FAQ() {
       setError('Gagal menghapus data: ' + error.message);
     } else {
       console.log('FAQ dihapus:', itemIdToDelete);
-      // Pembaruan UI akan ditangani oleh real-time listener
+      // Pembaruan UI akan ditangani oleh real-time listener, jadi tidak perlu panggil fetchFaqs di sini.
     }
     setLoading(false);
     setShowConfirmModal(false); // Tutup modal

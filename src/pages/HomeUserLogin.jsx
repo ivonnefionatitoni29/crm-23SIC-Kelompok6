@@ -6,10 +6,15 @@ const HomeUserLogin = () => {
   // --- STATE DARI KEDUA VERSI ---
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [faqs, setFaqs] = useState([]);
-  const [username, setUsername] = useState("");
+  const [faqs, setFaqs] =useState([]);
+  const [username, setUsername] = useState('');
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
+
+  // New states for user authentication details
+  const [currentUser, setCurrentUser] = useState(null); // Stores { id, email, role }
+  // username state is still used for display, can be renamed if desired to avoid confusion with setCurrentUserName below
+
   const navigate = useNavigate();
 
   // --- IMAGES & FUNCTIONS DARI KEDUA VERSI ---
@@ -27,9 +32,42 @@ const HomeUserLogin = () => {
     navigate(path);
   };
 
-  // --- LOGIKA useEffect TERBAIK DARI VERSI 2 ---
-  // (Mengambil data dinamis, cart, dan auto-slide)
+  // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
   useEffect(() => {
+    // Authentication Logic
+    const checkUserAuthentication = () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const userId = localStorage.getItem("userId");
+      const userEmail = localStorage.getItem("userEmail");
+      const userRole = localStorage.getItem("userRole"); // Assuming role is stored
+      const userNama = localStorage.getItem("username"); // Assuming display name is stored as 'username'
+
+      if (isLoggedIn && userId && userEmail) {
+        setCurrentUser({ id: userId, email: userEmail, role: userRole });
+        // Prioritize userNama for display, then userEmail, fallback to "Pengguna"
+        setUsername(userNama || userEmail || "Pengguna");
+
+        // Load loyalty points for the logged-in user
+        const storedLoyaltyData = JSON.parse(localStorage.getItem('dataLoyalitas')) || [];
+        const currentUserLoyalty = storedLoyaltyData.find(
+          (customer) => customer.namaPelanggan === userNama // Match by userNama (username)
+        );
+        if (currentUserLoyalty) {
+          setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
+        } else {
+          setLoyaltyPoints(0); // Reset if no loyalty data found for this user
+        }
+
+      } else {
+        setCurrentUser(null);
+        setUsername("Pengguna"); // Default display name
+        setLoyaltyPoints(0); // Reset loyalty points if not logged in
+        navigate("/login"); // Redirect to login page
+      }
+    };
+
+    checkUserAuthentication(); // Run on component mount
+
     // Fungsi untuk mengambil total item di keranjang dari localStorage
     const getTotalItemsInCart = () => {
       try {
@@ -48,11 +86,10 @@ const HomeUserLogin = () => {
     }
 
     // Load username dan poin loyalitas
-    const storedUsername = localStorage.getItem("username");
+    const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
       setUsername(storedUsername);
-      const storedLoyaltyData =
-        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      const storedLoyaltyData = JSON.parse(localStorage.getItem('dataLoyalitas')) || [];
       const currentUserLoyalty = storedLoyaltyData.find(
         (customer) => customer.namaPelanggan === storedUsername
       );
@@ -69,9 +106,16 @@ const HomeUserLogin = () => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
     }, 5000);
 
-    // Event listener untuk memantau perubahan localStorage (untuk update keranjang)
-    const handleStorageChange = () => {
-      setCartItemCount(getTotalItemsInCart());
+    // Event listener untuk memantau perubahan localStorage (untuk update keranjang dan auth)
+    const handleStorageChange = (event) => {
+      // Update cart count
+      if (event.key === "cart") {
+        setCartItemCount(getTotalItemsInCart());
+      }
+      // Re-check auth if relevant storage items change
+      if (event.key === "isLoggedIn" || event.key === "userId" || event.key === "userEmail" || event.key === "username" || event.key === "dataLoyalitas") {
+        checkUserAuthentication();
+      }
     };
     window.addEventListener("storage", handleStorageChange);
 
@@ -80,11 +124,19 @@ const HomeUserLogin = () => {
       clearInterval(slideInterval);
       window.removeEventListener("storage", handleStorageChange);
     };
-  }, [images.length]);
+  }, [images.length, navigate]); // Add navigate to dependency array
 
   const formatPoints = (points) => {
     return points.toLocaleString("id-ID");
   };
+
+  // Prevent rendering if not authenticated yet to avoid flickering
+  if (currentUser === null && localStorage.getItem("isLoggedIn") === "true") {
+      // This means we are still in the process of checking auth,
+      // or some auth data is missing, but isLoggedIn is true.
+      // You might want a loading spinner here instead of just returning null.
+      return null;
+  }
 
   return (
     <div className="font-sans text-gray-800 min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -98,13 +150,9 @@ const HomeUserLogin = () => {
             Groovy VetCare
           </h1>
           <nav className="space-x-6 flex items-center">
-            <Link to="/homeuserlogin" className="hover:underline">
-              Beranda
-            </Link>
-            <Link to="/pelangganjb" className="hover:underline">
-              Pembelian Produk
-            </Link>
-
+            <Link to="/homeuserlogin" className="hover:underline">Beranda</Link>
+            <Link to="/pelangganjb" className="hover:underline">Pembelian Produk</Link>
+            
             <div className="relative">
               <button
                 onClick={handleReservasiClick}
@@ -155,28 +203,15 @@ const HomeUserLogin = () => {
               )}
             </div>
 
-            <a
-              href="/faq-page"
-              className="hover:underline"
-              onClick={() => setShowReservasiMenu(false)}
-            >
-              FAQ
-            </a>
-
+            <a href="/faq-page" className="hover:underline" onClick={() => setShowReservasiMenu(false)}>FAQ</a>
+            
             <div className="flex items-center space-x-2">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                alt="Profil"
-                className="w-8 h-8 rounded-full"
-              />
+              <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profil" className="w-8 h-8 rounded-full" />
               <span>{username || "Pengguna"}</span>
             </div>
 
             {username && (
-              <Link
-                to="/loyalty"
-                className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors"
-              >
+              <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
                 Poin: {formatPoints(loyaltyPoints)} ⭐
               </Link>
             )}
@@ -193,14 +228,7 @@ const HomeUserLogin = () => {
               )}
             </Link>
 
-            <button
-              onClick={() => {
-                localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("username");
-                window.location.href = "/homeuser";
-              }}
-              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"
-            >
+            <button onClick={() => { localStorage.removeItem("isLoggedIn"); localStorage.removeItem("username"); window.location.href = "/login"; }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
               Logout
             </button>
           </nav>
@@ -464,5 +492,7 @@ const HomeUserLogin = () => {
   );
 };
 
-
 export default HomeUserLogin;
+
+
+//asdasfasd

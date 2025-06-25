@@ -1,20 +1,20 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingCart,
   Plus,
   Minus,
   Heart,
   Star,
-  Filter,
   Search,
-  MapPin,
-  Phone,
-  Mail,
 } from "lucide-react";
+import { supabase } from '../supabase'; // Import instance supabase
 
 const PetStoreApp = () => {
+  const navigate = useNavigate();
+
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -22,8 +22,10 @@ const PetStoreApp = () => {
   const [showCart, setShowCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserName, setCurrentUserName] = useState("Pengguna");
 
-  // Data produk
+  // Data produk dummy (bisa diambil dari Supabase juga)
   useEffect(() => {
     const initialProducts = [
       {
@@ -33,8 +35,7 @@ const PetStoreApp = () => {
         type: "anjing",
         price: 285000,
         originalPrice: 320000,
-        image:
-          "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=300&h=300&fit=crop",
+        image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=300&h=300&fit:crop",
         rating: 4.8,
         reviews: 156,
         description: "Makanan premium untuk anjing dengan nutrisi seimbang",
@@ -46,8 +47,7 @@ const PetStoreApp = () => {
         type: "kucing",
         price: 45000,
         originalPrice: 52000,
-        image:
-          "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?w=300&h=300&fit=crop",
+        image: "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?w=300&h=300&fit:crop",
         rating: 4.5,
         reviews: 203,
         description: "Makanan kucing rasa tuna yang lezat dan bergizi",
@@ -59,8 +59,7 @@ const PetStoreApp = () => {
         type: "umum",
         price: 125000,
         originalPrice: 145000,
-        image:
-          "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit=crop",
+        image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit:crop",
         rating: 4.7,
         reviews: 89,
         description: "Antibiotik untuk mengobati infeksi bakteri pada hewan",
@@ -72,8 +71,7 @@ const PetStoreApp = () => {
         type: "vitamin",
         price: 85000,
         originalPrice: 95000,
-        image:
-          "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit=crop",
+        image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit:crop",
         rating: 4.6,
         reviews: 67,
         description: "Suplemen vitamin untuk kesehatan hewan peliharaan",
@@ -85,8 +83,7 @@ const PetStoreApp = () => {
         type: "anjing",
         price: 195000,
         originalPrice: 220000,
-        image:
-          "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit:crop",
+        image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit:crop",
         rating: 4.9,
         reviews: 134,
         description: "Makanan untuk anjing dengan DHA dan protein tinggi",
@@ -98,8 +95,7 @@ const PetStoreApp = () => {
         type: "dewasa",
         price: 75000,
         originalPrice: 85000,
-        image:
-          "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=300&fit=crop",
+        image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=300&fit:crop",
         rating: 4.4,
         reviews: 98,
         description: "Obat cacing spektrum luas untuk anjing dan kucing dewasa",
@@ -107,6 +103,28 @@ const PetStoreApp = () => {
     ];
     setProducts(initialProducts);
   }, []);
+
+  // Efek samping untuk mengambil informasi pengguna dari localStorage
+  useEffect(() => {
+    const getUserFromLocalStorage = () => {
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      const userId = localStorage.getItem("userId");
+      const userEmail = localStorage.getItem("userEmail");
+      const userNama = localStorage.getItem("userNama");
+      const userRole = localStorage.getItem("userRole");
+
+      if (isLoggedIn && userId && userEmail) {
+        setCurrentUser({ id: userId, email: userEmail, role: userRole });
+        setCurrentUserName(userNama || userEmail || "Pengguna");
+      } else {
+        setCurrentUser(null);
+        setCurrentUserName("Pengguna");
+        navigate("/login");
+      }
+    };
+
+    getUserFromLocalStorage();
+  }, [navigate]);
 
   const categories = [
     { id: "all", name: "Semua Produk" },
@@ -117,7 +135,7 @@ const PetStoreApp = () => {
   const filteredProducts = products.filter((product) => {
     const matchesCategory =
       activeCategory === "all" || product.category === activeCategory;
-    const matchesSearch = product.name
+    const matchesSearch = searchTerm === "" || product.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
@@ -172,6 +190,7 @@ const PetStoreApp = () => {
       minimumFractionDigits: 0,
     }).format(price);
   };
+
 
   const ProductCard = ({ product }) => (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
@@ -239,9 +258,9 @@ const PetStoreApp = () => {
   );
 
   const CartModal = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-4 border-b">
+    <div className="fixed inset-0 bg-gradient-to-tr from-blue-100 via-white to-blue-200 bg-opacity-75 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-4 border-b border-gray-300">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Keranjang Belanja</h3>
             <button
@@ -261,7 +280,7 @@ const PetStoreApp = () => {
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 py-3 border-b last:border-b-0"
+                  className="flex items-center gap-3 py-3 border-b border-gray-300 last:border-b-0"
                 >
                   <img
                     src={item.image}
@@ -270,6 +289,7 @@ const PetStoreApp = () => {
                   />
                   <div className="flex-1">
                     <h4 className="font-medium text-sm">{item.name}</h4>
+                    <p className="text-sm text-gray-600 line-clamp-1">{item.description}</p>
                     <p className="text-[#2563EB] font-semibold">
                       {formatPrice(item.price)}
                     </p>
@@ -292,7 +312,7 @@ const PetStoreApp = () => {
                 </div>
               ))}
 
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 pt-4 border-t border-gray-300">
                 <div className="flex justify-between items-center mb-4">
                   <span className="font-semibold">Total:</span>
                   <span className="font-bold text-xl text-[#2563EB]">
@@ -329,7 +349,7 @@ const PetStoreApp = () => {
     useEffect(() => {
       const storedUsername = localStorage.getItem("username");
       if (storedUsername) {
-        setCustomerInfo((prevInfo) => ({ ...prevInfo, name: storedUsername }));
+        setCustomerInfo(prevInfo => ({ ...prevInfo, name: storedUsername }));
       }
     }, []); // Empty dependency array means this runs once on mount
 
@@ -343,13 +363,14 @@ const PetStoreApp = () => {
       const totalBelanjaSaatIni = getTotalPrice();
 
       // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
-      const existingPurchases =
-        JSON.parse(localStorage.getItem("dataPembelian")) || [];
+      const existingPurchases = JSON.parse(localStorage.getItem("dataPembelian")) || [];
       const newPurchases = cart.map((item, index) => ({
         id: Date.now() + index, // Membuat ID unik berdasarkan waktu
         namaItem: item.name,
         jenis: item.category,
-        tanggal: new Date().toISOString().split("T")[0], // Format: YYYY-MM-DD
+        // Hapus baris 'alamat' karena kolomnya sudah tidak ada di Supabase
+        tanggal: new Date().toISOString(),
+        id_pelanggan: loggedInUserId,
         harga: item.price,
         jumlah: item.quantity,
         total: item.price * item.quantity,
@@ -367,12 +388,9 @@ const PetStoreApp = () => {
       // --- AKHIR BAGIAN 1 ---
 
       // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
-      let dataLoyalitas =
-        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      let dataLoyalitas = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
       const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
-      const indexPelanggan = dataLoyalitas.findIndex(
-        (p) => p.id === idPelanggan
-      );
+      const indexPelanggan = dataLoyalitas.findIndex(p => p.id === idPelanggan);
       const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
 
       if (indexPelanggan > -1) {
@@ -382,31 +400,36 @@ const PetStoreApp = () => {
         dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
         dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name; // Ensure name is updated/consistent
       } else {
-        // Jika pelanggan baru
-        dataLoyalitas.push({
-          id: idPelanggan,
-          namaPelanggan: customerInfo.name,
-          poinLoyalitas: poinBaru,
-          totalBelanja: totalBelanjaSaatIni,
-          jumlahTransaksi: 1,
-        });
+        // Pelanggan belum ada, masukkan data baru
+        const { error: insertLoyaltyError } = await supabase
+          .from('dataloyalitas')
+          .insert({
+            id_pelanggan: localStorage.getItem("userId"),
+            poinloyalitas: pointsEarnedThisPurchase,
+            totalbelanja: totalPurchaseAmount,
+            jumlahtransaksi: 1,
+            // Supabase akan otomatis mengisi created_at jika defaultnya now()
+          });
+
+        if (insertLoyaltyError) {
+          console.error("Error inserting new loyalty data:", insertLoyaltyError);
+          alert("Terjadi kesalahan saat menambahkan data loyalitas baru: " + insertLoyaltyError.message);
+        }
       }
 
-      localStorage.setItem("dataLoyalitas", JSON.stringify(dataLoyalitas));
-      // --- AKHIR BAGIAN 2 ---
+      alert("Pesanan berhasil! Terima kasih atas pembelian Anda.");
 
-      alert("Pesanan berhasil! Poin loyalitas telah ditambahkan.");
-      setCart([]);
+      setCart([]); // Kosongkan keranjang setelah checkout
       setShowCheckout(false);
       navigate("/homeuserlogin"); // Navigasi ke halaman user login setelah checkout
     };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl max-w-md w-full max-h-96 overflow-y-auto">
+        <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Checkout</h3>
+              <h3 className="text-lg font-semibold">Konfirmasi Pesanan</h3>
               <button
                 onClick={() => setShowCheckout(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -417,73 +440,19 @@ const PetStoreApp = () => {
           </div>
 
           <div className="p-4">
-            <div className="space-y-4">
-              {/* Bagian input Nama Lengkap dihilangkan dari tampilan */}
-              {/* <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nama Lengkap
-                </label>
-                <input
-                  type="text"
-                  value={customerInfo.name}
-                  className="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
-                  disabled
-                />
-              </div> */}
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Nomor Telepon
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={customerInfo.phone}
-                  onChange={(e) =>
-                    setCustomerInfo({ ...customerInfo, phone: e.target.value })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Alamat Lengkap
-                </label>
-                <textarea
-                  required
-                  value={customerInfo.address}
-                  onChange={(e) =>
-                    setCustomerInfo({
-                      ...customerInfo,
-                      address: e.target.value,
-                    })
-                  }
-                  rows="3"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Metode Pembayaran
-                </label>
-                <select
-                  value={customerInfo.paymentMethod}
-                  onChange={(e) =>
-                    setCustomerInfo({
-                      ...customerInfo,
-                      paymentMethod: e.target.value,
-                    })
-                  }
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2563EB] focus:border-transparent"
-                >
-                  <option value="transfer">Transfer Bank</option>
-                  <option value="cod">Bayar di Tempat (COD)</option>
-                  <option value="ewallet">E-Wallet</option>
-                </select>
-              </div>
-            </div>
+            <h4 className="font-semibold text-gray-700 mb-3">Detail Pesanan Anda:</h4>
+            {cart.length === 0 ? (
+              <p className="text-center text-gray-500">Tidak ada item di keranjang.</p>
+            ) : (
+              <ul className="space-y-2 border-b pb-4 mb-4">
+                {cart.map(item => (
+                  <li key={item.id} className="flex justify-between items-center text-sm">
+                    <span className="text-gray-800 font-medium">{item.name} (x{item.quantity})</span>
+                    <span className="text-gray-600">{formatPrice(item.price * item.quantity)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className="mt-6 pt-4 border-t">
               <div className="flex justify-between items-center mb-4">
@@ -497,7 +466,7 @@ const PetStoreApp = () => {
                 onClick={handleSubmit}
                 className="w-full bg-[#2563EB] hover:bg-[#3B82F6] text-white py-3 rounded-lg font-semibold transition"
               >
-                Konfirmasi Pesanan
+                Konfirmasi & Bayar
               </button>
             </div>
           </div>
@@ -511,12 +480,8 @@ const PetStoreApp = () => {
       <header className="bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           {/* Logo */}
-          <h1
-            onClick={() => navigate("/homeuser")}
-            className="text-2xl font-bold c ursor-pointer hover:text-blue-300 transition"
-          >
-            Groovy VetCare
-          </h1>
+          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
+
           {/* Navigation */}
           <nav className="space-x-6 flex items-center">
             <Link to="/homeuserlogin" className="hover:underline">
@@ -529,14 +494,13 @@ const PetStoreApp = () => {
               FAQ
             </Link>
 
-            {/* Profil + Username */}
             <div className="flex items-center space-x-2">
               <img
                 src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
                 alt="Profil"
                 className="w-8 h-8 rounded-full"
               />
-              <span>{localStorage.getItem("username") || "Pengguna"}</span>
+              <span>{currentUserName}</span>
             </div>
 
             <button
@@ -551,12 +515,16 @@ const PetStoreApp = () => {
               )}
             </button>
 
-            {/* Tombol Logout */}
             <button
               onClick={() => {
                 localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("username");
-                window.location.href = "/login";
+                localStorage.removeItem("userId");
+                localStorage.removeItem("userEmail");
+                localStorage.removeItem("userNama");
+                localStorage.removeItem("userRole");
+                setCurrentUser(null);
+                setCurrentUserName("Pengguna");
+                navigate("/login");
               }}
               className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"
             >
@@ -566,7 +534,6 @@ const PetStoreApp = () => {
         </div>
       </header>
 
-      {/* Search & Filter */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
@@ -599,7 +566,6 @@ const PetStoreApp = () => {
           </div>
         </div>
 
-        {/* Products Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredProducts.map((product) => (
             <ProductCard key={product.id} product={product} />
@@ -615,10 +581,8 @@ const PetStoreApp = () => {
         )}
       </div>
 
-      {/* Footer */}
       <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Info Klinik */}
           <div>
             <h3 className="text-xl font-bold mb-3">Groovy Vetcare Clinic</h3>
             <p className="mb-1">Ruko Galeri Niaga No. 9F-G</p>
@@ -627,19 +591,18 @@ const PetStoreApp = () => {
             <div className="space-y-1">
               <p>📞 +6221-7280-0617</p>
               <p>📱 +62 811-4110-440</p>
-              <p>📧 groovyvetcare@medivet.pet</p>
             </div>
+            <p>📧 groovyvetcare@medivet.pet</p>
             <a
               href="https://maps.google.com"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-pink-600 mt-4 px-4 py-2 rounded-full font-semibold hover:bg-pink-700 transition"
             >
-              📍 Google Maps Direction
+              Google Maps Direction
             </a>
           </div>
 
-          {/* Tentang Kami */}
           <div className="md:col-span-2">
             <h3 className="text-xl font-bold mb-3">Tentang Kami</h3>
             <p className="mb-3">
@@ -653,7 +616,6 @@ const PetStoreApp = () => {
             </p>
           </div>
 
-          {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
             <h3 className="text-2xl font-bold text-blue-700 mb-4 flex items-center justify-center gap-2">
               🕒 Service Hours
@@ -683,13 +645,11 @@ const PetStoreApp = () => {
           </div>
         </div>
 
-        {/* Footer Credit */}
         <div className="mt-8 text-center text-xs text-white/80">
           © 2025 Groovy Vetcare. All rights reserved.
         </div>
       </footer>
 
-      {/* Modals */}
       {showCart && <CartModal />}
       {showCheckout && <CheckoutModal />}
     </div>
