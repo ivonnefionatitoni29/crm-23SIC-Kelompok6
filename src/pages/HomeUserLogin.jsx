@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react"; // Pastikan Anda sudah install: npm install lucide-react
+import { ShoppingCart } from "lucide-react";
+import { supabase } from '../supabase'; // Import Supabase instance
 
 const HomeUserLogin = () => {
   // --- STATE DARI KEDUA VERSI ---
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
+  const [loadingFaqs, setLoadingFaqs] = useState(true); // New loading state for FAQs
+  const [errorFaqs, setErrorFaqs] = useState(null); // New error state for FAQs
   const [username, setUsername] = useState('');
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
 
   // New states for user authentication details
   const [currentUser, setCurrentUser] = useState(null); // Stores { id, email, role }
-  // username state is still used for display, can be renamed if desired to avoid confusion with setCurrentUserName below
 
   const navigate = useNavigate();
 
@@ -30,6 +32,24 @@ const HomeUserLogin = () => {
 
   const goToPage = (path) => {
     navigate(path);
+  };
+
+  // Function to fetch FAQs from Supabase (identical to the one in FAQ admin)
+  const fetchFaqs = async () => {
+    setLoadingFaqs(true);
+    setErrorFaqs(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching FAQs for HomeUserLogin:', error.message);
+      setErrorFaqs('Gagal memuat FAQ. Sila cuba lagi.');
+    } else {
+      setFaqs(data);
+    }
+    setLoadingFaqs(false);
   };
 
   // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
@@ -66,34 +86,26 @@ const HomeUserLogin = () => {
       }
     };
 
-    checkUserAuthentication(); // Run on component mount
-
-    // Fungsi untuk mengambil total item di keranjang dari localStorage
-    const getTotalItemsInCart = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        return cart.reduce((total, item) => total + item.quantity, 0);
-      } catch (error) {
-        console.error("Failed to parse cart from localStorage:", error);
-        return 0;
-      }
-    };
-
-    // Load FAQs
-    const storedFaqs = localStorage.getItem("faqs");
-    if (storedFaqs) {
-      setFaqs(JSON.parse(storedFaqs));
-    }
-
-    // Load jumlah item keranjang awal
+    // Initial checks and loads
+    checkUserAuthentication();
     setCartItemCount(getTotalItemsInCart());
+    fetchFaqs(); // Fetch FAQs from Supabase on mount
+
+    // Real-time subscription for FAQs
+    const faqChannel = supabase
+      .channel('public:faqs_homeuserlogin_changes') // Unique channel name for this component
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for FAQs (HomeUserLogin):', payload);
+        fetchFaqs(); // Re-fetch data on any change
+      })
+      .subscribe();
 
     // Carousel auto-slide
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
     }, 5000);
 
-    // Event listener untuk memantau perubahan localStorage (untuk update keranjang dan auth)
+    // Event listener for monitoring localStorage changes (for cart and auth updates)
     const handleStorageChange = (event) => {
       // Update cart count
       if (event.key === "cart") {
@@ -106,12 +118,24 @@ const HomeUserLogin = () => {
     };
     window.addEventListener('storage', handleStorageChange);
 
-    // Cleanup saat komponen dibongkar
+    // Cleanup when component unmounts
     return () => {
       clearInterval(slideInterval);
       window.removeEventListener('storage', handleStorageChange);
+      supabase.removeChannel(faqChannel); // Unsubscribe from FAQ channel
     };
   }, [images.length, navigate]); // Add navigate to dependency array
+
+  // Fungsi untuk mengambil total item di keranjang dari localStorage
+  const getTotalItemsInCart = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      return cart.reduce((total, item) => total + item.quantity, 0);
+    } catch (error) {
+      console.error("Failed to parse cart from localStorage:", error);
+      return 0;
+    }
+  };
 
   const formatPoints = (points) => {
     return points.toLocaleString('id-ID');
@@ -119,10 +143,10 @@ const HomeUserLogin = () => {
 
   // Prevent rendering if not authenticated yet to avoid flickering
   if (currentUser === null && localStorage.getItem("isLoggedIn") === "true") {
-      // This means we are still in the process of checking auth,
-      // or some auth data is missing, but isLoggedIn is true.
-      // You might want a loading spinner here instead of just returning null.
-      return null;
+    // This means we are still in the process of checking auth,
+    // or some auth data is missing, but isLoggedIn is true.
+    // You might want a loading spinner here instead of just returning null.
+    return null;
   }
 
   return (
@@ -250,16 +274,20 @@ const HomeUserLogin = () => {
         </div>
       </section>
 
-      {/* --- BAGIAN FAQ (LOGIKA TAMPILAN DARI VERSI 1) --- */}
+      {/* --- BAGIAN FAQ (LOGIKA TAMPILAN DARI VERSI 1, DIPERBARUI DENGAN SUPABASE DATA) --- */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
           <h3 className="text-3xl font-bold text-center mb-8 text-blue-700">Pertanyaan Umum (FAQ)</h3>
           <div className="space-y-4 text-left">
-            {faqs.length === 0 ? (
+            {loadingFaqs ? (
+              <p className="text-center text-blue-600">Memuat FAQ...</p>
+            ) : errorFaqs ? (
+              <p className="text-center text-red-500">{errorFaqs}</p>
+            ) : faqs.length === 0 ? (
               <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
             ) : (
-              faqs.slice(0, 3).map(({ question, answer }, idx) => (
-                <details key={idx} className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition">
+              faqs.slice(0, 3).map(({ question, answer, id }) => ( // Added 'id' for the key
+                <details key={id} className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition">
                   <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />

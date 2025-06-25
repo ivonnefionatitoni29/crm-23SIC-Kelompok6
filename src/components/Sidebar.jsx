@@ -1,8 +1,10 @@
 import { LayoutDashboard } from 'lucide-react';
-import { FaDog, FaQuestionCircle, FaStore, FaUser, FaHeartbeat } from 'react-icons/fa'; // Tambahkan FaHeartbeat
+import { FaDog, FaQuestionCircle, FaStore, FaUser, FaHeartbeat } from 'react-icons/fa';
 import { MdVaccines, MdEmojiEvents } from 'react-icons/md';
 import { GiScalpel } from 'react-icons/gi';
 import { Link, useLocation } from 'react-router-dom';
+import { BiBox } from 'react-icons/bi';
+import { RiStockLine } from 'react-icons/ri'; // Import ikon baru untuk Manajemen Stok
 
 const menuItems = [
   { name: 'Dashboard', icon: <LayoutDashboard size={18} />, path: '/dashboard' },
@@ -12,9 +14,11 @@ const menuItems = [
   { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
   { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
   { name: 'Jual Beli', icon: <FaStore size={18} />, path: '/jualbeli' },
-  // Ikon Prediksi Kesehatan diubah menjadi FaHeartbeat
   { name: 'Prediksi Kesehatan', icon: <FaHeartbeat size={18} />, path: '/prediksi-kesehatan' },
   { name: 'Tabel User', icon: <FaUser size={18} />, path: '/users' },
+  { name: 'Product CRUD', icon: <BiBox size={18} />, path: '/admin-products' },
+  // Tambahkan item baru untuk Manajemen Stok
+  { name: 'Manajemen Stok', icon: <RiStockLine size={18} />, path: '/admin/stock-management' },
 ];
 
 const Sidebar = () => {
