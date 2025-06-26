@@ -2,8 +2,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { FaUser, FaLock } from 'react-icons/fa';
-import { supabase } from '../supabase'; // Import Supabase client
-import CryptoJS from 'crypto-js'; // Import library hashing
+import { supabase } from '../supabase';
+import CryptoJS from 'crypto-js';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -18,37 +18,21 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-
     try {
-      // PERINGATAN KRITIS: Membandingkan hash password di frontend SANGAT TIDAK AMAN.
-      // Ini hanya untuk DEMONSTRASI. Dalam aplikasi nyata, perbandingan hash harus dilakukan di backend.
       const hashedPassword = CryptoJS.SHA256(password).toString();
 
-      // 1. Ambil data pengguna dari tabel 'users' berdasarkan email
       const { data: userData, error: fetchError } = await supabase
         .from('users')
-        .select('id, email, password, role') // Ambil juga password yang tersimpan (hash) dan role
+        .select('id, email, password, role')
         .eq('email', email)
-        .single(); // Harusnya hanya ada satu pengguna dengan email ini
+        .single();
 
-      if (fetchError || !userData) {
-        // Jika error atau pengguna tidak ditemukan
-        alert("Login gagal: Email atau password salah.");
-        console.error("Login Fetch Error:", fetchError);
-        setLoading(false);
-        return;
-      }
-
-      // 2. Bandingkan password yang dimasukkan (setelah di-hash) dengan password yang tersimpan
       if (hashedPassword === userData.password) {
-        alert("Login berhasil!");
-        // 3. Simpan status login dan role di localStorage atau context API
         localStorage.setItem("isLoggedIn", "true");
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("userRole", userData.role); // Simpan peran pengguna
-        localStorage.setItem("userId", userData.id); // Simpan peran pengguna
+        localStorage.setItem("userRole", userData.role);
+        localStorage.setItem("userId", userData.id);
 
-        // 4. Arahkan pengguna berdasarkan perannya
         if (userData.role === 'admin') {
           navigate("/dashboard");
         } else {
@@ -67,55 +51,60 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-tr from-blue-100 via-white to-blue-200 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 space-y-6 border border-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-white/90 backdrop-blur-lg border border-blue-200 shadow-xl rounded-3xl p-8 space-y-6">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-purple-700">Login</h2>
+          <h2 className="text-4xl font-extrabold text-blue-700 mb-2">Welcome Back!</h2>
+          <p className="text-gray-500">Silakan login untuk melanjutkan</p>
         </div>
+
         <div className="space-y-4">
           <div className="relative">
             <input
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+              className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
             />
-            <FaUser className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
           </div>
 
           <div className="relative">
             <input
               type="password"
               placeholder="Password"
-              className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+              className="w-full px-4 py-3 pl-10 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
             />
-            <FaLock className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
           </div>
 
           <div className="flex items-center justify-between text-sm">
             <label className="flex items-center text-gray-600">
               <input type="checkbox" className="form-checkbox text-blue-600 rounded mr-2" />
-              <span>Remember me</span>
+              <span>Ingat saya</span>
             </label>
-            <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
+            <a href="#" className="text-blue-600 hover:underline">Lupa password?</a>
           </div>
 
           <button
             onClick={handleLogin}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-xl transition duration-200"
             disabled={loading}
           >
-            {loading ? 'Melakukan Login...' : 'Login'}
+            {loading ? 'Melakukan Login...' : '🔐 Login'}
           </button>
         </div>
 
-        <p className="text-sm text-center mt-4">
-          Don't have an account? <a href="/RegisterPage" className="text-blue-600 font-semibold hover:underline">Register</a>
+        <p className="text-sm text-center mt-4 text-gray-600">
+          Belum punya akun?{" "}
+          <a href="/RegisterPage" className="text-blue-600 font-semibold hover:underline">
+            Daftar Sekarang
+          </a>
         </p>
       </div>
     </div>

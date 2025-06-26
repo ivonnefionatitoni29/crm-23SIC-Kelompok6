@@ -531,10 +531,10 @@ export default function AdminProductCRUD() {
                 className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
               />
               {/* Show current image if exists (not a new preview blob) AND no new file selected yet */}
-              {(formData.imageUrl && !imageFile && !formData.imageUrl.startsWith("blob:")) && (
+              {(product.imageUrl && !imageFile && !product.imageUrl.startsWith("blob:")) && (
                 <div className="mt-2">
                   <p className="text-sm text-gray-600">Current Image:</p>
-                  <img src={formData.imageUrl} alt="Current Product" className="mt-1 w-24 h-24 object-cover rounded-md shadow-sm" />
+                  <img src={product.imageUrl} alt="Current Product" className="mt-1 w-24 h-24 object-cover rounded-md shadow-sm" />
                   <button
                     type="button"
                     onClick={() => {

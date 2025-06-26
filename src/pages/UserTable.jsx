@@ -85,9 +85,9 @@ function UserTable() {
   return (
     <div className="min-h-screen bg-blue-50 p-6">
       <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-blue-800 mb-4">
+        <h1 className="text-3xl font-extrabold text-blue-800 mb-6 text-center">
           Manajemen Data Pengguna
-        </h2>
+        </h1>
 
         {loading && (
           <p className="text-center text-lg text-blue-600">Memuat data pengguna...</p>

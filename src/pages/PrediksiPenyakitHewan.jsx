@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import axios from "axios";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ResponsiveContainer,
 } from "recharts";
 
 function PrediksiKesehatan() {
@@ -14,6 +19,7 @@ function PrediksiKesehatan() {
   });
 
   const [hasil, setHasil] = useState("");
+  const [confidence, setConfidence] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -23,53 +29,117 @@ function PrediksiKesehatan() {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_URL}/predict`,
-        {
-          Suhu: parseFloat(form.suhu),
-          Nafsu_Makan: parseInt(form.nafsuMakan),
-          Berat: parseFloat(form.berat),
-          Usia: parseInt(form.usia),
-          Muntah: parseInt(form.muntah)
-        }
-      );
+      const response = await fetch("https://a35b-34-105-115-88.ngrok-free.app/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          suhu: parseFloat(form.suhu),
+          nafsu_makan: form.nafsuMakan,
+          berat: parseFloat(form.berat),
+          usia: parseFloat(form.usia),
+          muntah: form.muntah
+        })
+      });
 
-      const hasilPrediksi = res.data.hasil_prediksi === 0 ? "Sehat 🐾" : "Sakit 💉";
-      setHasil(`Hewan kamu kemungkinan: ${hasilPrediksi}`);
+      const data = await response.json();
+
+      if (data.success) {
+        const label = data.predicted_label;
+        setHasil(`Hewan kamu kemungkinan: ${label === "tidak sehat" ? "Sakit 💉" : "Sehat 🐾"}`);
+        setConfidence(data.confidence);
+      } else {
+        setHasil("⚠️ Terjadi kesalahan: " + data.error);
+        setConfidence(null);
+      }
     } catch (error) {
       console.error(error);
-      setHasil("⚠️ Terjadi kesalahan saat memproses prediksi.");
+      setHasil("⚠️ Terjadi kesalahan saat menghubungi server.");
+      setConfidence(null);
     }
   };
 
+  const chartData = [
+    { name: "Suhu", value: parseFloat(form.suhu) || 0 },
+    {
+      name: "Nafsu Makan",
+      value:
+        form.nafsuMakan === "tinggi"
+          ? 3
+          : form.nafsuMakan === "sedang"
+          ? 2
+          : form.nafsuMakan === "rendah"
+          ? 1
+          : 0
+    },
+    { name: "Berat", value: parseFloat(form.berat) || 0 },
+    { name: "Usia", value: parseFloat(form.usia) || 0 },
+    { name: "Muntah", value: form.muntah === "ya" ? 1 : 0 }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-xl bg-white shadow-xl rounded-2xl p-8">
-        <h2 className="text-3xl font-bold text-center text-blue-700 mb-2">🩺 Prediksi Kesehatan Hewan</h2>
+    <div className="min-h-screen bg-blue-50 p-6">
+      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <h1 className="text-3xl font-extrabold text-blue-800 mb-6 text-center">
+          Prediksi Kesehatan Hewan
+        </h1>
         <p className="text-center text-gray-600 mb-6">
           Masukkan data hewan peliharaan kamu untuk mengetahui kondisi kesehatannya.
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {[
-            { label: "Suhu (°C)", name: "suhu" },
-            { label: "Nafsu Makan (1 = tidak, 2 = biasa, 3 = lahap)", name: "nafsuMakan" },
-            { label: "Berat (kg)", name: "berat" },
-            { label: "Usia (tahun)", name: "usia" },
-            { label: "Muntah (0 = tidak, 1 = ya)", name: "muntah" }
-          ].map(({ label, name }) => (
-            <div key={name}>
-              <label className="block font-medium text-gray-700 mb-1">{label}</label>
-              <input
-                type="number"
-                name={name}
-                value={form[name]}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[ // Input suhu, berat, usia
+              { label: "Suhu (°C)", name: "suhu", type: "number" },
+              { label: "Berat (kg)", name: "berat", type: "number" },
+              { label: "Usia (tahun)", name: "usia", type: "number" }
+            ].map(({ label, name, type }) => (
+              <div key={name}>
+                <label className="block font-medium text-gray-700 mb-1">{label}</label>
+                <input
+                  type={type}
+                  name={name}
+                  value={form[name]}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                />
+              </div>
+            ))}
+
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Nafsu Makan</label>
+              <select
+                name="nafsuMakan"
+                value={form.nafsuMakan}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
                 required
-              />
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              >
+                <option value="">Pilih</option>
+                <option value="tinggi">Lahap</option>
+                <option value="sedang">Biasa</option>
+                <option value="rendah">Tidak Nafsu</option>
+              </select>
             </div>
-          ))}
+
+            <div>
+              <label className="block font-medium text-gray-700 mb-1">Muntah</label>
+              <select
+                name="muntah"
+                value={form.muntah}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+              >
+                <option value="">Pilih</option>
+                <option value="ya">Ya</option>
+                <option value="tidak">Tidak</option>
+              </select>
+            </div>
+          </div>
+
           <button
             type="submit"
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition duration-200"
@@ -90,7 +160,9 @@ function PrediksiKesehatan() {
 
             <div
               className={`mt-6 border rounded-lg p-4 ${
-                hasil.includes("Sakit") ? "bg-red-50 border-red-200" : "bg-blue-50 border-blue-200"
+                hasil.includes("Sakit")
+                  ? "bg-red-50 border-red-200"
+                  : "bg-blue-50 border-blue-200"
               }`}
             >
               <h3
@@ -100,26 +172,52 @@ function PrediksiKesehatan() {
               >
                 📊 Data yang Dimasukkan
               </h3>
+
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={[
-                    { name: "Suhu", value: parseFloat(form.suhu) },
-                    { name: "Nafsu Makan", value: parseInt(form.nafsuMakan) },
-                    { name: "Berat", value: parseFloat(form.berat) },
-                    { name: "Usia", value: parseInt(form.usia) },
-                    { name: "Muntah", value: parseInt(form.muntah) },
-                  ]}
-                >
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
                   <Tooltip />
                   <Bar
                     dataKey="value"
-                    fill={hasil.includes("Sakit") ? "#f56565" : "#3b82f6"} // merah atau biru
+                    fill={hasil.includes("Sakit") ? "#f56565" : "#3b82f6"}
                   />
                 </BarChart>
               </ResponsiveContainer>
+
+              {confidence && (
+                <div className="mt-8">
+                  <h3
+                    className={`text-md font-bold text-center mb-4 ${
+                      hasil.includes("Sakit") ? "text-red-600" : "text-blue-600"
+                    }`}
+                  >
+                    📈 Confidence Prediksi
+                  </h3>
+
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart
+                      layout="vertical"
+                      data={Object.entries(confidence).map(([label, value]) => ({
+                        name: label,
+                        value: value
+                      }))}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" domain={[0, 100]} unit="%" />
+                      <YAxis type="category" dataKey="name" />
+                      <Tooltip formatter={(value) => `${value.toFixed(2)}%`} />
+                      <Bar
+                        dataKey="value"
+                        fill={hasil.includes("Sakit") ? "#f56565" : "#3b82f6"}
+                        barSize={25}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           </>
         )}

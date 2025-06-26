@@ -39,11 +39,11 @@ function App() {
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
-      <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
+      
       <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
       <Route path="/faq-page" element={<FaqPage />} />
       {/* Rute untuk Admin Product CRUD */}
-      <Route path="/admin-products" element={<AdminProductCRUD />} />
+      
 
       {/* Rute form layanan untuk user */}
       <Route path="/form-penitipan" element={<FormPenitipan />} />
@@ -59,6 +59,8 @@ function App() {
         <Route path="/loyalitaspelanggan" element={<Loyalitaspelanggan />} />
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
+        <Route path="/admin-products" element={<AdminProductCRUD />} />
+        <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
         {/* Rute untuk Tabel User */}
         <Route path="/users" element={<UserTable />} />
         {/* ⭐ Rute baru untuk Manajemen Stok ⭐ */}
