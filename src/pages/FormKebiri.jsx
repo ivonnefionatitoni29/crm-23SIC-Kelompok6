@@ -1,4 +1,3 @@
-// src/pages/FormKebiri.jsx
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabase'; // PASTIKAN PATH INI BENAR
 
@@ -13,61 +12,11 @@ const FormKebiri = () => {
     jam: '',
   });
 
-  // State dan fungsi terkait data reservasi pengguna tidak diperlukan lagi jika tabel dihapus
-  // const [dataUserReservasi, setDataUserReservasi] = useState([]);
-  // const [loadingReservasiList, setLoadingReservasiList] = useState(true);
-  // const [fetchError, setFetchError] = useState(null);
-
   const [loadingFormSubmit, setLoadingFormSubmit] = useState(false);
   const [submitMessage, setSubmitMessage] = useState(null);
 
   // Ambil username dari localStorage (jika ini yang Anda gunakan untuk identifikasi user)
   const username = localStorage.getItem('username') || 'anon_user';
-
-  // Fungsi untuk mengambil data reservasi kebiri dari Supabase (tidak lagi dipanggil jika tabel dihapus)
-  // const fetchUserReservations = async () => {
-  //   setLoadingReservasiList(true);
-  //   setFetchError(null);
-  //   const { data, error } = await supabase
-  //     .from('kebiri')
-  //     .select('*')
-  //     .eq('pemilik', username)
-  //     .order('created_at', { ascending: false });
-
-  //   if (error) {
-  //     console.error('Error fetching user reservations:', error);
-  //     setFetchError('Gagal memuat data reservasi Anda.');
-  //   } else {
-  //     setDataUserReservasi(data);
-  //   }
-  //   setLoadingReservasiList(false);
-  // };
-
-  // useEffect untuk memuat data awal dan berlangganan perubahan Realtime (tidak diperlukan jika tabel dihapus)
-  // useEffect(() => {
-  //   // fetchUserReservations(); // Tidak perlu panggil ini lagi
-
-  //   // const channel = supabase
-  //   //   .channel('public:kebiri_user_reservations')
-  //   //   .on(
-  //   //     'postgres_changes',
-  //   //     {
-  //   //       event: '*',
-  //   //       schema: 'public',
-  //   //       table: 'kebiri',
-  //   //       filter: `pemilik=eq.${username}`,
-  //   //     },
-  //   //     (payload) => {
-  //   //       console.log('Realtime change received for user reservations:', payload);
-  //   //       // fetchUserReservations(); // Tidak perlu panggil ini lagi
-  //   //     }
-  //   //   )
-  //   //   .subscribe();
-
-  //   // return () => {
-  //   //   // supabase.removeChannel(channel); // Tidak perlu remove channel ini lagi
-  //   // };
-  // }, [username]); // Dependensi username
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -113,9 +62,9 @@ const FormKebiri = () => {
   };
 
   return (
-    <div className="min-h-screen bg-blue-100 p-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-blue-600 text-white px-6 py-4 text-xl font-semibold">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-blue-600 text-white px-6 py-4 text-2xl font-bold">
           Form Kebiri Hewan
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -125,42 +74,117 @@ const FormKebiri = () => {
             </div>
           )}
 
-          <label className="block text-gray-700 font-semibold mb-1">Nama Hewan</label>
-          <input name="namaHewan" placeholder="Nama Hewan" value={form.namaHewan} onChange={handleChange} required className="w-full p-2 border rounded" />
+          <div>
+            <label htmlFor="namaHewan" className="block mb-1 text-gray-700 font-semibold">Nama Hewan</label>
+            <input
+              id="namaHewan"
+              name="namaHewan"
+              type="text"
+              placeholder="Contoh: Meong"
+              value={form.namaHewan}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+            />
+          </div>
 
-          <label className="block text-gray-700 font-semibold mb-1">Jenis Hewan</label>
-          <input name="jenisHewan" placeholder="Jenis Hewan" value={form.jenisHewan} onChange={handleChange} required className="w-full p-2 border rounded" />
+          <div>
+            <label htmlFor="jenisHewan" className="block mb-1 text-gray-700 font-semibold">Jenis Hewan</label>
+            <input
+              id="jenisHewan"
+              name="jenisHewan"
+              type="text"
+              placeholder="Contoh: Kucing, Anjing"
+              value={form.jenisHewan}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+            />
+          </div>
 
-          <label className="block text-gray-700 font-semibold mb-1">Nama Pemilik</label>
-          <input name="namaPemilik" placeholder="Nama Pemilik" value={form.namaPemilik} onChange={handleChange} required className="w-full p-2 border rounded" />
+          <div>
+            <label htmlFor="namaPemilik" className="block mb-1 text-gray-700 font-semibold">Nama Pemilik</label>
+            <input
+              id="namaPemilik"
+              name="namaPemilik"
+              type="text"
+              placeholder="Contoh: Budi Santoso"
+              value={form.namaPemilik}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+            />
+          </div>
 
-          <label className="block text-gray-700 font-semibold mb-1">Jenis Kelamin</label>
-          <select name="jenisKelamin" value={form.jenisKelamin} onChange={handleChange} required className="w-full p-2 border rounded">
-            <option value="">Pilih Jenis Kelamin</option>
-            <option value="Jantan">Jantan</option>
-            <option value="Betina">Betina</option>
-          </select>
+          <div>
+            <label htmlFor="jenisKelamin" className="block mb-1 text-gray-700 font-semibold">Jenis Kelamin</label>
+            <select
+              id="jenisKelamin"
+              name="jenisKelamin"
+              value={form.jenisKelamin}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded text-gray-600 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+            >
+              <option value="" disabled hidden>
+                Pilih Jenis Kelamin
+              </option>
+              <option value="Jantan">Jantan</option>
+              <option value="Betina">Betina</option>
+            </select>
+          </div>
 
-          <label className="block text-gray-700 font-semibold mb-1">Usia (bulan)</label>
-          <input name="usia" placeholder="Usia (bulan)" type="number" value={form.usia} onChange={handleChange} required className="w-full p-2 border rounded" min="0" />
+          <div>
+            <label htmlFor="usia" className="block mb-1 text-gray-700 font-semibold">Usia (bulan)</label>
+            <input
+              id="usia"
+              name="usia"
+              type="number"
+              placeholder="Contoh: 6"
+              value={form.usia}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              min="0"
+            />
+          </div>
 
-          <label className="block text-gray-700 font-semibold mb-1">Tanggal</label>
-          <input name="tanggal" type="date" value={form.tanggal} onChange={handleChange} required className="w-full p-2 border rounded" />
-
-          <label className="block text-gray-700 font-semibold mb-1">Jam</label>
-          <input name="jam" type="time" value={form.jam} onChange={handleChange} required className="w-full p-2 border rounded" />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="w-full sm:w-1/2">
+              <label htmlFor="tanggal" className="block mb-1 text-gray-700 font-semibold">Tanggal</label>
+              <input
+                id="tanggal"
+                name="tanggal"
+                type="date"
+                value={form.tanggal}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              />
+            </div>
+            <div className="w-full sm:w-1/2">
+              <label htmlFor="jam" className="block mb-1 text-gray-700 font-semibold">Jam</label>
+              <input
+                id="jam"
+                name="jam"
+                type="time"
+                value={form.jam}
+                onChange={handleChange}
+                required
+                className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+              />
+            </div>
+          </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 text-white font-semibold py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loadingFormSubmit}
           >
-            {loadingFormSubmit ? 'Mengirim...' : 'Kirim'}
+            {loadingFormSubmit ? 'Mengirim...' : 'Kirim Reservasi Kebiri'}
           </button>
         </form>
       </div>
-
-      {/* Bagian div tabel "Data Reservasi Saya" telah dihapus dari sini */}
     </div>
   );
 };

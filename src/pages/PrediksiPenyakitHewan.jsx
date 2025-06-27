@@ -29,7 +29,7 @@ function PrediksiKesehatan() {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://a35b-34-105-115-88.ngrok-free.app/predict", {
+      const response = await fetch("https://6b3c-34-48-96-24.ngrok-free.app/predict", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
