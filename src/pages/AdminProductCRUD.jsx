@@ -15,9 +15,9 @@ export default function AdminProductCRUD() {
     price: "",
     oldPrice: "", // Optional
     rating: "", // Optional
-    imageUrl: "", // To display current image in edit mode or hold a new image URL preview
+    imageUrl: "", // Now directly holds the URL string
   });
-  const [imageFile, setImageFile] = useState(null); // State for the selected image file
+  // const [imageFile, setImageFile] = useState(null); // No longer needed for file upload
   const [editId, setEditId] = useState(null); // ID of the product being edited
   const [showConfirmModal, setShowConfirmModal] = useState(false); // For delete confirmation
   const [itemIdToDelete, setItemIdToDelete] = useState(null); // ID of the item to delete
@@ -88,128 +88,18 @@ export default function AdminProductCRUD() {
     };
   }, []); // Empty dependency array ensures this runs only once on mount
 
-  // Handle form input changes for text fields
+  // Handle form input changes for text fields (now including imageUrl)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle image file selection
-  const handleImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      const selectedFile = e.target.files[0];
-      setImageFile(selectedFile);
-      // Optional: Update formData.imageUrl for instant preview (using blob URL)
-      setFormData((prev) => ({ ...prev, imageUrl: URL.createObjectURL(selectedFile) }));
-    } else {
-      // If user clears file input (e.g., clicks 'x' on file input)
-      setImageFile(null);
-      // Only clear formData.imageUrl if it was a preview URL.
-      // If it's an existing product's URL, we keep it until 'Remove Current Image' button is pressed
-      // or a new file is uploaded.
-      if (formData.imageUrl.startsWith("blob:")) {
-         setFormData((prev) => ({ ...prev, imageUrl: "" }));
-      }
-    }
-  };
-
-  // Upload image to Supabase Storage
-  const uploadImage = async (file) => {
-    if (!file) {
-      console.log("UploadImage: No file provided, returning null.");
-      return null;
-    }
-
-    const fileExt = file.name.split('.').pop();
-    // Generate a unique file name to avoid conflicts, using timestamp and a random string
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
-    // Define the full path in the bucket. Storing directly in root of 'product-images'
-    const filePath = `${fileName}`;
-
-    console.log(`UploadImage: Attempting to upload file '${file.name}' to path '${filePath}' in bucket 'product-images'.`);
-
-    const { data, error } = await supabase.storage
-      .from('product-images') // Ensure this bucket exists and is correctly named
-      .upload(filePath, file, {
-        cacheControl: '3600', // Cache for 1 hour
-        upsert: false // Do not overwrite if file with same name exists (though our naming prevents this)
-      });
-
-    if (error) {
-      console.error('UploadImage: Error during Supabase Storage upload:', error.message, error);
-      // More specific error handling for common issues
-      if (error.statusCode === '404') {
-        throw new Error('Failed to upload image: Storage bucket "product-images" not found. Please check its name or if it exists.');
-      }
-      if (error.statusCode === '403') {
-        throw new Error('Failed to upload image: Permission denied. Check your Storage RLS policies for INSERT.');
-      }
-      throw new Error('Failed to upload image: ' + error.message);
-    }
-
-    // Get the public URL for the newly uploaded file
-    const { data: publicUrlData } = supabase.storage
-      .from('product-images')
-      .getPublicUrl(filePath);
-
-    if (publicUrlData && publicUrlData.publicUrl) {
-      console.log('UploadImage: Image uploaded successfully, public URL:', publicUrlData.publicUrl);
-      return publicUrlData.publicUrl;
-    } else {
-      console.error('UploadImage: Failed to get public URL for uploaded image. Public URL data:', publicUrlData);
-      throw new Error('Failed to get public URL for image after upload.');
-    }
-  };
-
-  // Delete image from Supabase Storage
-  const deleteImage = async (imageUrl) => {
-    if (!imageUrl || imageUrl.startsWith("blob:")) { // Don't try to delete a blob URL
-      console.log("DeleteImage: No valid image URL provided for deletion (or it's a blob URL), skipping.");
-      return;
-    }
-
-    try {
-      // Supabase public URL format is typically:
-      // [SUPABASE_URL]/storage/v1/object/public/[BUCKET_NAME]/[FILE_PATH_WITHIN_BUCKET]
-      // We need to extract [FILE_PATH_WITHIN_BUCKET]
-      const urlParts = imageUrl.split('/');
-      const publicIndex = urlParts.indexOf('public');
-
-      if (publicIndex === -1 || publicIndex + 2 >= urlParts.length) {
-        console.warn('DeleteImage: Could not parse image URL for deletion: Invalid URL format or missing parts.', imageUrl);
-        return;
-      }
-
-      const bucketName = urlParts[publicIndex + 1]; // e.g., 'product-images'
-      const filePathInBucket = urlParts.slice(publicIndex + 2).join('/'); // The rest is the file path
-
-      if (!bucketName || !filePathInBucket) {
-        console.warn('DeleteImage: Extracted bucketName or filePathInBucket is empty. Skipping deletion.', { bucketName, filePathInBucket });
-        return;
-      }
-
-      console.log(`DeleteImage: Attempting to delete file '${filePathInBucket}' from bucket '${bucketName}'.`);
-
-      const { error } = await supabase.storage
-        .from(bucketName) // Use the extracted bucket name
-        .remove([filePathInBucket]); // Supabase storage remove expects an array of paths
-
-      if (error) {
-        console.error('DeleteImage: Error deleting old image from storage:', error.message);
-        // Important: Do not throw an error here if the image might genuinely not exist (e.g., already deleted manually)
-        // or if it's a 404 (file not found in storage).
-        // If it's a 403 (permission denied), you might want to re-evaluate policies.
-      } else {
-        console.log('DeleteImage: Old image deleted successfully:', filePathInBucket);
-      }
-    } catch (e) {
-      console.error('DeleteImage: Error processing image URL for deletion:', e.message, e);
-    }
-  };
+  // No longer need handleImageChange, uploadImage, or deleteImage functions
+  // as we're directly inputting URLs.
 
   // Handle adding or updating a product
   const handleAddOrUpdateProduct = async () => {
-    const { name, description, price, oldPrice, rating } = formData;
+    const { name, description, price, oldPrice, rating, imageUrl } = formData;
 
     if (!name.trim() || !price) {
       setError("Product name and price must be filled.");
@@ -219,37 +109,10 @@ export default function AdminProductCRUD() {
     setLoading(true);
     setError(null);
 
-    let finalImageUrl = formData.imageUrl; // Start with the URL currently in the form (could be existing, or a new preview blob URL)
+    // The image URL is now directly from formData.imageUrl
+    let finalImageUrl = imageUrl.trim() === "" ? null : imageUrl.trim();
 
     try {
-      if (imageFile) {
-        // Scenario 1: A new image file has been selected
-        console.log("handleAddOrUpdateProduct: New image file selected.");
-        // If editing and there was an existing image before new selection, delete it first
-        // (Only delete if it's a real URL, not a blob preview URL)
-        if (editId && formData.imageUrl && !formData.imageUrl.startsWith("blob:")) {
-            console.log("handleAddOrUpdateProduct: Editing and old image URL exists. Deleting old image...");
-            await deleteImage(formData.imageUrl);
-        }
-        // Upload the new image
-        finalImageUrl = await uploadImage(imageFile);
-      } else if (editId && formData.imageUrl === "" && products.find(p => p.id === editId)?.image_url) {
-        // Scenario 2: User explicitly cleared the image field for an existing product
-        // (no new file, formData.imageUrl is empty, but product originally had an image)
-        console.log("handleAddOrUpdateProduct: Editing: User explicitly removed existing image. Deleting from storage.");
-        const originalProduct = products.find(p => p.id === editId);
-        if (originalProduct && originalProduct.image_url) {
-          await deleteImage(originalProduct.image_url);
-        }
-        finalImageUrl = null; // Set image_url in DB to NULL
-      } else if (!imageFile && formData.imageUrl === "") {
-        // Scenario 3: No new image file selected and formData.imageUrl is also empty (e.g., adding new product without image)
-        console.log("handleAddOrUpdateProduct: No image selected for new product or existing product, setting image_url to NULL.");
-        finalImageUrl = null; // Ensure it's explicitly null in DB
-      }
-      // Scenario 4: No new imageFile, and formData.imageUrl is already a valid existing URL (user didn't change image)
-      // In this case, finalImageUrl correctly retains its value from formData.imageUrl.
-
       const productData = {
         name: name.trim(),
         // Store description as NULL if it's empty, otherwise trim it
@@ -257,7 +120,7 @@ export default function AdminProductCRUD() {
         price: parseFloat(price),
         old_price: oldPrice ? parseFloat(oldPrice) : null,
         rating: rating ? parseFloat(rating) : null,
-        image_url: finalImageUrl, // Use the final determined image URL (can be null)
+        image_url: finalImageUrl, // Use the URL directly from the form input
       };
 
       console.log("handleAddOrUpdateProduct: Final product data for DB operation:", productData);
@@ -297,7 +160,7 @@ export default function AdminProductCRUD() {
 
       // Reset form states after successful operation
       setFormData({ name: "", description: "", price: "", oldPrice: "", rating: "", imageUrl: "" });
-      setImageFile(null); // Clear image file input
+      // setImageFile(null); // No longer needed
       setShowForm(false); // Hide the form
       setEditId(null); // Clear edit ID
     } catch (e) {
@@ -322,20 +185,8 @@ export default function AdminProductCRUD() {
     setError(null);
 
     try {
-      // First, get the product data to retrieve the image_url before deleting the record
-      console.log(`HandleDelete: Fetching product with ID ${itemIdToDelete} to get image_url.`);
-      const { data: productData, error: fetchError } = await supabase
-        .from('products')
-        .select('image_url')
-        .eq('id', itemIdToDelete)
-        .single(); // Use .single() as we're expecting one record
-
-      if (fetchError) {
-        console.error('HandleDelete: Error fetching product for deletion:', fetchError.message);
-        throw new Error('Failed to fetch product for deletion.');
-      }
-
-      // Delete the product record from the database
+      // No need to fetch image_url to delete from storage, as we're not managing storage here.
+      // Simply delete the product record from the database.
       console.log(`HandleDelete: Deleting product record with ID ${itemIdToDelete}.`);
       const { error: deleteRecordError } = await supabase
         .from('products')
@@ -345,14 +196,6 @@ export default function AdminProductCRUD() {
       if (deleteRecordError) {
         console.error('HandleDelete: Error deleting product record:', deleteRecordError.message);
         throw new Error('Failed to delete product record.');
-      }
-
-      // If the product had an image_url, delete it from storage
-      if (productData && productData.image_url) {
-        console.log('HandleDelete: Product had an image, attempting to delete from storage.');
-        await deleteImage(productData.image_url);
-      } else {
-        console.log('HandleDelete: Product had no image_url, skipping storage deletion.');
       }
 
       console.log(`HandleDelete: Product ID ${itemIdToDelete} deleted successfully.`);
@@ -369,7 +212,7 @@ export default function AdminProductCRUD() {
         setEditId(null);
         setShowForm(false);
         setFormData({ name: "", description: "", price: "", oldPrice: "", rating: "", imageUrl: "" });
-        setImageFile(null);
+        // setImageFile(null); // No longer needed
       }
     }
   };
@@ -385,7 +228,7 @@ export default function AdminProductCRUD() {
       rating: product.rating || "", // Use empty string if null
       imageUrl: product.image_url || "", // Set existing image URL for display, use "" if null
     });
-    setImageFile(null); // Clear any previously selected file when starting edit
+    // setImageFile(null); // No longer needed
     setEditId(product.id);
     setShowForm(true); // Show the form
     setError(null); // Clear previous errors
@@ -399,7 +242,7 @@ export default function AdminProductCRUD() {
     setEditId(null); // Reset edit ID
     setShowForm(false); // Hide form
     setFormData({ name: "", description: "", price: "", oldPrice: "", rating: "", imageUrl: "" }); // Reset form data
-    setImageFile(null); // Clear image file input
+    // setImageFile(null); // No longer needed
     setError(null); // Clear errors
   };
 
@@ -427,7 +270,7 @@ export default function AdminProductCRUD() {
               setShowForm(true);
               setEditId(null); // Ensure add new mode
               setFormData({ name: "", description: "", price: "", oldPrice: "", rating: "", imageUrl: "" }); // Reset form
-              setImageFile(null); // Reset file
+              // setImageFile(null); // Reset file - no longer needed
               setError(null); // Clear error
             }}
             className="mb-6 px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
@@ -518,47 +361,35 @@ export default function AdminProductCRUD() {
                 />
               </div>
             </div>
+            {/* New Image URL Input */}
             <div className="mb-6">
-              <label htmlFor="image" className="block mb-2 font-medium text-blue-800">
-                Product Image
+              <label htmlFor="imageUrl" className="block mb-2 font-medium text-blue-800">
+                Image URL
               </label>
               <input
-                type="file"
-                id="image"
-                name="image"
-                accept="image/*"
-                onChange={handleImageChange}
+                type="text" // Changed to text input for URL
+                id="imageUrl"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange} // Use the same handleChange
                 className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                placeholder="e.g., https://example.com/image.jpg"
               />
-              {/* Show current image if exists (not a new preview blob) AND no new file selected yet */}
-              {(product.imageUrl && !imageFile && !product.imageUrl.startsWith("blob:")) && (
+              {/* Show preview of the image URL */}
+              {formData.imageUrl && (
                 <div className="mt-2">
-                  <p className="text-sm text-gray-600">Current Image:</p>
-                  <img src={product.imageUrl} alt="Current Product" className="mt-1 w-24 h-24 object-cover rounded-md shadow-sm" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFormData((prev) => ({ ...prev, imageUrl: "" })); // Clear the URL in form data
-                      setImageFile(null); // Ensure no new file is pending upload either
-                      // Note: Actual deletion from storage happens on Save Changes if imageUrl becomes empty
-                    }}
-                    className="mt-1 ml-2 px-3 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
-                  >
-                    Remove Current Image
-                  </button>
+                  <p className="text-sm text-gray-600">Image Preview:</p>
+                  <img
+                    src={formData.imageUrl}
+                    alt="Product Preview"
+                    className="mt-1 w-24 h-24 object-cover rounded-md shadow-sm"
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/96x96?text=Image+Error'; }} // Fallback for broken images
+                  />
                 </div>
               )}
-              {/* Show preview of newly selected image (blob URL) */}
-              {imageFile && (
-                <div className="mt-2">
-                  <p className="text-sm text-gray-600">New Image Preview:</p>
-                  <img src={URL.createObjectURL(imageFile)} alt="New Product Preview" className="mt-1 w-24 h-24 object-cover rounded-md shadow-sm" />
-                </div>
-              )}
-               {/* Show No Image text if no image is set and no new file is selected */}
-              {!formData.imageUrl && !imageFile && (
-                <div className="mt-2 text-sm text-gray-500">No image selected.</div>
-              )}
+               {!formData.imageUrl && (
+                 <div className="mt-2 text-sm text-gray-500">No image URL provided.</div>
+               )}
             </div>
 
             <div className="flex space-x-3">
@@ -606,6 +437,7 @@ export default function AdminProductCRUD() {
                           src={product.image_url}
                           alt={product.name}
                           className="w-20 h-20 object-cover rounded-md shadow-sm"
+                          onError={(e) => { e.target.onerror = null; e.target.src = 'https://via.placeholder.com/80x80?text=Image+Error'; }} // Fallback for broken images
                         />
                       ) : (
                         <div className="w-20 h-20 bg-gray-200 flex items-center justify-center rounded-md text-gray-500 text-xs">
@@ -615,7 +447,7 @@ export default function AdminProductCRUD() {
                     </td>
                     <td className="py-3 px-4 font-medium">{product.name}</td>
                     <td className="py-3 px-4 text-blue-700 max-w-xs overflow-hidden text-ellipsis whitespace-nowrap">
-                        {product.description || '-'} {/* Display '-' if description is null/empty */}
+                      {product.description || '-'} {/* Display '-' if description is null/empty */}
                     </td>
                     <td className="py-3 px-4">Rp {product.price.toLocaleString('id-ID')}</td>
                     <td className="py-3 px-4">

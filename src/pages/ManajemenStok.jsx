@@ -1,179 +1,237 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "../supabase"; // Pastikan path ini benar
+import { supabase } from "../supabase"; // Ensure this path is correct
 
 export default function ManajemenStok() {
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState([]);
+  const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showUpdateForm, setShowUpdateForm] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [stockChange, setStockChange] = useState("");
-  const [stockReason, setStockReason] = useState("");
-  const [currentUser, setCurrentUser] = useState(null); // Untuk menyimpan user saat ini untuk logging
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    current_stock: "",
+  });
+  const [editId, setEditId] = useState(null); // ID of the stock item being edited
+  const [showConfirmModal, setShowConfirmModal] = useState(false); // For delete confirmation
+  const [itemIdToDelete, setItemIdToDelete] = useState(null); // ID of the item to delete
 
-  // Cek User dan Role
-  useEffect(() => {
-    const checkUserAndRole = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user); // Set user saat ini
+  // User and Role check (remains the same for access control)
+  // useEffect(() => {
+  //   const checkUserAndRole = async () => {
+  //     const {
+  //       data: { user },
+  //     } = await supabase.auth.getUser();
+  //     console.log('ManajemenStok: Current User:', user);
 
-      if (!user) {
-        console.log('ManajemenStok: Tidak ada user ditemukan, mengarahkan ke login.');
-        navigate('/admin/stock-management'); // Sesuaikan dengan rute login admin Anda
-        return;
-      }
+  //     if (!user) {
+  //       console.log('ManajemenStok: No user found, redirecting to login.');
+  //       navigate('/admin-products'); // Adjust to your actual admin login route
+  //       return;
+  //     }
 
-      const userRole = localStorage.getItem('userRole');
-      console.log('ManajemenStok: Role user dari localStorage:', userRole);
+  //     const userRole = localStorage.getItem('userRole');
+  //     console.log('ManajemenStok: User role from localStorage:', userRole);
 
-      if (userRole !== 'admin') {
-        alert('Anda tidak memiliki akses sebagai admin ke halaman ini!');
-        console.log('ManajemenStok: User bukan admin, mengarahkan ke /homeuserlogin.');
-        navigate('/homeuserlogin'); // Sesuaikan dengan rute non-admin Anda
-      }
-    };
+  //     if (userRole !== 'admin') {
+  //       alert('Anda tidak memiliki akses sebagai admin ke halaman ini!');
+  //       console.log('ManajemenStok: User is not admin, redirecting to /homeuserlogin.');
+  //       navigate('/homeuserlogin'); // Adjust to your actual non-admin home route
+  //     }
+  //   };
 
-    checkUserAndRole();
-  }, [navigate]);
+  //   checkUserAndRole();
+  // }, [navigate]);
 
-  // Fungsi untuk mengambil produk dari Supabase
-  const fetchProducts = async () => {
+  // Function to fetch stock items from Supabase
+  const fetchStocks = async () => {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from('products')
-      .select('id, name, stock_quantity') // Hanya ambil kolom yang dibutuhkan
-      .order('name', { ascending: true });
+      .from('stocks') // Changed from 'products' to 'stocks'
+      .select('*')
+      .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error mengambil produk untuk manajemen stok:', error.message);
-      setError('Gagal memuat produk untuk manajemen stok. Silakan coba lagi.');
+      console.error('Error fetching stock items:', error.message);
+      setError('Gagal memuat data stok. Silakan coba lagi.');
     } else {
-      setProducts(data);
-      console.log('Produk berhasil diambil untuk manajemen stok:', data);
+      setStocks(data);
+      console.log('Stock items fetched:', data);
     }
     setLoading(false);
   };
 
-  // Efek untuk memuat produk dan berlangganan pembaruan real-time
+  // Effect to load stock items and subscribe to real-time updates
   useEffect(() => {
-    fetchProducts();
+    fetchStocks();
 
-    // Berlangganan perubahan real-time pada tabel 'products'
+    // Subscribe to real-time changes on the 'stocks' table
     const channel = supabase
-      .channel('public:products_stock_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload => {
-        console.log('Perubahan real-time diterima untuk Produk (Manajemen Stok):', payload);
-        // Hanya ambil ulang jika perubahan relevan dengan stok (misalnya, insert, update yang memengaruhi stock_quantity, atau delete)
-        if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') {
-          fetchProducts();
-        }
+      .channel('public:stocks_admin_changes') // Channel name changed
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stocks' }, payload => { // Table name changed
+        console.log('Realtime change received for Stocks (Admin):', payload);
+        fetchStocks(); // Re-fetch all stock items to update the list
       })
       .subscribe();
 
-    // Fungsi cleanup untuk menghapus channel saat komponen di-unmount
+    // Cleanup function to remove the channel when component unmounts
     return () => {
-      console.log('Berhenti berlangganan perubahan produk untuk manajemen stok.');
+      console.log('Unsubscribing from stock changes.');
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-  const handleOpenUpdateForm = (product) => {
-    setSelectedProduct(product);
-    setStockChange("");
-    setStockReason("");
-    setShowUpdateForm(true);
-    setError(null); // Hapus error sebelumnya
+  // Handle form input changes
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdateStock = async () => {
-    if (!selectedProduct || stockChange === "") {
-      setError("Silakan pilih produk dan masukkan jumlah perubahan stok.");
+  // Handle adding or updating a stock item
+  const handleAddOrUpdateStock = async () => {
+    const { name, current_stock } = formData;
+
+    if (!name.trim() || current_stock === "") {
+      setError("Nama produk dan stok saat ini harus diisi.");
       return;
     }
 
-    const changeValue = parseInt(stockChange, 10);
-    if (isNaN(changeValue) || changeValue === 0) {
-      setError("Silakan masukkan angka non-nol yang valid untuk perubahan stok.");
+    // Basic validation for current_stock to be a non-negative integer
+    const stockValue = parseInt(current_stock, 10);
+    if (isNaN(stockValue) || stockValue < 0) {
+      setError("Stok saat ini harus berupa angka non-negatif.");
       return;
-    }
-
-    // Hitung jumlah stok baru
-    const newQuantity = selectedProduct.stock_quantity + changeValue;
-
-    if (newQuantity < 0) {
-      if (!window.confirm(`Stok akan menjadi ${newQuantity}. Anda yakin ingin melanjutkan? (Stok minus)`)) {
-        return;
-      }
     }
 
     setLoading(true);
     setError(null);
 
     try {
-      // 1. Perbarui jumlah stok produk di tabel 'products'
-      const { data: updatedProduct, error: updateError } = await supabase
-        .from('products')
-        .update({ stock_quantity: newQuantity })
-        .eq('id', selectedProduct.id)
-        .select();
+      const stockData = {
+        name: name.trim(),
+        current_stock: stockValue,
+      };
 
-      if (updateError) {
-        console.error('Error memperbarui jumlah stok:', updateError.message);
-        throw new Error('Gagal memperbarui jumlah stok: ' + updateError.message);
-      }
+      console.log("handleAddOrUpdateStock: Final stock data for DB operation:", stockData);
 
-      console.log("Jumlah stok berhasil diperbarui:", updatedProduct);
+      if (editId !== null) {
+        // Update existing stock item
+        console.log("handleAddOrUpdateStock: Updating stock item with ID:", editId);
+        const { data, error } = await supabase
+          .from('stocks') // Changed to 'stocks'
+          .update(stockData)
+          .eq('id', editId)
+          .select();
 
-      // 2. (Opsional) Catat pergerakan stok di tabel 'stock_movements'
-      const { error: logError } = await supabase
-        .from('stock_movements')
-        .insert({
-          product_id: selectedProduct.id,
-          change_type: changeValue > 0 ? 'inbound' : (changeValue < 0 ? 'outbound' : 'adjustment'), // Tentukan tipe
-          quantity_change: changeValue,
-          new_stock_quantity: newQuantity,
-          reason: stockReason.trim() === "" ? null : stockReason.trim(),
-          changed_by_user_id: currentUser ? currentUser.id : null, // Catat user yang melakukan perubahan
-        });
-
-      if (logError) {
-        console.error('Error mencatat pergerakan stok:', logError.message);
-        // Jangan throw error di sini, karena update stok utama sudah berhasil.
-        // Cukup catat masalah dengan tabel logging.
+        if (error) {
+          console.error('handleAddOrUpdateStock: Error updating stock item:', error.message);
+          setError('Gagal memperbarui stok. Silakan coba lagi: ' + error.message);
+        } else {
+          console.log('handleAddOrUpdateStock: Stock item updated successfully:', data);
+          alert('Stok berhasil diperbarui!');
+        }
       } else {
-        console.log("Pergerakan stok berhasil dicatat.");
+        // Add new stock item
+        console.log("handleAddOrUpdateStock: Adding new stock item.");
+        const { data, error } = await supabase
+          .from('stocks') // Changed to 'stocks'
+          .insert([stockData])
+          .select();
+
+        if (error) {
+          console.error('handleAddOrUpdateStock: Error adding stock item:', error.message);
+          setError('Gagal menambahkan stok. Silakan coba lagi: ' + error.message);
+        } else {
+          console.log('handleAddOrUpdateStock: Stock item added successfully:', data);
+          alert('Stok berhasil ditambahkan!');
+        }
       }
 
-      alert('Stok berhasil diperbarui!');
-      setShowUpdateForm(false);
-      fetchProducts(); // Ambil ulang untuk mendapatkan jumlah stok terbaru
+      // Reset form states after successful operation
+      setFormData({ name: "", current_stock: "" });
+      setShowForm(false); // Hide the form
+      setEditId(null); // Clear edit ID
     } catch (e) {
-      console.error("Operasi pembaruan stok gagal:", e.message, e);
+      console.error("handleAddOrUpdateStock: Operation failed:", e.message, e);
       setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    setShowUpdateForm(false);
-    setSelectedProduct(null);
-    setStockChange("");
-    setStockReason("");
+  // Show confirmation modal before deleting
+  const handleDeleteConfirm = (id) => {
+    setItemIdToDelete(id);
+    setShowConfirmModal(true);
+  };
+
+  // Execute deletion after confirmation
+  const handleDelete = async () => {
+    if (itemIdToDelete === null) return;
+
+    setLoading(true);
     setError(null);
+
+    try {
+      console.log(`HandleDelete: Deleting stock record with ID ${itemIdToDelete}.`);
+      const { error: deleteRecordError } = await supabase
+        .from('stocks') // Changed to 'stocks'
+        .delete()
+        .eq('id', itemIdToDelete);
+
+      if (deleteRecordError) {
+        console.error('HandleDelete: Error deleting stock record:', deleteRecordError.message);
+        throw new Error('Gagal menghapus data stok.');
+      }
+
+      console.log(`HandleDelete: Stock ID ${itemIdToDelete} deleted successfully.`);
+      alert('Stok berhasil dihapus!');
+    } catch (e) {
+      console.error("HandleDelete: Operation failed:", e.message, e);
+      setError('Gagal menghapus data: ' + e.message);
+    } finally {
+      setLoading(false);
+      setShowConfirmModal(false);
+      setItemIdToDelete(null);
+      // If the stock being edited was deleted, reset the form
+      if (editId === itemIdToDelete) {
+        setEditId(null);
+        setShowForm(false);
+        setFormData({ name: "", current_stock: "" });
+      }
+    }
+  };
+
+  // Handle stock item editing
+  const handleEdit = (stock) => {
+    console.log("HandleEdit: Editing stock item:", stock);
+    setFormData({
+      name: stock.name,
+      current_stock: stock.current_stock,
+    });
+    setEditId(stock.id);
+    setShowForm(true); // Show the form
+    setError(null); // Clear previous errors
+  };
+
+  // Handle form or modal cancellation
+  const handleCancel = () => {
+    console.log("HandleCancel: Cancelling current operation.");
+    setShowConfirmModal(false);
+    setItemIdToDelete(null);
+    setEditId(null); // Reset edit ID
+    setShowForm(false); // Hide form
+    setFormData({ name: "", current_stock: "" }); // Reset form data
+    setError(null); // Clear errors
   };
 
   return (
     <div className="min-h-screen bg-blue-50 p-6 font-sans">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
         <h1 className="text-3xl font-extrabold text-blue-800 mb-6 text-center">
-          Manajemen Stok Produk
+          Manajemen Stok
         </h1>
 
         {error && (
@@ -184,61 +242,64 @@ export default function ManajemenStok() {
         )}
 
         {loading && (
-          <p className="text-center text-lg text-blue-600 mb-4">Memuat data stok...</p>
+          <p className="text-center text-lg text-blue-600 mb-4">Memuat data...</p>
         )}
 
-        {showUpdateForm && (
+        {!showForm && (
+          <button
+            onClick={() => {
+              setShowForm(true);
+              setEditId(null); // Ensure add new mode
+              setFormData({ name: "", current_stock: "" }); // Reset form
+              setError(null); // Clear error
+            }}
+            className="mb-6 px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Tambah Stok Baru
+          </button>
+        )}
+
+        {showForm && (
           <div className="mb-8 p-6 border border-blue-200 rounded-xl bg-blue-50 shadow-md">
             <h2 className="text-2xl font-bold text-blue-700 mb-4">
-              Perbarui Stok untuk "{selectedProduct?.name}"
+              {editId !== null ? "Edit Stok" : "Tambah Stok"}
             </h2>
             <div className="mb-4">
-              <label htmlFor="currentStock" className="block mb-2 font-medium text-blue-800">
-                Stok Saat Ini:
+              <label htmlFor="name" className="block mb-2 font-medium text-blue-800">
+                Nama Produk
               </label>
               <input
                 type="text"
-                id="currentStock"
-                value={selectedProduct?.stock_quantity}
-                className="w-full px-4 py-2 border border-blue-300 rounded-lg bg-gray-100 cursor-not-allowed"
-                readOnly
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                placeholder="Masukkan nama produk"
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="stockChange" className="block mb-2 font-medium text-blue-800">
-                Jumlah Perubahan (misalnya, +10 atau -5)
+              <label htmlFor="current_stock" className="block mb-2 font-medium text-blue-800">
+                Stok Saat Ini
               </label>
               <input
                 type="number"
-                id="stockChange"
-                name="stockChange"
-                value={stockChange}
-                onChange={(e) => setStockChange(e.target.value)}
+                id="current_stock"
+                name="current_stock"
+                value={formData.current_stock}
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="Masukkan positif untuk menambah, negatif untuk mengurangi"
-              />
-            </div>
-            <div className="mb-6">
-              <label htmlFor="stockReason" className="block mb-2 font-medium text-blue-800">
-                Alasan Perubahan (Opsional)
-              </label>
-              <textarea
-                id="stockReason"
-                name="stockReason"
-                value={stockReason}
-                onChange={(e) => setStockReason(e.target.value)}
-                className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="Misalnya, Pengiriman baru, stok rusak, pengembalian pelanggan"
-                rows={2}
+                placeholder="e.g., 100"
+                min="0"
               />
             </div>
 
             <div className="flex space-x-3">
               <button
-                onClick={handleUpdateStock}
-                className="px-6 py-2 bg-green-600 text-white rounded-lg shadow-md hover:bg-green-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                onClick={handleAddOrUpdateStock}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
               >
-                Simpan Perubahan Stok
+                {editId !== null ? "Simpan Perubahan" : "Simpan Stok"}
               </button>
               <button
                 onClick={handleCancel}
@@ -250,10 +311,10 @@ export default function ManajemenStok() {
           </div>
         )}
 
-        {!loading && !error && products.length === 0 ? (
+        {!loading && !error && stocks.length === 0 ? (
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg relative mb-4 text-center">
             <strong className="font-bold">Info:</strong>
-            <span className="block sm:inline"> Tidak ada produk yang tersedia untuk manajemen stok.</span>
+            <span className="block sm:inline"> Tidak ada stok tersedia.</span>
           </div>
         ) : (
           <div className="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
@@ -266,20 +327,22 @@ export default function ManajemenStok() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-blue-100">
-                {products.map((product) => (
-                  <tr key={product.id} className="hover:bg-blue-50 transition-colors duration-150">
-                    <td className="py-3 px-4 font-medium">{product.name}</td>
-                    <td className="py-3 px-4">
-                      <span className={`font-bold ${product.stock_quantity <= 5 && product.stock_quantity >=0 ? 'text-orange-500' : product.stock_quantity < 0 ? 'text-red-600' : 'text-green-700'}`}>
-                        {product.stock_quantity}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-center">
+                {stocks.map((stock) => (
+                  <tr key={stock.id} className="hover:bg-blue-50 transition-colors duration-150">
+                    <td className="py-3 px-4 font-medium">{stock.name}</td>
+                    <td className="py-3 px-4">{stock.current_stock}</td>
+                    <td className="py-3 px-4 text-center space-x-2">
                       <button
-                        onClick={() => handleOpenUpdateForm(product)}
+                        onClick={() => handleEdit(stock)}
                         className="px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                       >
-                        Perbarui Stok
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteConfirm(stock.id)}
+                        className="px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 transition-all duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                      >
+                        Hapus
                       </button>
                     </td>
                   </tr>
@@ -289,6 +352,32 @@ export default function ManajemenStok() {
           </div>
         )}
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center border border-gray-200">
+            <h3 className="text-xl font-bold text-gray-800 mb-4">Konfirmasi Penghapusan</h3>
+            <p className="text-gray-700 mb-6">
+              Apakah Anda yakin ingin menghapus item stok ini? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <button
+                onClick={handleDelete}
+                className="px-6 py-2 rounded-lg text-white font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200 ease-in-out transform hover:scale-105"
+              >
+                Ya, Hapus
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-6 py-2 rounded-lg text-gray-800 bg-gray-200 hover:bg-gray-300 font-semibold transition-all duration-200 ease-in-out transform hover:scale-105"
+              >
+                Tidak
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
