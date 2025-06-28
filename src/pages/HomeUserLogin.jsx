@@ -52,10 +52,32 @@ const HomeUserLogin = () => {
     setLoadingFaqs(false);
   };
 
+  // Function to fetch loyalty points from Supabase
+  const fetchLoyaltyPoints = async (userId) => {
+    if (!userId) {
+      setLoyaltyPoints(0);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('dataloyalitas')
+      .select('poinloyalitas')
+      .eq('id_pelanggan', userId)
+      .single(); // Use single() because there should be only one entry per user
+
+    if (error) {
+      console.error('Error fetching loyalty points:', error.message);
+      setLoyaltyPoints(0); // Set to 0 if an error occurs or no data is found
+    } else if (data) {
+      setLoyaltyPoints(data.poinloyalitas);
+    } else {
+      setLoyaltyPoints(0); // If data is null (no entry for this user)
+    }
+  };
+
   // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
   useEffect(() => {
     // Authentication Logic
-    const checkUserAuthentication = () => {
+    const checkUserAuthentication = async () => { // Made async to await fetchLoyaltyPoints
       const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
       const userId = localStorage.getItem("userId");
       const userEmail = localStorage.getItem("userEmail");
@@ -67,16 +89,8 @@ const HomeUserLogin = () => {
         // Prioritize userNama for display, then userEmail, fallback to "Pengguna"
         setUsername(userNama || userEmail || "Pengguna");
 
-        // Load loyalty points for the logged-in user
-        const storedLoyaltyData = JSON.parse(localStorage.getItem('dataLoyalitas')) || [];
-        const currentUserLoyalty = storedLoyaltyData.find(
-          (customer) => customer.namaPelanggan === userNama // Match by userNama (username)
-        );
-        if (currentUserLoyalty) {
-          setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
-        } else {
-          setLoyaltyPoints(0); // Reset if no loyalty data found for this user
-        }
+        // Fetch loyalty points for the logged-in user from Supabase
+        await fetchLoyaltyPoints(userId);
 
       } else {
         setCurrentUser(null);
@@ -100,6 +114,20 @@ const HomeUserLogin = () => {
       })
       .subscribe();
 
+    // Real-time subscription for loyalty points
+    const loyaltyChannel = supabase
+      .channel('public:dataloyalitas_changes') // Unique channel name
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dataloyalitas' }, payload => {
+        console.log('Realtime change received for loyalty points:', payload);
+        // Re-fetch loyalty points for the current user if their data changes
+        const currentUserId = localStorage.getItem("userId");
+        if (currentUserId) {
+          fetchLoyaltyPoints(currentUserId);
+        }
+      })
+      .subscribe();
+
+
     // Carousel auto-slide
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
@@ -112,7 +140,7 @@ const HomeUserLogin = () => {
         setCartItemCount(getTotalItemsInCart());
       }
       // Re-check auth if relevant storage items change
-      if (event.key === "isLoggedIn" || event.key === "userId" || event.key === "userEmail" || event.key === "username" || event.key === "dataLoyalitas") {
+      if (event.key === "isLoggedIn" || event.key === "userId" || event.key === "userEmail" || event.key === "username") {
         checkUserAuthentication();
       }
     };
@@ -123,6 +151,7 @@ const HomeUserLogin = () => {
       clearInterval(slideInterval);
       window.removeEventListener('storage', handleStorageChange);
       supabase.removeChannel(faqChannel); // Unsubscribe from FAQ channel
+      supabase.removeChannel(loyaltyChannel); // Unsubscribe from loyalty channel
     };
   }, [images.length, navigate]); // Add navigate to dependency array
 
@@ -182,7 +211,8 @@ const HomeUserLogin = () => {
               <span>{username || "Pengguna"}</span> {/* Displaying the username */}
             </div>
 
-            {username && loyaltyPoints > 0 && ( // Only show loyalty points if username exists and points are positive
+            {/* Loyalty Points Header */}
+            {loyaltyPoints > 0 && ( // Only show loyalty points if points are positive
               <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
                 Poin: {formatPoints(loyaltyPoints)} ⭐
               </Link>

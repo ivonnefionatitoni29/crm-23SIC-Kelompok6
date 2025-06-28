@@ -23,84 +23,37 @@ const PetStoreApp = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserName, setCurrentUserName] = useState("Pengguna");
 
-  // Data produk dummy (bisa diambil dari Supabase juga)
+  // Effect hook to fetch products from Supabase
   useEffect(() => {
-    const initialProducts = [
-      {
-        id: 1,
-        name: "Royal Canin Adult Dog Food",
-        category: "makanan",
-        type: "anjing",
-        price: 285000,
-        originalPrice: 320000,
-        image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=300&h=300&fit:crop",
-        rating: 4.8,
-        reviews: 156,
-        description: "Makanan premium untuk anjing dengan nutrisi seimbang",
-      },
-      {
-        id: 2,
-        name: "Whiskas Cat Food Tuna",
-        category: "makanan",
-        type: "kucing",
-        price: 45000,
-        originalPrice: 52000,
-        image: "https://images.unsplash.com/photo-1548681528-6a5c45b66b42?w=300&h=300&fit:crop",
-        rating: 4.5,
-        reviews: 203,
-        description: "Makanan kucing rasa tuna yang lezat dan bergizi",
-      },
-      {
-        id: 3,
-        name: "Antibiotik Amoxicillin",
-        category: "obat",
-        type: "umum",
-        price: 125000,
-        originalPrice: 145000,
-        image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit:crop",
-        rating: 4.7,
-        reviews: 89,
-        description: "Antibiotik untuk mengobati infeksi bakteri pada hewan",
-      },
-      {
-        id: 4,
-        name: "Vitamin Pet Health Plus",
-        category: "obat",
-        type: "vitamin",
-        price: 85000,
-        originalPrice: 95000,
-        image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=300&h=300&fit:crop",
-        rating: 4.6,
-        reviews: 67,
-        description: "Suplemen vitamin untuk kesehatan hewan peliharaan",
-      },
-      {
-        id: 5,
-        name: "Pro Plan Puppy Food",
-        category: "makanan",
-        type: "anjing",
-        price: 195000,
-        originalPrice: 220000,
-        image: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300&h=300&fit:crop",
-        rating: 4.9,
-        reviews: 134,
-        description: "Makanan untuk anjing dengan DHA dan protein tinggi",
-      },
-      {
-        id: 6,
-        name: "Obat Cacing Drontal",
-        category: "obat",
-        type: "dewasa",
-        price: 75000,
-        originalPrice: 85000,
-        image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=300&h=300&fit:crop",
-        rating: 4.4,
-        reviews: 98,
-        description: "Obat cacing spektrum luas untuk anjing dan kucing dewasa",
-      },
-    ];
-    setProducts(initialProducts);
-  }, []);
+    const fetchProducts = async () => {
+      let { data, error } = await supabase
+        .from('products') // Assuming your table name is 'products'
+        .select('*'); // Select all columns
+
+      if (error) {
+        console.error("Error fetching products:", error);
+        // You might want to display an error message to the user
+      } else {
+        // Map Supabase data to your product structure
+        // Ensure the field names from your Supabase table match what your UI expects
+        const mappedProducts = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          category: item.category || 'umum', // Add a default category if not present in DB
+          type: item.type || 'lain-lain', // Add a default type if not present in DB
+          price: parseFloat(item.price), // Convert numeric to float
+          originalPrice: item.old_price ? parseFloat(item.old_price) : null, // Handle optional old_price
+          image: item.image_url,
+          rating: item.rating ? parseFloat(item.rating) : 0, // Default to 0 if no rating
+          reviews: item.reviews || 0, // Default to 0 if no reviews
+          description: item.description,
+        }));
+        setProducts(mappedProducts);
+      }
+    };
+
+    fetchProducts();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Efek samping untuk mengambil informasi pengguna dari localStorage
   useEffect(() => {
@@ -350,11 +303,9 @@ const PetStoreApp = () => {
       }
 
       // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
-     // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
       const purchasesToInsert = cart.map((item) => ({
         namaitem: item.name,
         jenis: item.category,
-        // Hapus baris 'alamat' karena kolomnya sudah tidak ada di Supabase
         tanggal: new Date().toISOString(),
         id_pelanggan: loggedInUserId,
         harga: item.price,
@@ -380,7 +331,7 @@ const PetStoreApp = () => {
       const { data: existingLoyalty, error: fetchLoyaltyError } = await supabase
         .from('dataloyalitas')
         .select('*')
-        .eq('id', loggedInUserId)
+        .eq('id_pelanggan', loggedInUserId) // Ensure you are querying by the correct column name for id_pelanggan
         .single();
 
       if (fetchLoyaltyError && fetchLoyaltyError.code !== 'PGRST116') { // PGRST116 means "no rows found"
@@ -401,7 +352,7 @@ const PetStoreApp = () => {
             totalbelanja: newTotalBelanja,
             jumlahtransaksi: newJumlahTransaksi,
           })
-          .eq('id', loggedInUserId);
+          .eq('id_pelanggan', loggedInUserId); // Ensure you are updating by the correct column name
 
         if (updateLoyaltyError) {
           console.error("Error updating loyalty data:", updateLoyaltyError);
@@ -412,7 +363,7 @@ const PetStoreApp = () => {
         const { error: insertLoyaltyError } = await supabase
           .from('dataloyalitas')
           .insert({
-            id_pelanggan: localStorage.getItem("userId"),
+            id_pelanggan: loggedInUserId, // Use the loggedInUserId here
             poinloyalitas: pointsEarnedThisPurchase,
             totalbelanja: totalPurchaseAmount,
             jumlahtransaksi: 1,
