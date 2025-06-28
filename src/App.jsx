@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './components/MainLayout';
-import { BrowserRouter } from 'react-router-dom';
+// import { BrowserRouter } from 'react-router-dom'; // Tidak perlu import ini di sini jika sudah di index.js
 
 import Dashboard from './pages/Dashboard';
 import Penitipan from './pages/Penitipan';
@@ -18,8 +18,6 @@ import PelangganJB from './pages/PelangganJB';
 import LoyaltyPage from './pages/LoyaltyPage';
 import RegisterPage from './pages/RegisterPage';
 
-
-// ✅ Tambahkan import untuk form user
 import FormPenitipan from './pages/FormPenitipan';
 import FormKebiri from './pages/FormKebiri';
 import FormVaksinasi from './pages/FormVaksinasi';
@@ -27,8 +25,9 @@ import FormVaksinasi from './pages/FormVaksinasi';
 import PrediksiPenyakitHewan from './pages/PrediksiPenyakitHewan';
 import FaqPage from './pages/FaqPage';
 
-// IMPOR KOMPONEN USER TABLE YANG BARU
 import UserTable from './pages/UserTable'; // PASTIKAN PATH INI SESUAI
+import AdminProductCRUD from './pages/AdminProductCRUD'; // PASTIKAN PATH INI SESUAI
+import ManajemenStok from './pages/ManajemenStok'; // ⭐ IMPORT KOMPONEN MANAJEMEN STOK
 
 function App() {
   return (
@@ -40,11 +39,13 @@ function App() {
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
-      <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
+      
       <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
+      <Route path="/faq-page" element={<FaqPage />} />
+      {/* Rute untuk Admin Product CRUD */}
+      
 
-
-      {/* ✅ Rute form layanan untuk user */}
+      {/* Rute form layanan untuk user */}
       <Route path="/form-penitipan" element={<FormPenitipan />} />
       <Route path="/form-kebiri" element={<FormKebiri />} />
       <Route path="/form-vaksinasi" element={<FormVaksinasi />} />
@@ -58,11 +59,14 @@ function App() {
         <Route path="/loyalitaspelanggan" element={<Loyalitaspelanggan />} />
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
-        {/* Rute baru untuk Tabel User */}
+        <Route path="/admin-products" element={<AdminProductCRUD />} />
+        <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
+        {/* Rute untuk Tabel User */}
         <Route path="/users" element={<UserTable />} />
+        {/* ⭐ Rute baru untuk Manajemen Stok ⭐ */}
+        <Route path="/admin/stock-management" element={<ManajemenStok />} />
       </Route>
 
-        <Route path="/faq-page" element={<FaqPage />} />
     </Routes>
   );
 }

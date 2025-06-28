@@ -1,41 +1,6 @@
 import React, { useState, useEffect } from "react";
-// **********************************************************************************
-// SANGAT PENTING: SILA SESUAIKAN JALUR IMPORT SUPABASE INI MENGIKUT STRUKTUR FOLDER PROJEK ANDA.
-// Ralat "Could not resolve" ini berterusan dan merupakan PUNCA UTAMA masalah.
-// Fail 'supabase.js' anda TIDAK DITEMUI pada jalur relatif yang telah dicuba setakat ini.
-//
-// UNTUK MENYELESAIKAN INI SECARA MUKTAMAD, ANDA PERLU MEMBERITAHU LOKASI TEPAT FAIL 'supabase.js' ANDA.
-// Sila GANTI BARIS 'import { supabase } = ...' DI BAWAH INI DENGAN JALUR YANG BETUL
-// SETELAH ANDA MENGESAHKANNYA SENDIRI DARI STRUKTUR PROJEK ANDA.
-//
-// Anda boleh melihat jalur penuh fail `FAQ.jsx` anda adalah:
-// D:/project062025/crm-23SIC-Kelompok6/src/pages/FAQ.jsx
-//
-// Berikut adalah BEBERAPA CONTOH JALUR yang mungkin UNTUK FAIL `supabase.js` anda,
-// bergantung pada di mana ia disimpan RELATIF KEPADA `src/pages/FAQ.jsx`:
-//
-// CONTOH 1: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
-//           (iaitu, di dalam folder 'src', setingkat dengan folder 'pages')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../supabase"; // Ini adalah cubaan lalai saya yang terakhir.
-//
-// CONTOH 2: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js
-//           (iaitu, di akar projek anda, satu folder di atas folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../../supabase";
-//
-// CONTOH 3: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/utils/supabase.js
-//           (iaitu, di dalam folder 'utils' yang berada di dalam folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../utils/supabase";
-//
-// CONTOH 4: Jika 'supabase.js' berada di: D:/project062025/crm-23SIC-Kelompok6/src/config/supabase.js
-//           (iaitu, di dalam folder 'config' yang berada di dalam folder 'src')
-//           Maka, import yang BETUL adalah:
-//           import { supabase } from "../config/supabase";
-//
-// SILA GANTI BARIS DI BAWAH INI DENGAN JALUR YANG BETUL UNTUK PROJEK ANDA!
-import { supabase } from "../supabase"; // <<<<<<<<<<<<<<<<<<<<<<<<< JALUR INI MESTI DIBETULKAN SECARA MANUAL!
+
+import { supabase } from "../supabase"; // 
 
 
 export default function FAQ() {

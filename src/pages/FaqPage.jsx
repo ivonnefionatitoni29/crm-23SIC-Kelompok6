@@ -2,11 +2,34 @@ import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // untuk tombol login
 
+// SANGAT PENTING: Sila sesuaikan jalur import supabase ini mengikut struktur folder projek anda.
+// Ralat "Could not resolve" ini berterusan, menunjukkan bahawa fail 'supabase.js' anda TIDAK DITEMUI
+// pada jalur relatif yang telah dicuba setakat ini.
+//
+// Untuk menyelesaikan ini secara muktamad, anda perlu memberitahu LOKASI TEPAT fail 'supabase.js' anda.
+// Sila GANTI baris 'import { supabase } = ...' di bawah ini dengan jalur yang BETUL setelah anda mengesahkannya sendiri.
+//
+// Contoh:
+// - Jika jalur penuh fail anda ialah: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
+//   Maka, import yang BETUL adalah: import { supabase } from "../supabase";
+//
+// - Jika fail itu berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js (akar projek, satu folder di atas 'src')
+//   Maka, import yang BETUL adalah: import { supabase } from "../../supabase";
+//
+// - Jika di 'src/utils/supabase.js': import { supabase } from "../utils/supabase";
+// - Jika di 'src/config/supabase.js': import { supabase } from "../config/supabase";
+//
+// Sila pastikan anda memilih HANYA SATU daripada jalur di atas (atau jalur lain yang betul jika tiada yang sepadan)
+// dan gunakan ia. Saya akan meninggalkan yang paling umum sebagai lalai buat masa ini.
+import { supabase } from "../supabase"; // SILA GANTI BARIS INI DENGAN JALUR YANG BETUL!
+
+
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const [showReservasiMenu, setShowReservasiMenu] = useState(false); // State baru untuk dropdown
 
   // Fungsi untuk mengambil FAQ dari Supabase
   const fetchFaqs = async () => {
@@ -27,30 +50,45 @@ const FaqPage = () => {
   };
 
   // Efek untuk memuat FAQ saat komponen dipasang dan berlangganan pembaruan real-time
-  // Efek ini harus menangani pembaruan otomatis.
   useEffect(() => {
     fetchFaqs();
 
-    // Berlangganan perubahan real-time pada tabel 'faqs'
-    // Setiap kali ada INSERT, UPDATE, atau DELETE di tabel 'faqs',
-    // callback ini akan dipicu, dan 'fetchFaqs()' akan dipanggil ulang.
     const channel = supabase
-      .channel('public:faqs_page_changes') // Nama channel unik untuk halaman publik
+      .channel('public:faqs_page_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
         console.log('Realtime change received for public FAQs:', payload);
-        fetchFaqs(); // Ambil ulang data setiap ada perubahan
+        fetchFaqs();
       })
       .subscribe();
 
-    // Fungsi cleanup saat komponen dilepas untuk menghindari kebocoran memori
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []); // [] memastikan efek ini hanya berjalan sekali saat mount
+  }, []);
 
   const goToPage = (path) => {
     navigate(path);
   };
+
+  // Fungsi untuk menangani klik pada tombol "Layanan"
+  const handleReservasiClick = () => {
+    setShowReservasiMenu(!showReservasiMenu);
+  };
+
+  // Tutup dropdown jika klik di luar area menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showReservasiMenu && !event.target.closest('.relative')) {
+        setShowReservasiMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showReservasiMenu]);
+
 
   return (
     <>
@@ -64,7 +102,7 @@ const FaqPage = () => {
             Groovy VetCare
           </h1>
           <nav className="space-x-4 flex items-center">
-            <a href="#" className="hover:underline">Beranda</a>
+            <a href="/" className="hover:underline">Beranda</a>
             <a href="#layanan" className="hover:underline">Layanan</a>
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
@@ -99,9 +137,9 @@ const FaqPage = () => {
             <p className="text-center text-gray-500">Tiada FAQ yang tersedia buat masa ini.</p>
           ) : (
             <div className="space-y-4">
-              {faqs.map((faq) => ( // Iterasi langsung objek faq
+              {faqs.map((faq) => (
                 <details
-                  key={faq.id} // Gunakan ID unik dari Supabase sebagai key
+                  key={faq.id}
                   className="group border border-blue-200 bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-300"
                 >
                   <summary className="flex items-center justify-between cursor-pointer text-lg font-medium text-blue-800">
@@ -181,7 +219,7 @@ const FaqPage = () => {
           </div>
         </div>
         <div className="mt-8 text-center text-xs text-white/80">
-          &copy; 2025 Groovy Vetcare. All rights reserved.
+          © 2025 Groovy Vetcare. All rights reserved.
         </div>
       </footer>
     </>

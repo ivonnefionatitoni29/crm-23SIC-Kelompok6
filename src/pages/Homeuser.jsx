@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../supabase'; // Import supabase instance
 
 const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [showLayananMenu, setShowLayananMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
+  const [loadingFaqs, setLoadingFaqs] = useState(true); // New loading state for FAQs
+  const [errorFaqs, setErrorFaqs] = useState(null); // New error state for FAQs
   const navigate = useNavigate();
 
   const images = [
@@ -28,25 +31,54 @@ const HomeUser = () => {
     navigate(path);
   };
 
-  useEffect(() => {
-    const storedFaqs = localStorage.getItem("faqs");
-    if (storedFaqs) {
-      setFaqs(JSON.parse(storedFaqs));
+  // Function to fetch FAQs from Supabase (same as in your admin component)
+  const fetchFaqs = async () => {
+    setLoadingFaqs(true);
+    setErrorFaqs(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching FAQs for HomeUser:', error.message);
+      setErrorFaqs('Failed to load FAQs. Please try again later.');
+    } else {
+      setFaqs(data);
     }
-  }, []);
+    setLoadingFaqs(false);
+  };
+
+  useEffect(() => {
+    // Fetch FAQs on component mount
+    fetchFaqs();
+
+    // Subscribe to real-time changes on the 'faqs' table
+    const channel = supabase
+      .channel('public:faqs_user_changes') // Use a unique channel name for user side
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for FAQs (User):', payload);
+        fetchFaqs(); // Re-fetch data on any change
+      })
+      .subscribe();
+
+    // Cleanup function to unsubscribe when the component unmounts
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
 
   const userPoints = 150;
   const maxPoints = 200; // Max poin untuk Gold
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
 
-
-  // Warna dan style badge sesuai level
   const loyaltyColors = {
     Bronze: "bg-yellow-500 text-yellow-900",
     Silver: "bg-gray-300 text-gray-800",
     Gold: "bg-yellow-400 text-yellow-900",
   };
 
+  // eslint-disable-next-line no-unused-vars
   const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
 
   return (
@@ -57,7 +89,7 @@ const HomeUser = () => {
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
             <a href="#" className="hover:underline">Beranda</a>
-            
+
             <div className="relative">
               <button
                 onClick={handleLayananHeaderClick}
@@ -101,7 +133,7 @@ const HomeUser = () => {
                 </div>
               )}
             </div>
-            
+
             <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage("/login")}
@@ -175,7 +207,8 @@ const HomeUser = () => {
 
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage('/pelangganjb')}
+              // DIUBAH: Arah navigasi diubah dari '/pelangganjb' menjadi '/login'
+              onClick={() => goToPage('/login')}
               className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img
@@ -251,14 +284,18 @@ const HomeUser = () => {
             Pertanyaan Umum (FAQ)
           </h3>
           <div className="space-y-4 text-left">
-            {faqs.length === 0 ? (
+            {loadingFaqs ? (
+              <p className="text-center text-blue-600">Loading FAQs...</p>
+            ) : errorFaqs ? (
+              <p className="text-center text-red-500">{errorFaqs}</p>
+            ) : faqs.length === 0 ? (
               <p className="text-center text-gray-500">
                 Belum ada FAQ yang tersedia.
               </p>
             ) : (
-              faqs.slice(0, 3).map(({ question, answer }, idx) => (
+              faqs.slice(0, 3).map(({ question, answer, id }) => ( // Add 'id' to key
                 <details
-                  key={idx}
+                  key={id} // Use unique ID for key
                   className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition"
                 >
                   <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
