@@ -14,7 +14,6 @@ const menuItems = [
   { name: 'Loyalitas Pelanggan', icon: <MdEmojiEvents size={18} />, path: '/loyalitaspelanggan' },
   { name: 'FAQ', icon: <FaQuestionCircle size={18} />, path: '/faq' },
   { name: 'Jual Beli', icon: <FaStore size={18} />, path: '/jualbeli' },
-  { name: 'Prediksi Kesehatan', icon: <FaHeartbeat size={18} />, path: '/prediksi-kesehatan' },
   { name: 'Tabel User', icon: <FaUser size={18} />, path: '/users' },
   { name: 'Product CRUD', icon: <BiBox size={18} />, path: '/admin-products' },
   { name: 'Manajemen Stok', icon: <RiStockLine size={18} />, path: '/admin/stock-management' },
