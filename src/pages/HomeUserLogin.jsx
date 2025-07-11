@@ -1,15 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingCart } from "lucide-react"; // Pastikan Anda sudah install: npm install lucide-react
+import { ShoppingCart } from "lucide-react";
+import { supabase } from '../supabase'; // Import Supabase instance
 
 const HomeUserLogin = () => {
   // --- STATE DARI KEDUA VERSI ---
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [faqs, setFaqs] = useState([]);
-  const [username, setUsername] = useState("");
+  const [faqs, setFaqs] =useState([]);
+  const [username, setUsername] = useState('');
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
+
+  // New states for user authentication details
+  const [currentUser, setCurrentUser] = useState(null); // Stores { id, email, role }
+
   const navigate = useNavigate();
 
   // --- IMAGES & FUNCTIONS DARI KEDUA VERSI ---
@@ -27,8 +32,47 @@ const HomeUserLogin = () => {
     navigate(path);
   };
 
-  // --- LOGIKA useEffect TERBAIK DARI VERSI 2 ---
-  // (Mengambil data dinamis, cart, dan auto-slide)
+  // Function to fetch FAQs from Supabase (identical to the one in FAQ admin)
+  const fetchFaqs = async () => {
+    setLoadingFaqs(true);
+    setErrorFaqs(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching FAQs for HomeUserLogin:', error.message);
+      setErrorFaqs('Gagal memuat FAQ. Sila cuba lagi.');
+    } else {
+      setFaqs(data);
+    }
+    setLoadingFaqs(false);
+  };
+
+  // Function to fetch loyalty points from Supabase
+  const fetchLoyaltyPoints = async (userId) => {
+    if (!userId) {
+      setLoyaltyPoints(0);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('dataloyalitas')
+      .select('poinloyalitas')
+      .eq('id_pelanggan', userId)
+      .single(); // Use single() because there should be only one entry per user
+
+    if (error) {
+      console.error('Error fetching loyalty points:', error.message);
+      setLoyaltyPoints(0); // Set to 0 if an error occurs or no data is found
+    } else if (data) {
+      setLoyaltyPoints(data.poinloyalitas);
+    } else {
+      setLoyaltyPoints(0); // If data is null (no entry for this user)
+    }
+  };
+
+  // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
   useEffect(() => {
     // Fungsi untuk mengambil total item di keranjang dari localStorage
     const getTotalItemsInCart = () => {
@@ -48,43 +92,93 @@ const HomeUserLogin = () => {
     }
 
     // Load username dan poin loyalitas
-    const storedUsername = localStorage.getItem("username");
+    const storedUsername = localStorage.getItem('username');
     if (storedUsername) {
       setUsername(storedUsername);
-      const storedLoyaltyData =
-        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      const storedLoyaltyData = JSON.parse(localStorage.getItem('dataLoyalitas')) || [];
       const currentUserLoyalty = storedLoyaltyData.find(
         (customer) => customer.namaPelanggan === storedUsername
       );
       if (currentUserLoyalty) {
         setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
       }
-    }
+    };
 
-    // Load jumlah item keranjang awal
+    // Initial checks and loads
+    checkUserAuthentication();
     setCartItemCount(getTotalItemsInCart());
+    fetchFaqs(); // Fetch FAQs from Supabase on mount
+
+    // Real-time subscription for FAQs
+    const faqChannel = supabase
+      .channel('public:faqs_homeuserlogin_changes') // Unique channel name for this component
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for FAQs (HomeUserLogin):', payload);
+        fetchFaqs(); // Re-fetch data on any change
+      })
+      .subscribe();
+
+    // Real-time subscription for loyalty points
+    const loyaltyChannel = supabase
+      .channel('public:dataloyalitas_changes') // Unique channel name
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dataloyalitas' }, payload => {
+        console.log('Realtime change received for loyalty points:', payload);
+        // Re-fetch loyalty points for the current user if their data changes
+        const currentUserId = localStorage.getItem("userId");
+        if (currentUserId) {
+          fetchLoyaltyPoints(currentUserId);
+        }
+      })
+      .subscribe();
+
 
     // Carousel auto-slide
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
     }, 5000);
 
-    // Event listener untuk memantau perubahan localStorage (untuk update keranjang)
-    const handleStorageChange = () => {
-      setCartItemCount(getTotalItemsInCart());
+    // Event listener for monitoring localStorage changes (for cart and auth updates)
+    const handleStorageChange = (event) => {
+      // Update cart count
+      if (event.key === "cart") {
+        setCartItemCount(getTotalItemsInCart());
+      }
+      // Re-check auth if relevant storage items change
+      if (event.key === "isLoggedIn" || event.key === "userId" || event.key === "userEmail" || event.key === "username") {
+        checkUserAuthentication();
+      }
     };
     window.addEventListener("storage", handleStorageChange);
 
-    // Cleanup saat komponen dibongkar
+    // Cleanup when component unmounts
     return () => {
       clearInterval(slideInterval);
-      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener('storage', handleStorageChange);
     };
-  }, [images.length]);
+  }, [images.length, navigate]); // Add navigate to dependency array
+
+  // Fungsi untuk mengambil total item di keranjang dari localStorage
+  const getTotalItemsInCart = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      return cart.reduce((total, item) => total + item.quantity, 0);
+    } catch (error) {
+      console.error("Failed to parse cart from localStorage:", error);
+      return 0;
+    }
+  };
 
   const formatPoints = (points) => {
     return points.toLocaleString("id-ID");
   };
+
+  // Prevent rendering if not authenticated yet to avoid flickering
+  if (currentUser === null && localStorage.getItem("isLoggedIn") === "true") {
+    // This means we are still in the process of checking auth,
+    // or some auth data is missing, but isLoggedIn is true.
+    // You might want a loading spinner here instead of just returning null.
+    return null;
+  }
 
   return (
     <div className="font-sans text-gray-800 min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
@@ -98,13 +192,9 @@ const HomeUserLogin = () => {
             Groovy VetCare
           </h1>
           <nav className="space-x-6 flex items-center">
-            <Link to="/homeuserlogin" className="hover:underline">
-              Beranda
-            </Link>
-            <Link to="/pelangganjb" className="hover:underline">
-              Pembelian Produk
-            </Link>
-
+            <Link to="/homeuserlogin" className="hover:underline">Beranda</Link>
+            <Link to="/pelangganjb" className="hover:underline">Pembelian Produk</Link>
+            
             <div className="relative">
               <button
                 onClick={handleReservasiClick}
@@ -155,28 +245,15 @@ const HomeUserLogin = () => {
               )}
             </div>
 
-            <a
-              href="/faq-page"
-              className="hover:underline"
-              onClick={() => setShowReservasiMenu(false)}
-            >
-              FAQ
-            </a>
-
+            <a href="/faq-page" className="hover:underline" onClick={() => setShowReservasiMenu(false)}>FAQ</a>
+            
             <div className="flex items-center space-x-2">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                alt="Profil"
-                className="w-8 h-8 rounded-full"
-              />
+              <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profil" className="w-8 h-8 rounded-full" />
               <span>{username || "Pengguna"}</span>
             </div>
 
             {username && (
-              <Link
-                to="/loyalty"
-                className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors"
-              >
+              <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
                 Poin: {formatPoints(loyaltyPoints)} ⭐
               </Link>
             )}
@@ -193,14 +270,7 @@ const HomeUserLogin = () => {
               )}
             </Link>
 
-            <button
-              onClick={() => {
-                localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("username");
-                window.location.href = "/homeuser";
-              }}
-              className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"
-            >
+            <button onClick={() => { localStorage.removeItem("isLoggedIn"); localStorage.removeItem("username"); window.location.href = "/login"; }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
               Logout
             </button>
           </nav>
@@ -235,11 +305,7 @@ const HomeUserLogin = () => {
       <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="md:w-1/2 flex justify-center">
-            <img
-              src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
-              alt="Health Prediction"
-              className="w-64 md:w-80 drop-shadow-xl"
-            />
+            <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Health Prediction" className="w-64 md:w-80 drop-shadow-xl" />
           </div>
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
@@ -340,7 +406,7 @@ const HomeUserLogin = () => {
         </div>
       </section>
 
-      {/* --- BAGIAN FAQ (LOGIKA TAMPILAN DARI VERSI 1) --- */}
+      {/* --- BAGIAN FAQ (LOGIKA TAMPILAN DARI VERSI 1, DIPERBARUI DENGAN SUPABASE DATA) --- */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
           <h3 className="text-3xl font-bold text-center mb-8 text-blue-700">
@@ -348,15 +414,10 @@ const HomeUserLogin = () => {
           </h3>
           <div className="space-y-4 text-left">
             {faqs.length === 0 ? (
-              <p className="text-center text-gray-500">
-                Belum ada FAQ yang tersedia.
-              </p>
+              <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
             ) : (
               faqs.slice(0, 3).map(({ question, answer }, idx) => (
-                <details
-                  key={idx}
-                  className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition"
-                >
+                <details key={idx} className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition">
                   <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

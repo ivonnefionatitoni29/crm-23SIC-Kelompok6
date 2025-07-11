@@ -1,72 +1,86 @@
 import React, { useState, useEffect } from "react";
+// Assuming supabase client is configured and exported from this path
+// Adjusted path for common project structures. If this still causes an error,
+// please verify the exact path to your supabase.js file relative to this component.
+import { supabase } from "../supabase"; // Adjusted path from "./supabase" to "../supabase"
+// ^^^ Pastikan jalur ini benar menuju inisialisasi Supabase client Anda.
 
-import { supabase } from "../supabase"; // 
-
-
-
-export default function FAQ() {
+const ListFAQ = () => {
+  // State untuk menyimpan daftar FAQ
   const [faqs, setFaqs] = useState([]);
+  // State untuk menunjukkan status loading data
   const [loading, setLoading] = useState(true);
+  // State untuk menyimpan pesan error jika terjadi
   const [error, setError] = useState(null);
+  // State untuk mengontrol tampilan form tambah/edit FAQ
   const [showForm, setShowForm] = useState(false);
+  // State untuk data form (pertanyaan dan jawaban)
   const [formData, setFormData] = useState({ question: "", answer: "" });
+  // State untuk menyimpan ID FAQ yang sedang diedit (null jika mode tambah)
   const [editId, setEditId] = useState(null);
+  // State untuk mengontrol tampilan modal konfirmasi
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  // State untuk menentukan aksi modal (delete atau cancel)
+  const [modalAction, setModalAction] = useState(null); // 'delete' or 'cancel'
+  // State untuk menyimpan ID item yang akan dihapus
   const [itemIdToDelete, setItemIdToDelete] = useState(null);
 
-  // Fungsi untuk mengambil FAQ dari Supabase
+  // Fungsi untuk mengambil data FAQ dari Supabase
   const fetchFaqs = async () => {
-    setLoading(true);
-    setError(null);
+    setLoading(true); // Set loading ke true saat memulai fetch
+    setError(null); // Bersihkan error sebelumnya
     const { data, error } = await supabase
-      .from('faqs')
-      .select('*')
-      .order('created_at', { ascending: false }); // Urutkan berdasarkan waktu pembuatan terbaru
+      .from('faqs') // Pilih tabel 'faqs'
+      .select('*') // Ambil semua kolom
+      .order('created_at', { ascending: false }); // Urutkan berdasarkan tanggal dibuat terbaru
 
     if (error) {
       console.error('Error fetching FAQs:', error.message);
-      setError('Gagal memuat FAQ. Sila cuba lagi.');
+      setError('Gagal memuat FAQ. Silakan coba lagi.'); // Set pesan error
     } else {
-      setFaqs(data);
+      setFaqs(data); // Update state faqs dengan data yang diterima
     }
-    setLoading(false);
+    setLoading(false); // Set loading ke false setelah fetch selesai
   };
 
-  // Efek untuk memuat FAQ saat komponen dipasang dan berlangganan pembaruan real-time
-  // Efek ini akan menangani pembaruan otomatis setelah import supabase diperbaiki.
+  // Effect hook untuk memuat FAQ saat komponen pertama kali di-mount
+  // dan juga untuk berlangganan pembaruan real-time dari Supabase.
   useEffect(() => {
-    fetchFaqs();
+    fetchFaqs(); // Panggil fungsi fetchFaqs saat komponen di-mount
 
-    // Berlangganan perubahan real-time pada tabel 'faqs'
-    // Setiap kali ada INSERT, UPDATE, atau DELETE di tabel 'faqs',
-    // callback ini akan dipicu, dan 'fetchFaqs()' akan dipanggil ulang.
+    // Berlangganan perubahan real-time pada tabel 'faqs'.
+    // Ini adalah bagian kunci yang membuat data update otomatis tanpa refresh.
     const channel = supabase
-      .channel('public:faqs_admin_changes') // Nama channel unik
+      .channel('public:faqs') // Nama channel (bisa apa saja, tapi 'public:nama_tabel' umum)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
-        console.log('Realtime change received for FAQs (Admin):', payload);
-        fetchFaqs(); // Ambil ulang data setiap ada perubahan
+        // 'event: *' berarti melacak semua event (INSERT, UPDATE, DELETE)
+        // 'schema: public' dan 'table: faqs' menentukan tabel yang dilacak
+        console.log('Perubahan Realtime diterima untuk FAQs:', payload);
+        // Ketika ada perubahan, panggil kembali fetchFaqs untuk memperbarui UI.
+        fetchFaqs();
       })
-      .subscribe();
+      .subscribe(); // Jangan lupa memanggil .subscribe() untuk mengaktifkan langganan
 
-    // Fungsi cleanup saat komponen dilepas untuk menghindari kebocoran memori
+    // Fungsi cleanup: Ini akan dijalankan saat komponen di-unmount (dihapus dari DOM).
+    // Penting untuk membersihkan langganan agar tidak terjadi kebocoran memori.
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []); // [] memastikan efek ini hanya berjalan sekali saat mount
+  }, []); // Array dependensi kosong berarti effect ini hanya berjalan sekali saat mount dan cleanup saat unmount.
 
-  // Mengelola perubahan input form
+  // Handle perubahan input pada form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Mengelola penambahan atau pembaruan FAQ
+  // Handle penambahan atau pembaruan FAQ
   const handleAddOrUpdateFAQ = async () => {
     const trimmedQuestion = formData.question.trim();
     const trimmedAnswer = formData.answer.trim();
 
     if (!trimmedQuestion || !trimmedAnswer) {
-      setError("Pertanyaan dan jawapan harus diisi.");
+      setError("Pertanyaan dan jawaban tidak boleh kosong."); // Tampilkan error jika ada input kosong
       return;
     }
 
@@ -74,93 +88,98 @@ export default function FAQ() {
     setError(null);
 
     if (editId !== null) {
-      // Perbarui FAQ yang sudah ada
+      // Jika editId tidak null, berarti mode edit: update FAQ yang ada
       const { data, error } = await supabase
         .from('faqs')
         .update({ question: trimmedQuestion, answer: trimmedAnswer })
-        .eq('id', editId)
-        .select();
+        .eq('id', editId) // Perbarui FAQ dengan ID yang cocok
+        .select(); // Ambil data yang diperbarui
 
       if (error) {
-        console.error('Error updating FAQ:', error.message);
-        setError('Gagal memperbarui FAQ. Sila cuba lagi.');
+        console.error('Error memperbarui FAQ:', error.message);
+        setError('Gagal memperbarui FAQ. Silakan coba lagi.');
       } else {
         console.log('FAQ diperbarui:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener, jadi tidak perlu panggil fetchFaqs di sini.
+        // Tidak perlu memanggil fetchFaqs() di sini karena Realtime akan menangani pembaruan UI.
       }
     } else {
-      // Tambah FAQ baru
+      // Jika editId null, berarti mode tambah: masukkan FAQ baru
       const { data, error } = await supabase
         .from('faqs')
         .insert([{ question: trimmedQuestion, answer: trimmedAnswer }])
-        .select();
+        .select(); // Ambil data yang baru ditambahkan
 
       if (error) {
-        console.error('Error adding FAQ:', error.message);
-        setError('Gagal menambah FAQ. Sila cuba lagi.');
+        console.error('Error menambahkan FAQ:', error.message);
+        setError('Gagal menambahkan FAQ. Silakan coba lagi.');
       } else {
         console.log('FAQ ditambahkan:', data);
-        // Pembaruan UI akan ditangani oleh realtime listener, jadi tidak perlu panggil fetchFaqs di sini.
+        // Tidak perlu memanggil fetchFaqs() di sini karena Realtime akan menangani pembaruan UI.
       }
     }
 
-    // Reset form dan sembunyikan form setelah operasi selesai
+    // Reset form, sembunyikan form, dan bersihkan editId setelah operasi selesai
     setFormData({ question: "", answer: "" });
     setShowForm(false);
     setEditId(null);
-    setLoading(false); // Selesai loading setelah operasi database
+    setLoading(false);
   };
 
-  // Tampilkan modal konfirmasi sebelum menghapus
+  // Siapkan untuk aksi hapus dengan menampilkan modal konfirmasi
   const handleDeleteConfirm = (id) => {
     setItemIdToDelete(id);
+    setModalAction('delete');
     setShowConfirmModal(true);
   };
 
-  // Jalankan aksi penghapusan setelah konfirmasi
+  // Eksekusi aksi hapus
   const handleDelete = async () => {
-    if (itemIdToDelete === null) return;
+    if (itemIdToDelete === null) return; // Pastikan ada ID yang akan dihapus
 
     setLoading(true);
     setError(null);
     const { error } = await supabase
       .from('faqs')
       .delete()
-      .eq('id', itemIdToDelete);
+      .eq('id', itemIdToDelete); // Hapus FAQ dengan ID yang cocok
 
     if (error) {
-      console.error('Error deleting FAQ:', error.message);
-      setError('Gagal menghapus data: ' + error.message);
+      console.error('Error menghapus FAQ:', error.message);
+      setError('Gagal menghapus FAQ. Silakan coba lagi.');
     } else {
       console.log('FAQ dihapus:', itemIdToDelete);
-      // Pembaruan UI akan ditangani oleh real-time listener, jadi tidak perlu panggil fetchFaqs di sini.
+      // Tidak perlu memanggil fetchFaqs() di sini karena Realtime akan menangani pembaruan UI.
     }
     setLoading(false);
-    setShowConfirmModal(false); // Tutup modal
-    setItemIdToDelete(null); // Reset ID untuk dihapus
-    if (editId === itemIdToDelete) { // Jika FAQ yang diedit dihapus
+    // Tutup modal dan reset state terkait setelah hapus
+    setShowConfirmModal(false);
+    setItemIdToDelete(null);
+    setModalAction(null);
+    // Jika FAQ yang dihapus adalah yang sedang diedit, reset form dan editId
+    if (editId === itemIdToDelete) {
       setEditId(null);
       setShowForm(false);
       setFormData({ question: "", answer: "" });
     }
   };
 
-  // Mengelola pengeditan FAQ
+  // Handle pengeditan FAQ: mengisi form dengan data FAQ yang dipilih
   const handleEdit = (faq) => {
     setFormData({ question: faq.question, answer: faq.answer });
-    setEditId(faq.id);
-    setShowForm(true);
-    setError(null); // Hapus error sebelumnya
+    setEditId(faq.id); // Set ID FAQ yang akan diedit
+    setShowForm(true); // Tampilkan form
+    setError(null); // Bersihkan error sebelumnya
   };
 
-  // Mengelola pembatalan form atau modal
+  // Handle pembatalan form atau modal
   const handleCancel = () => {
-    setShowConfirmModal(false);
-    setItemIdToDelete(null);
-    setEditId(null);
-    setShowForm(false);
-    setFormData({ question: "", answer: "" });
-    setError(null); // Hapus error
+    setShowConfirmModal(false); // Sembunyikan modal konfirmasi
+    setModalAction(null); // Reset aksi modal
+    setItemIdToDelete(null); // Reset ID item yang akan dihapus
+    setEditId(null); // Reset ID edit
+    setShowForm(false); // Sembunyikan form
+    setFormData({ question: "", answer: "" }); // Reset data form
+    setError(null); // Bersihkan error
   };
 
   return (
@@ -170,6 +189,7 @@ export default function FAQ() {
           Manajemen FAQ
         </h1>
 
+        {/* Area pesan error */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
             <strong className="font-bold">Error!</strong>
@@ -177,10 +197,12 @@ export default function FAQ() {
           </div>
         )}
 
+        {/* Area pesan loading */}
         {loading && (
           <p className="text-center text-lg text-blue-600 mb-4">Memuat data...</p>
         )}
 
+        {/* Tombol Tambah FAQ Baru (hanya tampil jika form tidak aktif) */}
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
@@ -190,6 +212,7 @@ export default function FAQ() {
           </button>
         )}
 
+        {/* Form Tambah/Edit FAQ (tampil jika showForm true) */}
         {showForm && (
           <div className="mb-8 p-6 border border-blue-200 rounded-xl bg-blue-50 shadow-md">
             <h2 className="text-2xl font-bold text-blue-700 mb-4">
@@ -211,7 +234,7 @@ export default function FAQ() {
             </div>
             <div className="mb-6">
               <label htmlFor="answer" className="block mb-2 font-medium text-blue-800">
-                Jawapan
+                Jawaban
               </label>
               <textarea
                 id="answer"
@@ -219,7 +242,7 @@ export default function FAQ() {
                 value={formData.answer}
                 onChange={handleChange}
                 className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="Masukkan jawapan FAQ"
+                placeholder="Masukkan jawaban FAQ"
                 rows={4}
               />
             </div>
@@ -241,10 +264,11 @@ export default function FAQ() {
           </div>
         )}
 
+        {/* Tampilan daftar FAQ */}
         {!loading && !error && faqs.length === 0 ? (
           <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-4 py-3 rounded-lg relative mb-4 text-center">
             <strong className="font-bold">Info:</strong>
-            <span className="block sm:inline"> Tiada FAQ yang tersedia.</span>
+            <span className="block sm:inline"> Tidak ada FAQ yang tersedia.</span>
           </div>
         ) : (
           <div className="overflow-x-auto bg-white shadow-lg rounded-xl border border-gray-200">
@@ -252,7 +276,7 @@ export default function FAQ() {
               <thead className="bg-blue-100">
                 <tr>
                   <th className="py-3 px-4 rounded-tl-xl text-blue-800 font-semibold">Pertanyaan</th>
-                  <th className="py-3 px-4 text-blue-800 font-semibold">Jawapan</th>
+                  <th className="py-3 px-4 text-blue-800 font-semibold">Jawaban</th>
                   <th className="py-3 px-4 rounded-tr-xl text-center text-blue-800 font-semibold">Aksi</th>
                 </tr>
               </thead>
@@ -289,14 +313,16 @@ export default function FAQ() {
           <div className="bg-white p-8 rounded-xl shadow-2xl max-w-sm w-full text-center border border-gray-200">
             <h3 className="text-xl font-bold text-gray-800 mb-4">Konfirmasi</h3>
             <p className="text-gray-700 mb-6">
-              Adakah anda pasti ingin menghapus FAQ ini?
+              Apakah Anda yakin ingin {modalAction === 'delete' ? "menghapus FAQ ini" : "membatalkan"}?
             </p>
             <div className="flex justify-center space-x-4">
               <button
-                onClick={handleDelete}
-                className="px-6 py-2 rounded-lg text-white font-semibold bg-red-600 hover:bg-red-700 transition-all duration-200 ease-in-out transform hover:scale-105"
+                onClick={modalAction === 'delete' ? handleDelete : handleCancel}
+                className={`px-6 py-2 rounded-lg text-white font-semibold transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                  modalAction === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Ya, Hapus
+                Ya
               </button>
               <button
                 onClick={handleCancel}
@@ -305,9 +331,11 @@ export default function FAQ() {
                 Tidak
               </button>
             </div>
-          </div>  
+          </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default ListFAQ;

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
+  const [showLayananMenu, setShowLayananMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [faqs, setFaqs] = useState([]);
   const navigate = useNavigate();
 
   const images = [
@@ -17,31 +18,39 @@ const HomeUser = () => {
     setShowReservasiMenu(!showReservasiMenu);
   };
 
+
   const goToPage = (path) => {
     navigate(path);
   };
 
   useEffect(() => {
-    const storedFaqs = localStorage.getItem("faqs");
-    if (storedFaqs) {
-      setFaqs(JSON.parse(storedFaqs));
-    }
+    // Add carousel auto-slide effect
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
+
+    return () => {
+      clearInterval(slideInterval); // Clear interval on component unmount
+    };
   }, []);
+
 
   const userPoints = 150;
   const maxPoints = 200; // Max poin untuk Gold
-  const loyaltyLevel =
-    userPoints >= 200 ? "Gold" : userPoints >= 100 ? "Silver" : "Bronze";
+  const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
+
 
   // Warna dan style badge sesuai level
   const loyaltyColors = {
-    Bronze: "bg-yellow-500 text-yellow-900",
-    Silver: "bg-gray-300 text-gray-800",
-    Gold: "bg-yellow-400 text-yellow-900",
+    Bronze: 'bg-yellow-500 text-yellow-900',
+    Silver: 'bg-gray-300 text-gray-800',
+    Gold: 'bg-yellow-400 text-yellow-900',
   };
+
 
   // Persentase progress bar
   const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
+
 
   return (
     <div className="font-sans text-gray-800">
@@ -50,15 +59,9 @@ const HomeUser = () => {
         <div className="container mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
-            <a href="#" className="hover:underline">
-              Beranda
-            </a>
-            <a href="#layanan" className="hover:underline">
-              Layanan
-            </a>
-            <a href="/faq-page" className="hover:underline">
-              FAQ
-            </a>
+            <a href="#" className="hover:underline">Beranda</a>
+            <a href="#layanan" className="hover:underline">Layanan</a>
+            <a href="/faq-page" className="hover:underline">FAQ</a>
             <button
               onClick={() => goToPage("/login")}
               className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
@@ -95,14 +98,14 @@ const HomeUser = () => {
       {/* Prediksi Kesehatan Hewan */}
       <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
-          {/* Ilustrasi */}
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
+              src="https://d2zp5xs5cp8zlg.cloudfront.net/image-43032-800.jpg"
               alt="Health Prediction"
-              className="w-64 md:w-80 drop-shadow-xl"
+  className="w-[18rem] md:w-[32rem] lg:w-[36rem] drop-shadow-2xl"
             />
           </div>
+
 
           {/* Konten Teks */}
           <div className="md:w-1/2 text-center md:text-left">
@@ -130,9 +133,11 @@ const HomeUser = () => {
         <div className="container mx-auto text-center">
           <h3 className="text-2xl font-bold mb-8">Layanan Kami</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+
+
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage("/login")}
+              onClick={() => goToPage('/pelangganjb')}
               className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img
@@ -185,6 +190,7 @@ const HomeUser = () => {
 
               {showReservasiMenu && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                  {/* Layanan di sini juga akan mengarah ke login */}
                   {["Penitipan Hewan", "Kebiri", "Vaksinasi"].map((layanan) => (
                     <button
                       key={layanan}
@@ -200,6 +206,7 @@ const HomeUser = () => {
           </div>
         </div>
       </section>
+
 
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
@@ -243,6 +250,7 @@ const HomeUser = () => {
             )}
           </div>
 
+
           {/* Tombol Lihat Semua */}
           {faqs.length > 3 && (
             <div className="text-center mt-6">
@@ -257,9 +265,14 @@ const HomeUser = () => {
         </div>
       </section>
 
+
+
+
       {/* Footer */}
       <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+
+
           {/* Info Klinik */}
           <div>
             <h3 className="text-xl font-bold mb-3">Groovy Vetcare Clinic</h3>
@@ -281,6 +294,7 @@ const HomeUser = () => {
             </a>
           </div>
 
+
           {/* Tentang Kami */}
           <div className="md:col-span-2">
             <h3 className="text-xl font-bold mb-3">Tentang Kami</h3>
@@ -294,6 +308,7 @@ const HomeUser = () => {
               Cat Cafe.
             </p>
           </div>
+
 
           {/* Jam Layanan */}
           <div className="bg-white rounded-xl shadow-lg p-5 text-gray-800">
@@ -325,9 +340,10 @@ const HomeUser = () => {
           </div>
         </div>
 
+
         {/* Footer Credit */}
         <div className="mt-8 text-center text-xs text-white/80">
-          &copy; 2025 Groovy Vetcare. All rights reserved.
+          © 2025 Groovy Vetcare. All rights reserved.
         </div>
       </footer>
     </div>

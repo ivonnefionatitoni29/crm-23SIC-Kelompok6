@@ -1,169 +1,200 @@
-import React, { useState, useEffect } from 'react'
+// src/pages/FormVaksinasi.jsx
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabase'; // Pastikan path import ini benar
+import UserHeader from '../components/UserHeader'; // Import komponen UserHeader
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const FormVaksinasi = () => {
   const [form, setForm] = useState({
-    nama: '',
-    jenis: '',
-    vaksin: '',
-    jam: '',
+    nama_hewan: '',
+    jenis_hewan: '',
+    jenis_vaksin: '',
+    jam_vaksin: '',
     tanggal: '',
-  })
+  });
 
-  const [data, setData] = useState([])
+  const [loading, setLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState(null);
+
+  const navigate = useNavigate(); // Inisialisasi useNavigate
+
+  // --- State untuk UserHeader ---
+  const [username, setUsername] = useState("User");
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
+  const [showReservasiMenu, setShowReservasiMenu] = useState(false);
+
+  // --- Fungsi untuk UserHeader ---
+  const handleReservasiClick = () => {
+    setShowReservasiMenu(!showReservasiMenu);
+  };
+
+  const formatPoints = (points) => {
+    return points.toLocaleString("id-ID");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
+  // --- useEffect untuk UserHeader ---
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) setUsername(storedUsername);
+  }, []);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('dataVaksinasi')) || []
-    setData(stored)
-  }, [])
-
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'dataVaksinasi') {
-        const updated = JSON.parse(e.newValue) || []
-        setData(updated)
+    const handleClickOutside = (event) => {
+      if (showReservasiMenu && !event.target.closest(".relative")) {
+        setShowReservasiMenu(false);
       }
-    }
-    window.addEventListener('storage', handleStorageChange)
-    return () => window.removeEventListener('storage', handleStorageChange)
-  }, [])
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showReservasiMenu]);
 
+  // --- Logika Form Vaksinasi ---
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setSubmitMessage(null);
+
     const newData = {
-      id: Date.now(),
-      ...form,
-      status: 'Pending',
+      nama_hewan: form.nama_hewan,
+      jenis_hewan: form.jenis_hewan,
+      jenis_vaksin: form.jenis_vaksin,
+      jam_vaksin: form.jam_vaksin,
+      tanggal: form.tanggal,
+      status: 'Pending', // Status awal reservasi
+    };
+
+    const { error } = await supabase.from('vaksinasi').insert([newData]);
+
+    if (error) {
+      console.error('Error inserting data:', error);
+      setSubmitMessage({ type: 'error', text: 'Terjadi kesalahan saat mengirim reservasi vaksinasi: ' + error.message });
+    } else {
+      console.log('Data vaksinasi inserted successfully.');
+      setSubmitMessage({ type: 'success', text: 'Reservasi vaksinasi berhasil dikirim!' });
+      // Reset form setelah berhasil
+      setForm({
+        nama_hewan: '',
+        jenis_hewan: '',
+        jenis_vaksin: '',
+        jam_vaksin: '',
+        tanggal: '',
+      });
     }
-    const updated = [...data, newData]
-    localStorage.setItem('dataVaksinasi', JSON.stringify(updated))
-    setData(updated)
-    setForm({
-      nama: '',
-      jenis: '',
-      vaksin: '',
-      jam: '',
-      tanggal: '',
-    })
-  }
+    setLoading(false);
+  };
 
   return (
-    <div className="min-h-screen bg-blue-100 p-6">
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="bg-blue-600 text-white px-6 py-4 text-xl font-semibold">
-          Form Vaksinasi Hewan
-        </div>
-        <div className="px-6 pt-4 pb-2 text-gray-700 text-sm">
-          Silakan isi form vaksinasi hewan dengan lengkap. Setelah dikirim, reservasi Anda akan diproses oleh admin dan statusnya dapat Anda lihat di bawah form ini.
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block mb-1 font-medium">Nama Hewan</label>
-            <input
-              name="nama"
-              className="w-full p-2 border rounded"
-              value={form.nama}
-              onChange={handleChange}
-              required
-            />
+    <>
+      <UserHeader
+        username={username}
+        loyaltyPoints={loyaltyPoints}
+        cartItemCount={cartItemCount}
+        showReservasiMenu={showReservasiMenu}
+        handleReservasiClick={handleReservasiClick}
+        formatPoints={formatPoints}
+        handleLogout={handleLogout}
+      />
+
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-6">
+        <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-blue-600 text-white px-6 py-4 text-2xl font-bold">
+            Form Vaksinasi Hewan
           </div>
-          <div>
-            <label className="block mb-1 font-medium">Jenis Hewan</label>
-            <input
-              name="jenis"
-              className="w-full p-2 border rounded"
-              value={form.jenis}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div>
-            <label className="block mb-1 font-medium">Jenis Vaksin</label>
-            <input
-              name="vaksin"
-              className="w-full p-2 border rounded"
-              value={form.vaksin}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="flex gap-4">
-            <div className="w-1/2">
-              <label className="block mb-1 font-medium">Jam Vaksin</label>
+
+          <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            {submitMessage && (
+              <div className={`px-4 py-3 rounded-md mb-4 ${submitMessage.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {submitMessage.text}
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="nama_hewan" className="block mb-1 text-gray-700 font-semibold">Nama Hewan</label>
               <input
-                name="jam"
-                type="time"
-                className="w-full p-2 border rounded"
-                value={form.jam}
+                id="nama_hewan"
+                name="nama_hewan"
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                value={form.nama_hewan}
                 onChange={handleChange}
+                placeholder="Contoh: Snowy"
                 required
               />
             </div>
-            <div className="w-1/2">
-              <label className="block mb-1 font-medium">Tanggal Vaksin</label>
+            <div>
+              <label htmlFor="jenis_hewan" className="block mb-1 text-gray-700 font-semibold">Jenis Hewan</label>
               <input
-                name="tanggal"
-                type="date"
-                className="w-full p-2 border rounded"
-                value={form.tanggal}
+                id="jenis_hewan"
+                name="jenis_hewan"
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                value={form.jenis_hewan}
                 onChange={handleChange}
+                placeholder="Contoh: Kucing, Anjing"
                 required
               />
             </div>
-          </div>
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-            Kirim
-          </button>
-        </form>
-      </div>
-
-      <div className="max-w-5xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
-        <h2 className="text-xl font-bold mb-4 text-blue-700">Data Vaksinasi Saya</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-blue-200 text-blue-800">
-              <tr>
-                <th className="py-2 px-4 text-left">Nama</th>
-                <th className="py-2 px-4 text-left">Jenis</th>
-                <th className="py-2 px-4 text-left">Vaksin</th>
-                <th className="py-2 px-4 text-left">Jam</th>
-                <th className="py-2 px-4 text-left">Tanggal</th>
-                <th className="py-2 px-4 text-left">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="text-center py-4 text-gray-500">Belum ada data vaksinasi.</td>
-                </tr>
-              )}
-              {data.map((item) => (
-                <tr key={item.id} className="border-t">
-                  <td className="py-2 px-4">{item.nama}</td>
-                  <td className="py-2 px-4">{item.jenis}</td>
-                  <td className="py-2 px-4">{item.vaksin}</td>
-                  <td className="py-2 px-4">{item.jam}</td>
-                  <td className="py-2 px-4">{item.tanggal}</td>
-                  <td className="py-2 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      item.status === 'Diterima' ? 'bg-blue-100 text-blue-700'
-                      : item.status === 'Ditolak' ? 'bg-red-100 text-red-700'
-                      : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+            <div>
+              <label htmlFor="jenis_vaksin" className="block mb-1 text-gray-700 font-semibold">Jenis Vaksin</label>
+              <input
+                id="jenis_vaksin"
+                name="jenis_vaksin"
+                type="text"
+                className="w-full p-2 border border-gray-300 rounded placeholder-gray-400 focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                value={form.jenis_vaksin}
+                onChange={handleChange}
+                placeholder="Contoh: Rabies, Feline Panleukopenia"
+                required
+              />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-1/2">
+                <label htmlFor="jam_vaksin" className="block mb-1 text-gray-700 font-semibold">Jam Vaksin</label>
+                <input
+                  id="jam_vaksin"
+                  name="jam_vaksin"
+                  type="time"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  value={form.jam_vaksin}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="w-full sm:w-1/2">
+                <label htmlFor="tanggal" className="block mb-1 text-gray-700 font-semibold">Tanggal Vaksin</label>
+                <input
+                  id="tanggal"
+                  name="tanggal"
+                  type="date"
+                  className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-300 focus:outline-none"
+                  value={form.tanggal}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 transition duration-200 text-white font-semibold py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading}
+            >
+              {loading ? 'Mengirim...' : 'Kirim Reservasi Vaksinasi'}
+            </button>
+          </form>
         </div>
       </div>
-    </div>
-  )
-}
+    </>
+  );
+};
 
-export default FormVaksinasi
+export default FormVaksinasi;
