@@ -83,14 +83,6 @@ export default function LoginPage() {
             <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-500" />
           </div>
 
-          <div className="flex items-center justify-between text-sm">
-            <label className="flex items-center text-gray-600">
-              <input type="checkbox" className="form-checkbox text-blue-600 rounded mr-2" />
-              <span>Ingat saya</span>
-            </label>
-            <a href="#" className="text-blue-600 hover:underline">Lupa password?</a>
-          </div>
-
           <button
             onClick={handleLogin}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold py-3 rounded-xl transition duration-200"

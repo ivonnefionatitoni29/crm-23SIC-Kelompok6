@@ -231,7 +231,7 @@ const HomeUserLogin = () => {
                 localStorage.removeItem("userEmail");
                 localStorage.removeItem("userRole");
                 localStorage.removeItem("username"); // Clear the display name as well
-                window.location.href = "/login"; // Full page reload to clear all state
+                window.location.href = "/homeuser"; // Full page reload to clear all state
             }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
               Logout
             </button>
@@ -255,7 +255,7 @@ const HomeUserLogin = () => {
       <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="md:w-1/2 flex justify-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Health Prediction" className="w-64 md:w-80 drop-shadow-xl" />
+            <img src="https://d2zp5xs5cp8zlg.cloudfront.net/image-43032-800.jpg" alt="Health Prediction" className="w-[18rem] md:w-[32rem] lg:w-[36rem] drop-shadow-2xl" />
           </div>
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">Prediksi Kesehatan Hewanmu</h2>

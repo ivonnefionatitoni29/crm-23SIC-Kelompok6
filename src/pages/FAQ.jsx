@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "../supabase"; // 
 
 
+
 export default function FAQ() {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -304,7 +305,7 @@ export default function FAQ() {
                 Tidak
               </button>
             </div>
-          </div>
+          </div>  
         </div>
       )}
     </div>
