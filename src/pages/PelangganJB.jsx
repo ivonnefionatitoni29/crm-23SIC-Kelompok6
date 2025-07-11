@@ -313,36 +313,40 @@ const PetStoreApp = () => {
         return;
       }
 
+<<<<<<<<< Temporary merge branch 1
       const totalBelanjaSaatIni = getTotalPrice();
 
       // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
-      const existingPurchases = JSON.parse(localStorage.getItem("dataPembelian")) || [];
+      const existingPurchases =
+        JSON.parse(localStorage.getItem("dataPembelian")) || [];
       const newPurchases = cart.map((item, index) => ({
         id: Date.now() + index, // Membuat ID unik berdasarkan waktu
         namaItem: item.name,
+=========
+      // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
+      const purchasesToInsert = cart.map((item) => ({
+        namaitem: item.name,
+>>>>>>>>> Temporary merge branch 2
         jenis: item.category,
         tanggal: new Date().toISOString(),
         id_pelanggan: loggedInUserId,
         harga: item.price,
         jumlah: item.quantity,
         total: item.price * item.quantity,
-        // Tambahan info pelanggan untuk setiap item
-        pelanggan: {
-          nama: customerInfo.name, // Use the name from localStorage (which is hidden)
-          telepon: customerInfo.phone,
-          alamat: customerInfo.address,
-        },
       }));
 
-      // Gabungkan data lama dengan data baru
-      const updatedPurchases = [...existingPurchases, ...newPurchases];
-      localStorage.setItem("dataPembelian", JSON.stringify(updatedPurchases));
-      // --- AKHIR BAGIAN 1 ---
+      const { data: insertedPurchases, error: insertError } = await supabase
+        .from('datapembelian')
+        .insert(purchasesToInsert);
 
+<<<<<<<<< Temporary merge branch 1
       // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
-      let dataLoyalitas = JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      let dataLoyalitas =
+        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
       const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
-      const indexPelanggan = dataLoyalitas.findIndex(p => p.id === idPelanggan);
+      const indexPelanggan = dataLoyalitas.findIndex(
+        (p) => p.id === idPelanggan
+      );
       const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
 
       if (indexPelanggan > -1) {
@@ -351,6 +355,58 @@ const PetStoreApp = () => {
         dataLoyalitas[indexPelanggan].totalBelanja += totalBelanjaSaatIni;
         dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
         dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name; // Ensure name is updated/consistent
+      } else {
+        // Jika pelanggan baru
+        dataLoyalitas.push({
+          id: idPelanggan,
+          namaPelanggan: customerInfo.name,
+          poinLoyalitas: poinBaru,
+          totalBelanja: totalBelanjaSaatIni,
+          jumlahTransaksi: 1,
+        });
+=========
+      if (insertError) {
+        console.error("Error saving purchase data to Supabase:", insertError);
+        alert("Terjadi kesalahan saat menyimpan data pembelian: " + insertError.message);
+        return;
+>>>>>>>>> Temporary merge branch 2
+      }
+
+      // --- UPDATE DATA LOYALITAS PELANGGAN ---
+      let totalPurchaseAmount = getTotalPrice();
+      // Contoh: 1 poin per 10.000 IDR
+      const pointsEarnedThisPurchase = Math.floor(totalPurchaseAmount / 10000);
+
+      const { data: existingLoyalty, error: fetchLoyaltyError } = await supabase
+        .from('dataloyalitas')
+        .select('*')
+        .eq('id_pelanggan', loggedInUserId) // Ensure you are querying by the correct column name for id_pelanggan
+        .single();
+
+      if (fetchLoyaltyError && fetchLoyaltyError.code !== 'PGRST116') { // PGRST116 means "no rows found"
+        console.error("Error fetching existing loyalty data:", fetchLoyaltyError);
+        alert("Terjadi kesalahan saat mengambil data loyalitas: " + fetchLoyaltyError.message);
+      }
+
+      if (existingLoyalty) {
+        // Pelanggan sudah ada, update datanya
+        const newPoinLoyalitas = existingLoyalty.poinloyalitas + pointsEarnedThisPurchase;
+        const newTotalBelanja = existingLoyalty.totalbelanja + totalPurchaseAmount;
+        const newJumlahTransaksi = existingLoyalty.jumlahtransaksi + 1;
+
+        const { error: updateLoyaltyError } = await supabase
+          .from('dataloyalitas')
+          .update({
+            poinloyalitas: newPoinLoyalitas,
+            totalbelanja: newTotalBelanja,
+            jumlahtransaksi: newJumlahTransaksi,
+          })
+          .eq('id_pelanggan', loggedInUserId); // Ensure you are updating by the correct column name
+
+        if (updateLoyaltyError) {
+          console.error("Error updating loyalty data:", updateLoyaltyError);
+          alert("Terjadi kesalahan saat memperbarui data loyalitas: " + updateLoyaltyError.message);
+        }
       } else {
         // Pelanggan belum ada, masukkan data baru
         const { error: insertLoyaltyError } = await supabase

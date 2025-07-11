@@ -1,6 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // untuk tombol login
+<<<<<<<<< Temporary merge branch 1
+import { useNavigate } from "react-router-dom";
+=========
+import { useNavigate, Link } from "react-router-dom"; // Import Link di sini
+
+// SANGAT PENTING: Sila sesuaikan jalur import supabase ini mengikut struktur folder projek anda.
+// Ralat "Could not resolve" ini berterusan, menunjukkan bahawa fail 'supabase.js' anda TIDAK DITEMUI
+// pada jalur relatif yang telah dicuba setakat ini.
+//
+// Untuk menyelesaikan ini secara muktamad, anda perlu memberitahu LOKASI TEPAT fail 'supabase.js' anda.
+// Sila GANTI baris 'import { supabase } = ...' di bawah ini dengan jalur yang BETUL setelah anda mengesahkannya sendiri.
+//
+// Contoh:
+// - Jika jalur penuh fail anda ialah: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
+//   Maka, import yang BETUL adalah: import { supabase } from "../supabase";
+//
+// - Jika fail itu berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js (akar projek, satu folder di atas 'src')
+//   Maka, import yang BETUL adalah: import { supabase } from "../../supabase";
+//
+// - Jika di 'src/utils/supabase.js': import { supabase } from "../utils/supabase";
+// - Jika di 'src/config/supabase.js': import { supabase } from "../config/supabase";
+//
+// Sila pastikan anda memilih HANYA SATU daripada jalur di atas (atau jalur lain yang betul jika tiada yang sepadan)
+// dan gunakan ia. Saya akan meninggalkan yang paling umum sebagai lalai buat masa ini.
+import { supabase } from "../supabase"; // SILA GANTI BARIS INI DENGAN JALUR YANG BETUL!
+
+>>>>>>>>> Temporary merge branch 2
 
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);

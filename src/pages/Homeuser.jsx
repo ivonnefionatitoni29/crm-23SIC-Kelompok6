@@ -1,6 +1,11 @@
+<<<<<<<<< Temporary merge branch 1
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+=========
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { supabase } from '../supabase'; // Import supabase instance
+>>>>>>>>> Temporary merge branch 2
 
 const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
@@ -18,17 +23,59 @@ const HomeUser = () => {
     setShowReservasiMenu(!showReservasiMenu);
   };
 
+<<<<<<<<< Temporary merge branch 1
+=========
+  const handleLayananHeaderClick = () => {
+    setShowLayananMenu(!showLayananMenu);
+  };
 
   const goToPage = (path) => {
     navigate(path);
   };
 
-  useEffect(() => {
-    // Add carousel auto-slide effect
-    const slideInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+<<<<<<<<< Temporary merge branch 1
+=========
+  // Function to fetch FAQs from Supabase (same as in your admin component)
+  const fetchFaqs = async () => {
+    setLoadingFaqs(true);
+    setErrorFaqs(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false });
 
+    if (error) {
+      console.error('Error fetching FAQs for HomeUser:', error.message);
+      setErrorFaqs('Failed to load FAQs. Please try again later.');
+    } else {
+      setFaqs(data);
+    }
+    setLoadingFaqs(false);
+  };
+
+>>>>>>>>> Temporary merge branch 2
+  useEffect(() => {
+    // Fetch FAQs on component mount
+    fetchFaqs();
+
+<<<<<<<<< Temporary merge branch 1
+  const userPoints = 150;
+  const maxPoints = 200; // Max poin untuk Gold
+  const loyaltyLevel =
+    userPoints >= 200 ? "Gold" : userPoints >= 100 ? "Silver" : "Bronze";
+
+  // Warna dan style badge sesuai level
+=========
+    // Subscribe to real-time changes on the 'faqs' table
+    const channel = supabase
+      .channel('public:faqs_user_changes') // Use a unique channel name for user side
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for FAQs (User):', payload);
+        fetchFaqs(); // Re-fetch data on any change
+      })
+      .subscribe();
+
+    // Cleanup function to unsubscribe when the component unmounts
     return () => {
       clearInterval(slideInterval); // Clear interval on component unmount
     };
@@ -39,16 +86,19 @@ const HomeUser = () => {
   const maxPoints = 200; // Max poin untuk Gold
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
 
-
-  // Warna dan style badge sesuai level
+  // eslint-disable-next-line no-unused-vars
+>>>>>>>>> Temporary merge branch 2
   const loyaltyColors = {
     Bronze: 'bg-yellow-500 text-yellow-900',
     Silver: 'bg-gray-300 text-gray-800',
     Gold: 'bg-yellow-400 text-yellow-900',
   };
 
-
+<<<<<<<<< Temporary merge branch 1
   // Persentase progress bar
+=========
+  // eslint-disable-next-line no-unused-vars
+>>>>>>>>> Temporary merge branch 2
   const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
 
 
@@ -105,9 +155,11 @@ const HomeUser = () => {
   className="w-[18rem] md:w-[32rem] lg:w-[36rem] drop-shadow-2xl"
             />
           </div>
-
+<<<<<<<<< Temporary merge branch 1
 
           {/* Konten Teks */}
+=========
+>>>>>>>>> Temporary merge branch 2
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
               Prediksi Kesehatan Hewanmu
@@ -137,7 +189,8 @@ const HomeUser = () => {
 
             {/* Pembelian Produk */}
             <div
-              onClick={() => goToPage('/pelangganjb')}
+              onClick={() => goToPage('/login')}
+>>>>>>>>> Temporary merge branch 2
               className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img
