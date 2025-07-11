@@ -17,6 +17,7 @@ import HomeUserLogin from './pages/HomeUserLogin';
 import PelangganJB from './pages/PelangganJB';
 import LoyaltyPage from './pages/LoyaltyPage';
 import RegisterPage from './pages/RegisterPage';
+import LiveChat from './pages/LiveChat';
 
 import FormPenitipan from './pages/FormPenitipan';
 import FormKebiri from './pages/FormKebiri';
@@ -39,6 +40,8 @@ function App() {
       <Route path="/homeuser" element={<HomeUser />} />
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
+      <Route path="/live-chat" element={<LiveChat />} />
+      
       
       <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
       <Route path="/faq-page" element={<FaqPage />} />

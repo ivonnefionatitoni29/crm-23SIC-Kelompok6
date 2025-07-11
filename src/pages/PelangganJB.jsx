@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import {
@@ -289,7 +287,8 @@ const PetStoreApp = () => {
     </div>
   );
 
-  const CheckoutModal = () => {
+  // Pass currentUser?.id as loggedInUserId to CheckoutModal
+  const CheckoutModal = ({ loggedInUserId }) => {
     const navigate = useNavigate();
     const [customerInfo, setCustomerInfo] = useState({
       name: "", // Initialized empty, will be filled from localStorage
@@ -300,33 +299,28 @@ const PetStoreApp = () => {
 
     // Load username from localStorage when the modal mounts
     useEffect(() => {
-      const storedUsername = localStorage.getItem("username");
+      const storedUsername = localStorage.getItem("userNama"); // Use userNama, as per your useEffect for currentUserName
       if (storedUsername) {
         setCustomerInfo(prevInfo => ({ ...prevInfo, name: storedUsername }));
       }
     }, []); // Empty dependency array means this runs once on mount
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => { // Make handleSubmit async
       // Check if phone or address are empty (name is now auto-filled)
       if (!customerInfo.phone || !customerInfo.address) {
         alert("Mohon lengkapi Nomor Telepon dan Alamat!"); // Updated alert message
         return;
       }
 
-<<<<<<<<< Temporary merge branch 1
-      const totalBelanjaSaatIni = getTotalPrice();
+      if (!loggedInUserId) {
+        alert("User ID tidak ditemukan. Mohon login kembali.");
+        navigate("/login");
+        return;
+      }
 
-      // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
-      const existingPurchases =
-        JSON.parse(localStorage.getItem("dataPembelian")) || [];
-      const newPurchases = cart.map((item, index) => ({
-        id: Date.now() + index, // Membuat ID unik berdasarkan waktu
-        namaItem: item.name,
-=========
       // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
       const purchasesToInsert = cart.map((item) => ({
         namaitem: item.name,
->>>>>>>>> Temporary merge branch 2
         jenis: item.category,
         tanggal: new Date().toISOString(),
         id_pelanggan: loggedInUserId,
@@ -339,37 +333,10 @@ const PetStoreApp = () => {
         .from('datapembelian')
         .insert(purchasesToInsert);
 
-<<<<<<<<< Temporary merge branch 1
-      // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
-      let dataLoyalitas =
-        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
-      const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
-      const indexPelanggan = dataLoyalitas.findIndex(
-        (p) => p.id === idPelanggan
-      );
-      const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
-
-      if (indexPelanggan > -1) {
-        // Jika pelanggan sudah ada
-        dataLoyalitas[indexPelanggan].poinLoyalitas += poinBaru;
-        dataLoyalitas[indexPelanggan].totalBelanja += totalBelanjaSaatIni;
-        dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
-        dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name; // Ensure name is updated/consistent
-      } else {
-        // Jika pelanggan baru
-        dataLoyalitas.push({
-          id: idPelanggan,
-          namaPelanggan: customerInfo.name,
-          poinLoyalitas: poinBaru,
-          totalBelanja: totalBelanjaSaatIni,
-          jumlahTransaksi: 1,
-        });
-=========
       if (insertError) {
         console.error("Error saving purchase data to Supabase:", insertError);
         alert("Terjadi kesalahan saat menyimpan data pembelian: " + insertError.message);
         return;
->>>>>>>>> Temporary merge branch 2
       }
 
       // --- UPDATE DATA LOYALITAS PELANGGAN ---
@@ -659,7 +626,8 @@ const PetStoreApp = () => {
       </footer>
 
       {showCart && <CartModal />}
-      {showCheckout && <CheckoutModal />}
+      {/* Pass currentUser?.id as loggedInUserId to CheckoutModal */}
+      {showCheckout && <CheckoutModal loggedInUserId={currentUser?.id} />}
     </div>
   );
 };

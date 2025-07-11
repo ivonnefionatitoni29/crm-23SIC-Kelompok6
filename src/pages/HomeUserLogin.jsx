@@ -4,25 +4,20 @@ import { ShoppingCart } from "lucide-react";
 import { supabase } from '../supabase'; // Import Supabase instance
 
 const HomeUserLogin = () => {
-  // --- STATE DARI KEDUA VERSI ---
+  // --- STATE DECLARATIONS ---
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
-<<<<<<<<< Temporary merge branch 1
-  const [username, setUsername] = useState("");
-=========
-  const [loadingFaqs, setLoadingFaqs] = useState(true); // New loading state for FAQs
-  const [errorFaqs, setErrorFaqs] = useState(null); // New error state for FAQs
+  const [loadingFaqs, setLoadingFaqs] = useState(true);
+  const [errorFaqs, setErrorFaqs] = useState(null);
   const [username, setUsername] = useState('');
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
-
-  // New states for user authentication details
   const [currentUser, setCurrentUser] = useState(null); // Stores { id, email, role }
 
   const navigate = useNavigate();
 
-  // --- IMAGES & FUNCTIONS DARI KEDUA VERSI ---
+  // --- IMAGES & FUNCTIONS ---
   const images = [
     "https://bic.id/wp-content/uploads/2023/12/dokter-Hewan-Lulusan-Dari-Fakultas-Kedokteran-Hewan.webp",
     "https://cnc-magazine.oramiland.com/parenting/images/dokter-hewan-bandar-lampung.width-800.format-webp.webp",
@@ -37,7 +32,7 @@ const HomeUserLogin = () => {
     navigate(path);
   };
 
-  // Function to fetch FAQs from Supabase (identical to the one in FAQ admin)
+  // Function to fetch FAQs from Supabase
   const fetchFaqs = async () => {
     setLoadingFaqs(true);
     setErrorFaqs(null);
@@ -77,45 +72,54 @@ const HomeUserLogin = () => {
     }
   };
 
-  // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
+  // Function to get total items in cart from localStorage
+  const getTotalItemsInCart = () => {
+    try {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      return cart.reduce((total, item) => total + item.quantity, 0);
+    } catch (error) {
+      console.error("Failed to parse cart from localStorage:", error);
+      return 0;
+    }
+  };
+
+  // Authentication check function
+  const checkUserAuthentication = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      // User is logged in via Supabase Auth
+      setCurrentUser(user);
+      setUsername(localStorage.getItem("username") || user.email); // Use username from localstorage or email
+      fetchLoyaltyPoints(user.id);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userId", user.id);
+      localStorage.setItem("userEmail", user.email);
+      // You might also want to set user role here if it's stored in user metadata or a profile table
+      // const { data: profileData, error: profileError } = await supabase
+      //   .from('profiles')
+      //   .select('role')
+      //   .eq('id', user.id)
+      //   .single();
+      // if (profileData) {
+      //   localStorage.setItem("userRole", profileData.role);
+      // }
+    } else {
+      // No user session
+      setCurrentUser(null);
+      setUsername("");
+      setLoyaltyPoints(0);
+      localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("userId");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("username");
+    }
+  };
+
   useEffect(() => {
-    // Fungsi untuk mengambil total item di keranjang dari localStorage
-    const getTotalItemsInCart = () => {
-      try {
-        const cart = JSON.parse(localStorage.getItem("cart")) || [];
-        return cart.reduce((total, item) => total + item.quantity, 0);
-      } catch (error) {
-        console.error("Failed to parse cart from localStorage:", error);
-        return 0;
-      }
-    };
-
-<<<<<<<<< Temporary merge branch 1
-    // Load FAQs
-    const storedFaqs = localStorage.getItem("faqs");
-    if (storedFaqs) {
-      setFaqs(JSON.parse(storedFaqs));
-    }
-
-    // Load username dan poin loyalitas
-    const storedUsername = localStorage.getItem("username");
-    if (storedUsername) {
-      setUsername(storedUsername);
-      const storedLoyaltyData =
-        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
-      const currentUserLoyalty = storedLoyaltyData.find(
-        (customer) => customer.namaPelanggan === storedUsername
-      );
-      if (currentUserLoyalty) {
-        setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
-      }
-    }
-
-    // Load jumlah item keranjang awal
-=========
     // Initial checks and loads
     checkUserAuthentication();
->>>>>>>>> Temporary merge branch 2
     setCartItemCount(getTotalItemsInCart());
     fetchFaqs(); // Fetch FAQs from Supabase on mount
 
@@ -141,7 +145,6 @@ const HomeUserLogin = () => {
       })
       .subscribe();
 
-
     // Carousel auto-slide
     const slideInterval = setInterval(() => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % images.length);
@@ -164,39 +167,32 @@ const HomeUserLogin = () => {
     return () => {
       clearInterval(slideInterval);
       window.removeEventListener('storage', handleStorageChange);
+      faqChannel.unsubscribe(); // Unsubscribe from Supabase FAQ channel
+      loyaltyChannel.unsubscribe(); // Unsubscribe from Supabase loyalty channel
     };
-  }, [images.length, navigate]); // Add navigate to dependency array
-
-  // Fungsi untuk mengambil total item di keranjang dari localStorage
-  const getTotalItemsInCart = () => {
-    try {
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
-      return cart.reduce((total, item) => total + item.quantity, 0);
-    } catch (error) {
-      console.error("Failed to parse cart from localStorage:", error);
-      return 0;
-    }
-  };
+  }, [images.length]); // Add navigate to dependency array removed, not needed as it's a stable function
 
   const formatPoints = (points) => {
     return points.toLocaleString("id-ID");
   };
 
   // Prevent rendering if not authenticated yet to avoid flickering
+  // This can be improved with a loading state, e.g., a spinner
   if (currentUser === null && localStorage.getItem("isLoggedIn") === "true") {
-    // This means we are still in the process of checking auth,
-    // or some auth data is missing, but isLoggedIn is true.
-    // You might want a loading spinner here instead of just returning null.
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <p className="text-xl text-gray-700">Loading user data...</p>
+      </div>
+    );
   }
 
   return (
     <div className="font-sans text-gray-800 min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
-      {/* --- HEADER TERBAIK DARI VERSI 2 --- */}
+      {/* --- HEADER --- */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-blue-600 text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
           <h1
-            onClick={() => navigate("/homeuser")}
+            onClick={() => navigate("/homeuserlogin")} // Changed to homeuserlogin for logged-in user
             className="text-2xl font-bold cursor-pointer hover:text-blue-300 transition"
           >
             Groovy VetCare
@@ -255,30 +251,6 @@ const HomeUserLogin = () => {
               )}
             </div>
 
-<<<<<<<<< Temporary merge branch 1
-            <a
-              href="/faq-page"
-              className="hover:underline"
-              onClick={() => setShowReservasiMenu(false)}
-            >
-              FAQ
-            </a>
-
-            <div className="flex items-center space-x-2">
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
-                alt="Profil"
-                className="w-8 h-8 rounded-full"
-              />
-              <span>{username || "Pengguna"}</span>
-            </div>
-
-            {username && (
-              <Link
-                to="/loyalty"
-                className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors"
-              >
-=========
             <Link to="/faq-page" className="hover:underline" onClick={() => setShowReservasiMenu(false)}>FAQ</Link>
 
             <div className="flex items-center space-x-2">
@@ -287,7 +259,7 @@ const HomeUserLogin = () => {
             </div>
 
             {/* Loyalty Points Header */}
-            {loyaltyPoints > 0 && ( // Only show loyalty points if points are positive
+            {loyaltyPoints >= 0 && ( // Show loyalty points if defined (even if 0)
               <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
                 Poin: {formatPoints(loyaltyPoints)} ⭐
               </Link>
@@ -305,18 +277,21 @@ const HomeUserLogin = () => {
               )}
             </Link>
 
-<<<<<<<<< Temporary merge branch 1
-            <button onClick={() => { localStorage.removeItem("isLoggedIn"); localStorage.removeItem("username"); window.location.href = "/login"; }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
-=========
-            <button onClick={() => {
-                localStorage.removeItem("isLoggedIn");
-                localStorage.removeItem("userId");
-                localStorage.removeItem("userEmail");
-                localStorage.removeItem("userRole");
-                localStorage.removeItem("username"); // Clear the display name as well
-                window.location.href = "/homeuser"; // Full page reload to clear all state
+            <button onClick={async () => { // Use async here for await supabase.auth.signOut()
+                const { error } = await supabase.auth.signOut();
+                if (!error) {
+                    localStorage.removeItem("isLoggedIn");
+                    localStorage.removeItem("userId");
+                    localStorage.removeItem("userEmail");
+                    localStorage.removeItem("userRole");
+                    localStorage.removeItem("username"); // Clear the display name as well
+                    navigate("/homeuser"); // Use navigate for SPA routing
+                } else {
+                    console.error("Error during logout:", error.message);
+                    // Optionally, handle error, e.g., show a toast message
+                    alert("Logout failed: " + error.message); // Simple alert for now
+                }
             }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
->>>>>>>>> Temporary merge branch 2
               Logout
             </button>
           </nav>
@@ -324,150 +299,93 @@ const HomeUserLogin = () => {
       </header>
 
       {/* --- HERO SECTION --- */}
-      <main className="pt-20"></main>
-      <section className="relative">
-        <img
-          src={images[currentSlide]}
-          alt="Hero"
-          className="w-full h-[400px] object-cover"
-        />
-        <div className="absolute top-0 left-0 w-full h-full bg-black/40 flex flex-col justify-center items-center text-white px-4">
-          <h2 className="text-4xl font-bold mb-2 text-center">
-            Selamat Datang di Groovy VetCare
-          </h2>
-          <p className="text-lg mb-4 text-center max-w-xl">
-            Periksa dan rawat hewan kesayanganmu bersama dokter terbaik kami.
-          </p>
-          <button
-            onClick={() => goToPage("/form-penitipan")}
-            className="bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 transition"
-          >
-            Buat Janji
-          </button>
-        </div>
-      </section>
-
-      {/* --- BAGIAN PREDIKSI KESEHATAN (DARI VERSI 1) --- */}
-      <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="md:w-1/2 flex justify-center">
-            <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Health Prediction" className="w-64 md:w-80 drop-shadow-xl" />
-          </div>
-          <div className="md:w-1/2 text-center md:text-left">
-            <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
-              Prediksi Kesehatan Hewanmu
+      <main className="pt-20"> {/* Added pt-20 to push content below fixed header */}
+        <section className="relative">
+          <img
+            src={images[currentSlide]}
+            alt="Hero"
+            className="w-full h-[400px] object-cover"
+          />
+          <div className="absolute top-0 left-0 w-full h-full bg-black/40 flex flex-col justify-center items-center text-white px-4">
+            <h2 className="text-4xl font-bold mb-2 text-center">
+              Selamat Datang di Groovy VetCare
             </h2>
-            <p className="text-gray-700 text-base mb-6 leading-relaxed">
-              Manfaatkan kecerdasan buatan (AI) untuk membantu mendiagnosis
-              kondisi awal kesehatan hewan peliharaanmu. Jawab beberapa
-              pertanyaan sederhana dan dapatkan hasil prediksi dalam hitungan
-              detik!
+            <p className="text-lg mb-4 text-center max-w-xl">
+              Periksa dan rawat hewan kesayanganmu bersama dokter terbaik kami.
             </p>
             <button
-              onClick={() => navigate("/prediksi-kesehatan")}
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
+              onClick={() => goToPage("/form-penitipan")}
+              className="bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 transition"
             >
-              🔍 Mulai Prediksi Sekarang
+              Buat Janji
             </button>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* --- BAGIAN LAYANAN --- */}
-      <section id="layanan" className="py-12 bg-gray-50">
-        <div className="container mx-auto text-center">
-          <h3 className="text-2xl font-bold mb-8">Layanan Utama Kami</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <div
-              onClick={() => goToPage("/pelangganjb")}
-              className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
-            >
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png"
-                alt="Produk"
-                className="w-20 mb-4"
-              />
-              <h4 className="font-semibold text-lg mb-2">
-                Pembelian Obat & Makanan
-              </h4>
-              <p className="text-sm text-gray-600">
-                Dapatkan produk terbaik untuk hewan kesayanganmu.
-              </p>
+        {/* --- BAGIAN PREDIKSI KESEHATAN --- */}
+        <section className="py-16 bg-gradient-to-r from-blue-50 to-white">
+          <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
+            <div className="md:w-1/2 flex justify-center">
+              <img src="https://cdn-icons-png.flaticon.com/512/616/616408.png" alt="Health Prediction" className="w-64 md:w-80 drop-shadow-xl" />
             </div>
-            <div className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
-              <div
-                onClick={handleReservasiClick}
-                className="cursor-pointer text-center flex flex-col items-center"
+            <div className="md:w-1/2 text-center md:text-left">
+              <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
+                Prediksi Kesehatan Hewanmu
+              </h2>
+              <p className="text-gray-700 text-base mb-6 leading-relaxed">
+                Manfaatkan kecerdasan buatan (AI) untuk membantu mendiagnosis
+                kondisi awal kesehatan hewan peliharaanmu. Jawab beberapa
+                pertanyaan sederhana dan dapatkan hasil prediksi dalam hitungan
+                detik!
+              </p>
+              <button
+                onClick={() => navigate("/prediksi-kesehatan")}
+                className="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-6 py-3 rounded-full font-semibold shadow-md transition duration-300"
               >
-                <img
-                  src="https://cdn-icons-png.flaticon.com/512/7586/7586970.png"
-                  alt="Reservasi"
-                  className="w-20 mb-3 transition-transform duration-300 hover:scale-105"
-                />
-                <h4 className="font-semibold text-lg flex items-center gap-2">
-                  Reservasi Layanan
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-4 w-4 transform transition-transform duration-300 ${
-                      showReservasiMenu ? "rotate-180" : "rotate-0"
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </h4>
-                <p className="text-sm text-gray-600">
-                  Klik untuk memilih jenis layanan reservasi.
-                </p>
-              </div>
-              {showReservasiMenu && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
-                  {[
-                    { label: "Penitipan Hewan", path: "/form-penitipan" },
-                    { label: "Kebiri", path: "/form-kebiri" },
-                    { label: "Vaksinasi", path: "/form-vaksinasi" },
-                  ].map((layanan) => (
-                    <button
-                      key={layanan.label}
-                      onClick={() => {
-                        goToPage(layanan.path);
-                        setShowReservasiMenu(false);
-                      }}
-                      className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
-                    >
-                      {layanan.label}
-                    </button>
-                  ))}
-                </div>
-              )}
+                🔍 Mulai Prediksi Sekarang
+              </button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* --- BAGIAN FAQ (LOGIKA TAMPILAN DARI VERSI 1, DIPERBARUI DENGAN SUPABASE DATA) --- */}
-      <section id="faq" className="bg-white py-12">
-        <div className="container mx-auto max-w-3xl">
-          <h3 className="text-3xl font-bold text-center mb-8 text-blue-700">
-            Pertanyaan Umum (FAQ)
-          </h3>
-          <div className="space-y-4 text-left">
-            {faqs.length === 0 ? (
-              <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
-            ) : (
-              faqs.slice(0, 3).map(({ question, answer }, idx) => (
-                <details key={idx} className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition">
-                  <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
+        {/* --- BAGIAN LAYANAN --- */}
+        <section id="layanan" className="py-12 bg-gray-50">
+          <div className="container mx-auto text-center">
+            <h3 className="text-2xl font-bold mb-8">Layanan Utama Kami</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              <div
+                onClick={() => goToPage("/pelangganjb")}
+                className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
+              >
+                <img
+                  src="https://cdn-icons-png.flaticon.com/512/2936/2936776.png"
+                  alt="Produk"
+                  className="w-20 mb-4"
+                />
+                <h4 className="font-semibold text-lg mb-2">
+                  Pembelian Obat & Makanan
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Dapatkan produk terbaik untuk hewan kesayanganmu.
+                </p>
+              </div>
+              <div className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition relative">
+                <div
+                  onClick={handleReservasiClick}
+                  className="cursor-pointer text-center flex flex-col items-center"
+                >
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/7586/7586970.png"
+                    alt="Reservasi"
+                    className="w-20 mb-3 transition-transform duration-300 hover:scale-105"
+                  />
+                  <h4 className="font-semibold text-lg flex items-center gap-2">
+                    Reservasi Layanan
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 text-blue-600"
+                      className={`h-4 w-4 transform transition-transform duration-300 ${
+                        showReservasiMenu ? "rotate-180" : "rotate-0"
+                      }`}
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -476,30 +394,92 @@ const HomeUserLogin = () => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                        d="M19 9l-7 7-7-7"
                       />
                     </svg>
-                    {question}
-                  </summary>
-                  <p className="mt-2 text-blue-900 text-sm leading-relaxed">
-                    {answer}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    Klik untuk memilih jenis layanan reservasi.
                   </p>
-                </details>
-              ))
+                </div>
+                {showReservasiMenu && (
+                  <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                    {[
+                      { label: "Penitipan Hewan", path: "/form-penitipan" },
+                      { label: "Kebiri", path: "/form-kebiri" },
+                      { label: "Vaksinasi", path: "/form-vaksinasi" },
+                    ].map((layanan) => (
+                      <button
+                        key={layanan.label}
+                        onClick={() => {
+                          goToPage(layanan.path);
+                          setShowReservasiMenu(false);
+                        }}
+                        className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition"
+                      >
+                        {layanan.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* --- BAGIAN FAQ --- */}
+        <section id="faq" className="bg-white py-12">
+          <div className="container mx-auto max-w-3xl">
+            <h3 className="text-3xl font-bold text-center mb-8 text-blue-700">
+              Pertanyaan Umum (FAQ)
+            </h3>
+            <div className="space-y-4 text-left">
+              {loadingFaqs ? (
+                <p className="text-center text-gray-500">Loading FAQs...</p>
+              ) : errorFaqs ? (
+                <p className="text-center text-red-500">{errorFaqs}</p>
+              ) : faqs.length === 0 ? (
+                <p className="text-center text-gray-500">Belum ada FAQ yang tersedia.</p>
+              ) : (
+                faqs.slice(0, 3).map(({ question, answer }, idx) => (
+                  <details key={idx} className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition">
+                    <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-blue-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M8 9l4-4 4 4m0 6l-4 4-4-4"
+                        />
+                      </svg>
+                      {question}
+                    </summary>
+                    <p className="mt-2 text-blue-900 text-sm leading-relaxed">
+                      {answer}
+                    </p>
+                  </details>
+                ))
+              )}
+            </div>
+            {faqs.length > 3 && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => navigate("/faq-page")}
+                  className="text-blue-700 hover:underline font-medium"
+                >
+                  ➕ Lihat Semua FAQ
+                </button>
+              </div>
             )}
           </div>
-          {faqs.length > 3 && (
-            <div className="text-center mt-6">
-              <button
-                onClick={() => navigate("/faq-page")}
-                className="text-blue-700 hover:underline font-medium"
-              >
-                ➕ Lihat Semua FAQ
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
+      </main> {/* End of main tag */}
 
       {/* --- FOOTER --- */}
       <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
@@ -515,7 +495,7 @@ const HomeUserLogin = () => {
               <p>📧 groovyvetcare@medivet.pet</p>
             </div>
             <a
-              href="https://maps.google.com/"
+              href="https://maps.app.goo.gl/YourGoogleMapsLinkHere" // Placeholder for actual map link
               target="_blank"
               rel="noopener noreferrer"
               className="inline-block bg-pink-600 mt-4 px-4 py-2 rounded-full font-semibold hover:bg-pink-700 transition"
@@ -572,6 +552,3 @@ const HomeUserLogin = () => {
 };
 
 export default HomeUserLogin;
-
-
-//asdasfasd
