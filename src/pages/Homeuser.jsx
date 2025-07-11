@@ -1,8 +1,11 @@
+<<<<<<<<< Temporary merge branch 1
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+=========
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabase'; // Import supabase instance
+>>>>>>>>> Temporary merge branch 2
 
 const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
@@ -20,6 +23,8 @@ const HomeUser = () => {
     setShowReservasiMenu(!showReservasiMenu);
   };
 
+<<<<<<<<< Temporary merge branch 1
+=========
   const handleLayananHeaderClick = () => {
     setShowLayananMenu(!showLayananMenu);
   };
@@ -28,30 +33,75 @@ const HomeUser = () => {
     navigate(path);
   };
 
-  useEffect(() => {
-    // Add carousel auto-slide effect
-    const slideInterval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % images.length);
-    }, 5000); // Change image every 5 seconds
+<<<<<<<<< Temporary merge branch 1
+=========
+  // Function to fetch FAQs from Supabase (same as in your admin component)
+  const fetchFaqs = async () => {
+    setLoadingFaqs(true);
+    setErrorFaqs(null);
+    const { data, error } = await supabase
+      .from('faqs')
+      .select('*')
+      .order('created_at', { ascending: false });
 
+    if (error) {
+      console.error('Error fetching FAQs for HomeUser:', error.message);
+      setErrorFaqs('Failed to load FAQs. Please try again later.');
+    } else {
+      setFaqs(data);
+    }
+    setLoadingFaqs(false);
+  };
+
+>>>>>>>>> Temporary merge branch 2
+  useEffect(() => {
+    // Fetch FAQs on component mount
+    fetchFaqs();
+
+<<<<<<<<< Temporary merge branch 1
+  const userPoints = 150;
+  const maxPoints = 200; // Max poin untuk Gold
+  const loyaltyLevel =
+    userPoints >= 200 ? "Gold" : userPoints >= 100 ? "Silver" : "Bronze";
+
+  // Warna dan style badge sesuai level
+=========
+    // Subscribe to real-time changes on the 'faqs' table
+    const channel = supabase
+      .channel('public:faqs_user_changes') // Use a unique channel name for user side
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
+        console.log('Realtime change received for FAQs (User):', payload);
+        fetchFaqs(); // Re-fetch data on any change
+      })
+      .subscribe();
+
+    // Cleanup function to unsubscribe when the component unmounts
     return () => {
       clearInterval(slideInterval); // Clear interval on component unmount
     };
   }, []); // Empty dependency array ensures this runs once on mount
 
+<<<<<<<<< Temporary merge branch 1
   const userPoints = 150;
   const maxPoints = 200;
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
 
-  // eslint-disable-next-line no-unused-vars
   const loyaltyColors = {
-    Bronze: 'bg-yellow-500 text-yellow-900',
-    Silver: 'bg-gray-300 text-gray-800',
-    Gold: 'bg-yellow-400 text-yellow-900',
+    Bronze: "bg-yellow-500 text-yellow-900",
+    Silver: "bg-gray-300 text-gray-800",
+    Gold: "bg-yellow-400 text-yellow-900",
+=========
+  // Fungsi handleLogout tidak lagi relevan untuk header "belum login", tapi tetap di sini
+  // jika Anda ingin menggunakannya di tempat lain atau untuk state "sudah login"
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error logging out:', error.message);
+    } else {
+      navigate('/login'); // Redirect to login page after successful logout
+    }
+>>>>>>>>> Temporary merge branch 2
   };
-
-  // eslint-disable-next-line no-unused-vars
-  const progressPercent = Math.min((userPoints / maxPoints) * 100, 100);
 
   return (
     <div className="font-sans text-gray-800">
@@ -61,58 +111,8 @@ const HomeUser = () => {
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
             <a href="#" className="hover:underline">Beranda</a>
-            {/* Pembelian Produk sebagai item menu terpisah di header, tetap mengarah ke login */}
-            <a href="/login" className="hover:underline">Pembelian Produk</a>
-
-            <div className="relative">
-              <button
-                onClick={handleLayananHeaderClick}
-                className="hover:underline flex items-center gap-1"
-              >
-                Layanan
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-4 w-4 transform transition-transform duration-300 ${
-                    showLayananMenu ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-
-              {showLayananMenu && (
-                <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-20 animate-fade-down">
-                  {/* Semua layanan di sini akan mengarah ke login */}
-                  <button
-                    onClick={() => goToPage('/login')}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
-                  >
-                    Penitipan Hewan
-                  </button>
-                  <button
-                    onClick={() => goToPage('/login')}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
-                  >
-                    Kebiri
-                  </button>
-                  <button
-                    onClick={() => goToPage('/login')}
-                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
-                  >
-                    Vaksinasi
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* FAQ tetap langsung ke halaman FAQ tanpa login */}
+            <a href="#layanan" className="hover:underline">Layanan</a>
             <a href="/faq-page" className="hover:underline">FAQ</a>
-
-            {/* Tombol Login untuk pengguna yang belum login */}
             <button
               onClick={() => goToPage("/login")}
               className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
@@ -156,6 +156,11 @@ const HomeUser = () => {
   className="w-[18rem] md:w-[32rem] lg:w-[36rem] drop-shadow-2xl"
             />
           </div>
+<<<<<<<<< Temporary merge branch 1
+
+          {/* Konten Teks */}
+=========
+>>>>>>>>> Temporary merge branch 2
           <div className="md:w-1/2 text-center md:text-left">
             <h2 className="text-4xl font-bold text-blue-700 mb-4 leading-snug">
               Prediksi Kesehatan Hewanmu
@@ -183,10 +188,13 @@ const HomeUser = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
 
+            {/* Pembelian Produk */}
+=========
             {/* Pembelian Produk di bagian ini juga akan mengarah ke login */}
+>>>>>>>>> Temporary merge branch 2
             <div
-              // DIUBAH: Arah navigasi diubah dari '/pelangganjb' menjadi '/login'
               onClick={() => goToPage('/login')}
+>>>>>>>>> Temporary merge branch 2
               className="bg-white border hover:border-blue-400 rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer flex flex-col items-center"
             >
               <img
@@ -256,6 +264,7 @@ const HomeUser = () => {
         </div>
       </section>
 
+<<<<<<<<< Temporary merge branch 1
       {/* FAQ */}
       <section id="faq" className="bg-white py-12">
         <div className="container mx-auto max-w-3xl">
@@ -263,18 +272,14 @@ const HomeUser = () => {
             Pertanyaan Umum (FAQ)
           </h3>
           <div className="space-y-4 text-left">
-            {loadingFaqs ? (
-              <p className="text-center text-blue-600">Loading FAQs...</p>
-            ) : errorFaqs ? (
-              <p className="text-center text-red-500">{errorFaqs}</p>
-            ) : faqs.length === 0 ? (
+            {faqs.length === 0 ? (
               <p className="text-center text-gray-500">
                 Belum ada FAQ yang tersedia.
               </p>
             ) : (
-              faqs.slice(0, 3).map(({ question, answer, id }) => ( // Add 'id' to key
+              faqs.slice(0, 3).map(({ question, answer }, idx) => (
                 <details
-                  key={id} // Use unique ID for key
+                  key={idx}
                   className="border border-blue-300 rounded-lg p-4 bg-blue-50 hover:bg-blue-100 transition"
                 >
                   <summary className="cursor-pointer font-semibold text-blue-800 flex items-center gap-2">
@@ -314,6 +319,8 @@ const HomeUser = () => {
         </div>
       </section>
 
+=========
+>>>>>>>>> Temporary merge branch 2
       {/* Footer */}
       <footer className="bg-blue-700 text-white py-10 px-6 text-sm">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">

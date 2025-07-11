@@ -313,10 +313,20 @@ const PetStoreApp = () => {
         return;
       }
 
+<<<<<<<<< Temporary merge branch 1
+      const totalBelanjaSaatIni = getTotalPrice();
+
+      // --- [BAGIAN 1] - SIMPAN REKAP PEMBELIAN ---
+      const existingPurchases =
+        JSON.parse(localStorage.getItem("dataPembelian")) || [];
+      const newPurchases = cart.map((item, index) => ({
+        id: Date.now() + index, // Membuat ID unik berdasarkan waktu
+        namaItem: item.name,
+=========
       // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
-     // --- SIMPAN REKAP PEMBELIAN KE SUPABASE ---
       const purchasesToInsert = cart.map((item) => ({
         namaitem: item.name,
+>>>>>>>>> Temporary merge branch 2
         jenis: item.category,
         tanggal: new Date().toISOString(),
         id_pelanggan: loggedInUserId,
@@ -329,10 +339,37 @@ const PetStoreApp = () => {
         .from('datapembelian')
         .insert(purchasesToInsert);
 
+<<<<<<<<< Temporary merge branch 1
+      // --- [BAGIAN 2] - LOGIKA LOYALITAS PELANGGAN ---
+      let dataLoyalitas =
+        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      const idPelanggan = customerInfo.phone; // Still using phone as ID for loyalty
+      const indexPelanggan = dataLoyalitas.findIndex(
+        (p) => p.id === idPelanggan
+      );
+      const poinBaru = Math.floor(totalBelanjaSaatIni / 10000);
+
+      if (indexPelanggan > -1) {
+        // Jika pelanggan sudah ada
+        dataLoyalitas[indexPelanggan].poinLoyalitas += poinBaru;
+        dataLoyalitas[indexPelanggan].totalBelanja += totalBelanjaSaatIni;
+        dataLoyalitas[indexPelanggan].jumlahTransaksi += 1;
+        dataLoyalitas[indexPelanggan].namaPelanggan = customerInfo.name; // Ensure name is updated/consistent
+      } else {
+        // Jika pelanggan baru
+        dataLoyalitas.push({
+          id: idPelanggan,
+          namaPelanggan: customerInfo.name,
+          poinLoyalitas: poinBaru,
+          totalBelanja: totalBelanjaSaatIni,
+          jumlahTransaksi: 1,
+        });
+=========
       if (insertError) {
         console.error("Error saving purchase data to Supabase:", insertError);
         alert("Terjadi kesalahan saat menyimpan data pembelian: " + insertError.message);
         return;
+>>>>>>>>> Temporary merge branch 2
       }
 
       // --- UPDATE DATA LOYALITAS PELANGGAN ---
@@ -343,7 +380,7 @@ const PetStoreApp = () => {
       const { data: existingLoyalty, error: fetchLoyaltyError } = await supabase
         .from('dataloyalitas')
         .select('*')
-        .eq('id', loggedInUserId)
+        .eq('id_pelanggan', loggedInUserId) // Ensure you are querying by the correct column name for id_pelanggan
         .single();
 
       if (fetchLoyaltyError && fetchLoyaltyError.code !== 'PGRST116') { // PGRST116 means "no rows found"
@@ -364,7 +401,7 @@ const PetStoreApp = () => {
             totalbelanja: newTotalBelanja,
             jumlahtransaksi: newJumlahTransaksi,
           })
-          .eq('id', loggedInUserId);
+          .eq('id_pelanggan', loggedInUserId); // Ensure you are updating by the correct column name
 
         if (updateLoyaltyError) {
           console.error("Error updating loyalty data:", updateLoyaltyError);

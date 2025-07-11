@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom"; // Import Link di sini
+<<<<<<<<< Temporary merge branch 1
+import { useNavigate } from "react-router-dom"; // untuk tombol login
 
 // SANGAT PENTING: Sila sesuaikan jalur import supabase ini mengikut struktur folder projek anda.
 // Ralat "Could not resolve" ini berterusan, menunjukkan bahawa fail 'supabase.js' anda TIDAK DITEMUI
@@ -23,6 +24,11 @@ import { useNavigate, Link } from "react-router-dom"; // Import Link di sini
 // dan gunakan ia. Saya akan meninggalkan yang paling umum sebagai lalai buat masa ini.
 import { supabase } from "../supabase"; // SILA GANTI BARIS INI DENGAN JALUR YANG BETUL!
 
+=========
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "../supabase"; // GANTI sesuai lokasi supabase.js
+import GuestHeader from "../components/GuestHeader";
+>>>>>>>>> Temporary merge branch 2
 
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);

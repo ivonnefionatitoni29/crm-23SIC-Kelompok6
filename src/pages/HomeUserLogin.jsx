@@ -8,6 +8,11 @@ const HomeUserLogin = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [faqs, setFaqs] = useState([]);
+<<<<<<<<< Temporary merge branch 1
+  const [username, setUsername] = useState("");
+=========
+  const [loadingFaqs, setLoadingFaqs] = useState(true); // New loading state for FAQs
+  const [errorFaqs, setErrorFaqs] = useState(null); // New error state for FAQs
   const [username, setUsername] = useState('');
   const [loyaltyPoints, setLoyaltyPoints] = useState(0);
   const [cartItemCount, setCartItemCount] = useState(0);
@@ -74,32 +79,6 @@ const HomeUserLogin = () => {
 
   // --- LOGIKA useEffect TERBAIK DARI VERSI 2 DENGAN PENAMBAHAN LOGIKA OTENTIKASI ---
   useEffect(() => {
-    // Authentication Logic
-    const checkUserAuthentication = async () => { // Made async to await fetchLoyaltyPoints
-      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      const userId = localStorage.getItem("userId");
-      const userEmail = localStorage.getItem("userEmail");
-      const userRole = localStorage.getItem("userRole"); // Assuming role is stored
-      const userNama = localStorage.getItem("username"); // Assuming display name is stored as 'username'
-
-      if (isLoggedIn && userId && userEmail) {
-        setCurrentUser({ id: userId, email: userEmail, role: userRole });
-        // Prioritize userNama for display, then userEmail, fallback to "Pengguna"
-        setUsername(userNama || userEmail || "Pengguna");
-
-        // Fetch loyalty points for the logged-in user from Supabase
-        await fetchLoyaltyPoints(userId);
-
-      } else {
-        setCurrentUser(null);
-        setUsername("Pengguna"); // Default display name
-        setLoyaltyPoints(0); // Reset loyalty points if not logged in
-        navigate("/login"); // Redirect to login page
-      }
-    };
-
-    checkUserAuthentication(); // Run on component mount
-
     // Fungsi untuk mengambil total item di keranjang dari localStorage
     const getTotalItemsInCart = () => {
       try {
@@ -111,13 +90,32 @@ const HomeUserLogin = () => {
       }
     };
 
+<<<<<<<<< Temporary merge branch 1
     // Load FAQs
     const storedFaqs = localStorage.getItem("faqs");
     if (storedFaqs) {
       setFaqs(JSON.parse(storedFaqs));
     }
 
+    // Load username dan poin loyalitas
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+      const storedLoyaltyData =
+        JSON.parse(localStorage.getItem("dataLoyalitas")) || [];
+      const currentUserLoyalty = storedLoyaltyData.find(
+        (customer) => customer.namaPelanggan === storedUsername
+      );
+      if (currentUserLoyalty) {
+        setLoyaltyPoints(currentUserLoyalty.poinLoyalitas);
+      }
+    }
+
     // Load jumlah item keranjang awal
+=========
+    // Initial checks and loads
+    checkUserAuthentication();
+>>>>>>>>> Temporary merge branch 2
     setCartItemCount(getTotalItemsInCart());
     fetchFaqs(); // Fetch FAQs from Supabase on mount
 
@@ -257,14 +255,39 @@ const HomeUserLogin = () => {
               )}
             </div>
 
-            <a href="/faq-page" className="hover:underline" onClick={() => setShowReservasiMenu(false)}>FAQ</a>
-            
+<<<<<<<<< Temporary merge branch 1
+            <a
+              href="/faq-page"
+              className="hover:underline"
+              onClick={() => setShowReservasiMenu(false)}
+            >
+              FAQ
+            </a>
+
             <div className="flex items-center space-x-2">
-              <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profil" className="w-8 h-8 rounded-full" />
+              <img
+                src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                alt="Profil"
+                className="w-8 h-8 rounded-full"
+              />
               <span>{username || "Pengguna"}</span>
             </div>
 
-            {username && loyaltyPoints > 0 && ( // Only show loyalty points if username exists and points are positive
+            {username && (
+              <Link
+                to="/loyalty"
+                className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors"
+              >
+=========
+            <Link to="/faq-page" className="hover:underline" onClick={() => setShowReservasiMenu(false)}>FAQ</Link>
+
+            <div className="flex items-center space-x-2">
+              <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profil" className="w-8 h-8 rounded-full" />
+              <span>{username || "Pengguna"}</span> {/* Displaying the username */}
+            </div>
+
+            {/* Loyalty Points Header */}
+            {loyaltyPoints > 0 && ( // Only show loyalty points if points are positive
               <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
                 Poin: {formatPoints(loyaltyPoints)} ⭐
               </Link>
@@ -282,14 +305,18 @@ const HomeUserLogin = () => {
               )}
             </Link>
 
+<<<<<<<<< Temporary merge branch 1
+            <button onClick={() => { localStorage.removeItem("isLoggedIn"); localStorage.removeItem("username"); window.location.href = "/login"; }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
+=========
             <button onClick={() => {
                 localStorage.removeItem("isLoggedIn");
                 localStorage.removeItem("userId");
                 localStorage.removeItem("userEmail");
                 localStorage.removeItem("userRole");
                 localStorage.removeItem("username"); // Clear the display name as well
-                window.location.href = "/login"; // Full page reload to clear all state
+                window.location.href = "/homeuser"; // Full page reload to clear all state
             }} className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200">
+>>>>>>>>> Temporary merge branch 2
               Logout
             </button>
           </nav>
