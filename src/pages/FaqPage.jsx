@@ -1,62 +1,45 @@
 import React, { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom"; // Import Link di sini
-
-// SANGAT PENTING: Sila sesuaikan jalur import supabase ini mengikut struktur folder projek anda.
-// Ralat "Could not resolve" ini berterusan, menunjukkan bahawa fail 'supabase.js' anda TIDAK DITEMUI
-// pada jalur relatif yang telah dicuba setakat ini.
-//
-// Untuk menyelesaikan ini secara muktamad, anda perlu memberitahu LOKASI TEPAT fail 'supabase.js' anda.
-// Sila GANTI baris 'import { supabase } = ...' di bawah ini dengan jalur yang BETUL setelah anda mengesahkannya sendiri.
-//
-// Contoh:
-// - Jika jalur penuh fail anda ialah: D:/project062025/crm-23SIC-Kelompok6/src/supabase.js
-//   Maka, import yang BETUL adalah: import { supabase } from "../supabase";
-//
-// - Jika fail itu berada di: D:/project062025/crm-23SIC-Kelompok6/supabase.js (akar projek, satu folder di atas 'src')
-//   Maka, import yang BETUL adalah: import { supabase } from "../../supabase";
-//
-// - Jika di 'src/utils/supabase.js': import { supabase } from "../utils/supabase";
-// - Jika di 'src/config/supabase.js': import { supabase } from "../config/supabase";
-//
-// Sila pastikan anda memilih HANYA SATU daripada jalur di atas (atau jalur lain yang betul jika tiada yang sepadan)
-// dan gunakan ia. Saya akan meninggalkan yang paling umum sebagai lalai buat masa ini.
-import { supabase } from "../supabase"; // SILA GANTI BARIS INI DENGAN JALUR YANG BETUL!
-
+import { useNavigate, Link } from "react-router-dom";
+import { supabase } from "../supabase"; // GANTI sesuai lokasi supabase.js
+import GuestHeader from "../components/GuestHeader";
 
 const FaqPage = () => {
   const [faqs, setFaqs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const [showReservasiMenu, setShowReservasiMenu] = useState(false); // State baru untuk dropdown
 
-  // Fungsi untuk mengambil FAQ dari Supabase
+  // Tambahan untuk UserHeader
+  const [showReservasiMenu, setShowReservasiMenu] = useState(false);
+  const [username, setUsername] = useState("User");
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  const [cartItemCount, setCartItemCount] = useState(0);
+
   const fetchFaqs = async () => {
     setLoading(true);
     setError(null);
     const { data, error } = await supabase
-      .from('faqs')
-      .select('*')
-      .order('created_at', { ascending: false }); // Urutkan berdasarkan waktu pembuatan terbaru
+      .from("faqs")
+      .select("*")
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error('Error fetching FAQs for public page:', error.message);
-      setError('Gagal memuat FAQ. Sila cuba lagi nanti.');
+      console.error("Error fetching FAQs for public page:", error.message);
+      setError("Gagal memuat FAQ. Sila cuba lagi nanti.");
     } else {
       setFaqs(data);
     }
     setLoading(false);
   };
 
-  // Efek untuk memuat FAQ saat komponen dipasang dan berlangganan pembaruan real-time
   useEffect(() => {
     fetchFaqs();
 
     const channel = supabase
-      .channel('public:faqs_page_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
-        console.log('Realtime change received for public FAQs:', payload);
+      .channel("public:faqs_page_changes")
+      .on("postgres_changes", { event: "*", schema: "public", table: "faqs" }, payload => {
+        console.log("Realtime change received for public FAQs:", payload);
         fetchFaqs();
       })
       .subscribe();
@@ -66,67 +49,35 @@ const FaqPage = () => {
     };
   }, []);
 
-  const goToPage = (path) => {
-    navigate(path);
-  };
-
-  // Fungsi untuk menangani klik pada tombol "Layanan"
   const handleReservasiClick = () => {
     setShowReservasiMenu(!showReservasiMenu);
   };
 
-  // Tutup dropdown jika klik di luar area menu
+  const formatPoints = (points) => {
+    return points.toLocaleString("id-ID");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showReservasiMenu && !event.target.closest('.relative')) {
+      if (showReservasiMenu && !event.target.closest(".relative")) {
         setShowReservasiMenu(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showReservasiMenu]);
 
-
   return (
     <>
-      {/* Header */}
-      <header className="bg-blue-600 text-white p-4 shadow-md">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Groovy VetCare</h1>
-          <nav className="space-x-4 flex items-center">
-            <a href="/homeuserlogin" className="hover:underline">Beranda</a>
-
-            {/* Bagian Dropdown Layanan yang Baru */}
-            <div className="relative">
-              <button onClick={handleReservasiClick} className="hover:underline flex items-center gap-1">
-                Layanan
-                <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transform transition-transform duration-300 ${showReservasiMenu ? "rotate-180" : "rotate-0"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              {showReservasiMenu && (
-                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
-                  <Link to="/form-penitipan" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Penitipan Hewan</Link>
-                  <Link to="/form-kebiri" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Kebiri</Link>
-                  <Link to="/form-vaksinasi" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Vaksinasi</Link>
-                </div>
-              )}
-            </div>
-            {/* Akhir Bagian Dropdown Layanan */}
-
-            <a href="/faq-page" className="hover:underline">FAQ</a>
-            <button
-              onClick={() => goToPage('/login')}
-              className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
-            >
-              Login
-            </button>
-          </nav>
-        </div>
-      </header>
+      <GuestHeader />
 
       {/* Konten FAQ */}
       <main className="min-h-screen bg-gradient-to-b from-white via-blue-50 to-blue-100 py-16 px-6">
