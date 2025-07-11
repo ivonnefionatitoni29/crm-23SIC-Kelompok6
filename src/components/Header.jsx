@@ -28,15 +28,15 @@ const Header = () => {
       </div>
 
       {/* Logout Button */}
-      <button
-        onClick={() => {
-          localStorage.removeItem("isLoggedIn");
-          window.location.href = "/login";
-        }}
-        className="px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 shadow transition"
-      >
-        Logout
-      </button>
+  <button
+  onClick={() => {
+    localStorage.removeItem("isLoggedIn");
+    window.location.href = "/homeuser";
+  }}
+  className="px-5 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-700 shadow transition"
+>
+  Logout
+</button>
     </header>
   );
 };

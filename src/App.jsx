@@ -60,12 +60,13 @@ function App() {
         <Route path="/kebiri" element={<Kebiri />} />
         <Route path="/jualbeli" element={<Beli />} />
         <Route path="/admin-products" element={<AdminProductCRUD />} />
-        <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
         {/* Rute untuk Tabel User */}
         <Route path="/users" element={<UserTable />} />
         {/* ⭐ Rute baru untuk Manajemen Stok ⭐ */}
         <Route path="/admin/stock-management" element={<ManajemenStok />} />
       </Route>
+
+      <Route path="/prediksi-kesehatan" element={<PrediksiPenyakitHewan />} />
 
     </Routes>
   );

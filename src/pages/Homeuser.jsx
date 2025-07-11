@@ -8,9 +8,6 @@ const HomeUser = () => {
   const [showReservasiMenu, setShowReservasiMenu] = useState(false);
   const [showLayananMenu, setShowLayananMenu] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [faqs, setFaqs] = useState([]);
-  const [loadingFaqs, setLoadingFaqs] = useState(true); // New loading state for FAQs
-  const [errorFaqs, setErrorFaqs] = useState(null); // New error state for FAQs
   const navigate = useNavigate();
 
   const images = [
@@ -31,51 +28,26 @@ const HomeUser = () => {
     navigate(path);
   };
 
-  // Function to fetch FAQs from Supabase (same as in your admin component)
-  const fetchFaqs = async () => {
-    setLoadingFaqs(true);
-    setErrorFaqs(null);
-    const { data, error } = await supabase
-      .from('faqs')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching FAQs for HomeUser:', error.message);
-      setErrorFaqs('Failed to load FAQs. Please try again later.');
-    } else {
-      setFaqs(data);
-    }
-    setLoadingFaqs(false);
-  };
-
   useEffect(() => {
-    // Fetch FAQs on component mount
-    fetchFaqs();
+    // Add carousel auto-slide effect
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % images.length);
+    }, 5000); // Change image every 5 seconds
 
-    // Subscribe to real-time changes on the 'faqs' table
-    const channel = supabase
-      .channel('public:faqs_user_changes') // Use a unique channel name for user side
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'faqs' }, payload => {
-        console.log('Realtime change received for FAQs (User):', payload);
-        fetchFaqs(); // Re-fetch data on any change
-      })
-      .subscribe();
-
-    // Cleanup function to unsubscribe when the component unmounts
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(slideInterval); // Clear interval on component unmount
     };
   }, []); // Empty dependency array ensures this runs once on mount
 
   const userPoints = 150;
-  const maxPoints = 200; // Max poin untuk Gold
+  const maxPoints = 200;
   const loyaltyLevel = userPoints >= 200 ? 'Gold' : userPoints >= 100 ? 'Silver' : 'Bronze';
 
+  // eslint-disable-next-line no-unused-vars
   const loyaltyColors = {
-    Bronze: "bg-yellow-500 text-yellow-900",
-    Silver: "bg-gray-300 text-gray-800",
-    Gold: "bg-yellow-400 text-yellow-900",
+    Bronze: 'bg-yellow-500 text-yellow-900',
+    Silver: 'bg-gray-300 text-gray-800',
+    Gold: 'bg-yellow-400 text-yellow-900',
   };
 
   // eslint-disable-next-line no-unused-vars
@@ -89,6 +61,8 @@ const HomeUser = () => {
           <h1 className="text-2xl font-bold">Groovy VetCare</h1>
           <nav className="space-x-4 flex items-center">
             <a href="#" className="hover:underline">Beranda</a>
+            {/* Pembelian Produk sebagai item menu terpisah di header, tetap mengarah ke login */}
+            <a href="/login" className="hover:underline">Pembelian Produk</a>
 
             <div className="relative">
               <button
@@ -112,6 +86,7 @@ const HomeUser = () => {
 
               {showLayananMenu && (
                 <div className="absolute left-0 mt-2 w-48 bg-white text-gray-800 rounded-md shadow-lg z-20 animate-fade-down">
+                  {/* Semua layanan di sini akan mengarah ke login */}
                   <button
                     onClick={() => goToPage('/login')}
                     className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition"
@@ -134,7 +109,10 @@ const HomeUser = () => {
               )}
             </div>
 
+            {/* FAQ tetap langsung ke halaman FAQ tanpa login */}
             <a href="/faq-page" className="hover:underline">FAQ</a>
+
+            {/* Tombol Login untuk pengguna yang belum login */}
             <button
               onClick={() => goToPage("/login")}
               className="ml-4 bg-white text-blue-600 font-semibold px-4 py-1 rounded hover:bg-blue-100 transition"
@@ -173,9 +151,9 @@ const HomeUser = () => {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-10">
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="https://cdn-icons-png.flaticon.com/512/616/616408.png"
+              src="https://d2zp5xs5cp8zlg.cloudfront.net/image-43032-800.jpg"
               alt="Health Prediction"
-              className="w-64 md:w-80 drop-shadow-xl"
+  className="w-[18rem] md:w-[32rem] lg:w-[36rem] drop-shadow-2xl"
             />
           </div>
           <div className="md:w-1/2 text-center md:text-left">
@@ -205,7 +183,7 @@ const HomeUser = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
 
-            {/* Pembelian Produk */}
+            {/* Pembelian Produk di bagian ini juga akan mengarah ke login */}
             <div
               // DIUBAH: Arah navigasi diubah dari '/pelangganjb' menjadi '/login'
               onClick={() => goToPage('/login')}
@@ -261,6 +239,7 @@ const HomeUser = () => {
 
               {showReservasiMenu && (
                 <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-[90%] max-w-xs bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                  {/* Layanan di sini juga akan mengarah ke login */}
                   {["Penitipan Hewan", "Kebiri", "Vaksinasi"].map((layanan) => (
                     <button
                       key={layanan}
@@ -322,9 +301,6 @@ const HomeUser = () => {
               ))
             )}
           </div>
-
-
-          {/* Tombol Lihat Semua */}
           {faqs.length > 3 && (
             <div className="text-center mt-6">
               <button

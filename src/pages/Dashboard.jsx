@@ -19,7 +19,9 @@ import {
   Star,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "../supabase"; // Pastikan path ini benar!
 
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -31,6 +33,7 @@ ChartJS.register(
   Legend
 );
 
+// Component untuk animasi angka
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(0);
 
@@ -66,6 +69,20 @@ const Dashboard = () => {
   const [currentDate, setCurrentDate] = useState("");
   const [userName, setUserName] = useState("");
 
+  // State untuk data statistik kartu (SEKARANG AKAN MENYIMPAN TOTAL)
+  const [totalCustomers, setTotalCustomers] = useState(0); // Berubah dari newCustomers
+  const [totalReservations, setTotalReservations] = useState(0); // Berubah dari reservationsThisMonth
+  const [totalProductsSold, setTotalProductsSold] = useState(0); // Berubah dari productsSold
+  const [avgLoyaltyPoints, setAvgLoyaltyPoints] = useState(0);
+
+  // State untuk data chart (INI TETAP UNTUK TAHUN INI)
+  const [monthlySalesData, setMonthlySalesData] = useState(new Array(12).fill(0));
+  const [customerGrowthData, setCustomerGrowthData] = useState(new Array(12).fill(0));
+
+  // State untuk loading dan error
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     const today = new Date();
     const formattedDate = today.toLocaleDateString("id-ID", {
@@ -78,62 +95,155 @@ const Dashboard = () => {
 
     const storedUser = localStorage.getItem("userName") || "Admin Groovy";
     setUserName(storedUser);
+
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const currentYear = today.getFullYear();
+        const currentMonth = today.getMonth(); // 0-indexed for Date object
+
+        // Variabel untuk filter bulanan (masih dibutuhkan untuk chart)
+        const startOfMonth = new Date(currentYear, currentMonth, 1).toISOString();
+        const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999).toISOString();
+
+        // Variabel untuk filter tahunan (masih dibutuhkan untuk chart)
+        const startOfYear = new Date(currentYear, 0, 1).toISOString();
+        const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999).toISOString();
+
+        // --- Ambil Total Pelanggan ---
+        // Hapus filter tanggal untuk mendapatkan TOTAL dari semua waktu
+        const { count: totalCustomersCount, error: usersError } = await supabase
+          .from("users")
+          .select("*", { count: "exact", head: true }); // Tanpa .gte/.lte
+        if (usersError) throw usersError;
+        setTotalCustomers(totalCustomersCount || 0);
+
+        // --- Ambil Total Reservasi (Kebiri, Penitipan, Vaksinasi) ---
+        // Hapus filter tanggal untuk mendapatkan TOTAL dari semua waktu
+        const { count: kebiriCount, error: kebiriError } = await supabase
+          .from("kebiri")
+          .select("*", { count: "exact", head: true }); // Tanpa .gte/.lte
+        if (kebiriError) throw kebiriError;
+
+        const { count: penitipanCount, error: penitipanError } = await supabase
+          .from("penitipan")
+          .select("*", { count: "exact", head: true }); // Tanpa .gte/.lte
+        if (penitipanError) throw penitipanError;
+
+        const { count: vaksinasiCount, error: vaksinasiError } = await supabase
+          .from("vaksinasi")
+          .select("*", { count: "exact", head: true }); // Tanpa .gte/.lte
+        if (vaksinasiError) throw vaksinasiError;
+
+        setTotalReservations((kebiriCount || 0) + (penitipanCount || 0) + (vaksinasiCount || 0));
+
+        // --- Ambil Total Produk Terjual ---
+        // Hapus filter tanggal untuk mendapatkan TOTAL dari semua waktu
+        const { data: productsData, error: productsError } = await supabase
+          .from("datapembelian")
+          .select("jumlah"); // Tanpa .gte/.lte
+        if (productsError) throw productsError;
+        const totalProductsSoldCount = productsData.reduce((sum, item) => sum + (item.jumlah || 0), 0);
+        setTotalProductsSold(totalProductsSoldCount);
+
+        // --- Ambil Data Rata-rata Poin Loyalitas ---
+        // Query ini memang sudah mengambil total karena tidak ada filter tanggal
+        const { data: loyaltyData, error: loyaltyError } = await supabase
+          .from("dataloyalitas")
+          .select("poinloyalitas");
+        if (loyaltyError) throw loyaltyError;
+        const totalLoyaltyPoints = loyaltyData.reduce((sum, item) => sum + (item.poinloyalitas || 0), 0);
+        const averagePoints = loyaltyData.length > 0 ? totalLoyaltyPoints / loyaltyData.length : 0;
+        setAvgLoyaltyPoints(Math.round(averagePoints));
+
+        // --- Ambil Data Penjualan Bulanan untuk Bar Chart (TETAP TAHUN INI) ---
+        const { data: salesChartRawData, error: salesChartError } = await supabase
+          .from("datapembelian")
+          .select("tanggal, total")
+          .gte("tanggal", startOfYear)
+          .lte("tanggal", endOfYear);
+        if (salesChartError) throw salesChartError;
+
+        const monthlySalesAggregate = new Array(12).fill(0);
+        salesChartRawData.forEach(sale => {
+          const monthIndex = new Date(sale.tanggal).getMonth();
+          monthlySalesAggregate[monthIndex] += parseFloat(sale.total || 0);
+        });
+        setMonthlySalesData(monthlySalesAggregate.map(value => value / 1000));
+
+        // --- Ambil Data Pertumbuhan Pelanggan untuk Line Chart (TETAP TAHUN INI) ---
+        const { data: usersChartRawData, error: usersChartError } = await supabase
+          .from("users")
+          .select("created_at")
+          .gte("created_at", startOfYear)
+          .lte("created_at", endOfYear);
+        if (usersChartError) throw usersChartError;
+
+        const monthlyCustomerAggregate = new Array(12).fill(0);
+        usersChartRawData.forEach(user => {
+          const monthIndex = new Date(user.created_at).getMonth();
+          monthlyCustomerAggregate[monthIndex]++;
+        });
+        setCustomerGrowthData(monthlyCustomerAggregate);
+
+      } catch (err) {
+        console.error("Error fetching dashboard data:", err.message);
+        setError("Gagal memuat data dashboard. Periksa koneksi atau konsol untuk detail.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
+  // Data statis untuk kartu (percent masih placeholder, bisa dibuat dinamis jika ada data perbandingan)
   const stats = [
     {
-      label: "Pelanggan Baru",
-      value: 312,
-      percent: 12,
+      label: "Total Pelanggan", // Label berubah
+      value: totalCustomers, // Menggunakan state baru
+      percent: 12, // Placeholder
       colorFrom: "from-blue-500",
       colorTo: "to-blue-700",
       icon: <User className="w-7 h-7 text-white" />,
     },
     {
-      label: "Reservasi Bulan Ini",
-      value: 985,
-      percent: 8,
+      label: "Total Reservasi", // Label berubah
+      value: totalReservations, // Menggunakan state baru
+      percent: 8, // Placeholder
       colorFrom: "from-green-400",
       colorTo: "to-green-600",
       icon: <PawPrint className="w-7 h-7 text-white" />,
     },
     {
-      label: "Produk Terjual",
-      value: 1240,
-      percent: 10,
+      label: "Total Produk Terjual", // Label berubah
+      value: totalProductsSold, // Menggunakan state baru
+      percent: 10, // Placeholder
       colorFrom: "from-purple-500",
       colorTo: "to-purple-700",
       icon: <ShoppingBag className="w-7 h-7 text-white" />,
     },
     {
       label: "Rata-rata Poin Loyalitas",
-      value: 145,
-      percent: 5,
+      value: avgLoyaltyPoints,
+      percent: 5, // Placeholder
       colorFrom: "from-yellow-400",
       colorTo: "to-yellow-600",
       icon: <Star className="w-7 h-7 text-white" />,
     },
   ];
 
+  // Data dan Opsi Chart (tetap sama karena ini sudah mengambil data tahunan)
   const barData = {
     labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "Mei",
-      "Jun",
-      "Jul",
-      "Agu",
-      "Sep",
-      "Okt",
-      "Nov",
-      "Des",
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
     ],
     datasets: [
       {
         label: "Penjualan (dalam ribuan $)",
-        data: [12, 19, 14, 17, 22, 30, 28, 26, 32, 35, 40, 45],
+        data: monthlySalesData,
         backgroundColor: "rgba(99, 102, 241, 0.7)",
       },
     ],
@@ -150,23 +260,13 @@ const Dashboard = () => {
 
   const lineData = {
     labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "Mei",
-      "Jun",
-      "Jul",
-      "Agu",
-      "Sep",
-      "Okt",
-      "Nov",
-      "Des",
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
     ],
     datasets: [
       {
         label: "Jumlah Pelanggan",
-        data: [50, 75, 120, 180, 220, 260, 300, 350, 400, 430, 460, 500],
+        data: customerGrowthData,
         borderColor: "rgba(59, 130, 246, 1)",
         backgroundColor: "rgba(59, 130, 246, 0.3)",
         fill: true,
@@ -184,6 +284,24 @@ const Dashboard = () => {
       title: { display: true, text: "Pertumbuhan Pelanggan Tahun Ini" },
     },
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-xl text-indigo-700 font-semibold">Memuat data dashboard...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-8 min-h-screen bg-red-100 flex flex-col items-center justify-center">
+        <p className="text-xl text-red-700 font-semibold mb-4">Terjadi Kesalahan:</p>
+        <p className="text-lg text-red-600 text-center">{error}</p>
+        <p className="text-sm text-red-500 mt-2">Pastikan Supabase Anda terhubung dan RLS sudah dikonfigurasi.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 min-h-screen bg-white space-y-10">
@@ -237,7 +355,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Grafik Reservasi */}
+      {/* Grafik Penjualan Bulanan */}
       <div className="bg-white rounded-3xl shadow-lg p-6">
         <Bar options={barOptions} data={barData} />
       </div>
