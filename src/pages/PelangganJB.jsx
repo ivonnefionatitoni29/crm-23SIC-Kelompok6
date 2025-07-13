@@ -22,6 +22,40 @@ const PetStoreApp = () => {
   const [favorites, setFavorites] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [currentUserName, setCurrentUserName] = useState("Pengguna");
+  const [loyaltyPoints, setLoyaltyPoints] = useState(0);
+  // NEW STATE: Untuk mengontrol visibilitas menu Reservasi/Layanan
+  const [showReservasiMenu, setShowReservasiMenu] = useState(false);
+
+  // Function to format price for display (already exists, but good to note)
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
+
+  // Function to format loyalty points
+  const formatPoints = (points) => points.toLocaleString('id-ID');
+
+  // --- NEW: Function to fetch loyalty points ---
+  const fetchLoyaltyPoints = async (userId) => {
+    if (!userId) {
+      setLoyaltyPoints(0);
+      return;
+    }
+    const { data, error } = await supabase
+      .from('dataloyalitas')
+      .select('poinloyalitas')
+      .eq('id_pelanggan', userId)
+      .single();
+    if (error && error.code !== 'PGRST116') { // PGRST116 means "no rows found"
+      console.error('Error fetching loyalty points:', error.message);
+      setLoyaltyPoints(0);
+    } else {
+      setLoyaltyPoints(data?.poinloyalitas || 0);
+    }
+  };
 
   // Effect hook to fetch products from Supabase
   useEffect(() => {
@@ -35,17 +69,16 @@ const PetStoreApp = () => {
         // You might want to display an error message to the user
       } else {
         // Map Supabase data to your product structure
-        // Ensure the field names from your Supabase table match what your UI expects
         const mappedProducts = data.map(item => ({
           id: item.id,
           name: item.name,
-          category: item.category || 'umum', // Add a default category if not present in DB
-          type: item.type || 'lain-lain', // Add a default type if not present in DB
-          price: parseFloat(item.price), // Convert numeric to float
-          originalPrice: item.old_price ? parseFloat(item.old_price) : null, // Handle optional old_price
+          category: item.category || 'umum',
+          type: item.type || 'lain-lain',
+          price: parseFloat(item.price),
+          originalPrice: item.old_price ? parseFloat(item.old_price) : null,
           image: item.image_url,
-          rating: item.rating ? parseFloat(item.rating) : 0, // Default to 0 if no rating
-          reviews: item.reviews || 0, // Default to 0 if no reviews
+          rating: item.rating ? parseFloat(item.rating) : 0,
+          reviews: item.reviews || 0,
           description: item.description,
         }));
         setProducts(mappedProducts);
@@ -55,9 +88,9 @@ const PetStoreApp = () => {
     fetchProducts();
   }, []); // Empty dependency array means this runs once on mount
 
-  // Efek samping untuk mengambil informasi pengguna dari localStorage
+  // Efek samping untuk mengambil informasi pengguna dari localStorage dan poin loyalitas
   useEffect(() => {
-    const getUserFromLocalStorage = () => {
+    const checkUserAuthenticationAndLoyalty = async () => {
       const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
       const userId = localStorage.getItem("userId");
       const userEmail = localStorage.getItem("userEmail");
@@ -67,15 +100,51 @@ const PetStoreApp = () => {
       if (isLoggedIn && userId && userEmail) {
         setCurrentUser({ id: userId, email: userEmail, role: userRole });
         setCurrentUserName(userNama || userEmail || "Pengguna");
+        await fetchLoyaltyPoints(userId); // <-- FETCH LOYALTY POINTS ON LOGIN
       } else {
         setCurrentUser(null);
         setCurrentUserName("Pengguna");
+        setLoyaltyPoints(0); // <-- RESET POINTS IF NOT LOGGED IN
         navigate("/login");
       }
     };
 
-    getUserFromLocalStorage();
-  }, [navigate]);
+    checkUserAuthenticationAndLoyalty();
+
+    // --- NEW: Real-time Listener for Loyalty Points ---
+    const loyaltyChannel = supabase
+      .channel('public:dataloyalitas_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dataloyalitas' }, payload => {
+        const currentUserId = localStorage.getItem("userId");
+        if (currentUserId) fetchLoyaltyPoints(currentUserId);
+      })
+      .subscribe();
+
+    // Cleanup function for real-time channel
+    return () => {
+      supabase.removeChannel(loyaltyChannel);
+    };
+  }, [navigate]); // navigate is a dependency
+
+  // NEW FUNCTIONS FOR RESERVASI MENU LOGIC
+  const handleReservasiClick = () => {
+    setShowReservasiMenu(!showReservasiMenu);
+  };
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      // Close the menu if clicked outside
+      if (showReservasiMenu && !event.target.closest(".relative")) {
+        setShowReservasiMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleDocumentClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleDocumentClick);
+    };
+  }, [showReservasiMenu]); // Re-run effect if showReservasiMenu changes
 
   const categories = [
     { id: "all", name: "Semua Produk" },
@@ -133,15 +202,6 @@ const PetStoreApp = () => {
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
 
   const ProductCard = ({ product }) => (
     <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group">
@@ -331,7 +391,7 @@ const PetStoreApp = () => {
       const { data: existingLoyalty, error: fetchLoyaltyError } = await supabase
         .from('dataloyalitas')
         .select('*')
-        .eq('id_pelanggan', loggedInUserId) // Ensure you are querying by the correct column name for id_pelanggan
+        .eq('id_pelanggan', loggedInUserId)
         .single();
 
       if (fetchLoyaltyError && fetchLoyaltyError.code !== 'PGRST116') { // PGRST116 means "no rows found"
@@ -352,27 +412,32 @@ const PetStoreApp = () => {
             totalbelanja: newTotalBelanja,
             jumlahtransaksi: newJumlahTransaksi,
           })
-          .eq('id_pelanggan', loggedInUserId); // Ensure you are updating by the correct column name
+          .eq('id_pelanggan', loggedInUserId);
 
         if (updateLoyaltyError) {
           console.error("Error updating loyalty data:", updateLoyaltyError);
           alert("Terjadi kesalahan saat memperbarui data loyalitas: " + updateLoyaltyError.message);
+        } else {
+          // Manually update the local state for loyalty points after a successful update
+          setLoyaltyPoints(newPoinLoyalitas);
         }
       } else {
         // Pelanggan belum ada, masukkan data baru
         const { error: insertLoyaltyError } = await supabase
           .from('dataloyalitas')
           .insert({
-            id_pelanggan: loggedInUserId, // Use the loggedInUserId here
+            id_pelanggan: loggedInUserId,
             poinloyalitas: pointsEarnedThisPurchase,
             totalbelanja: totalPurchaseAmount,
             jumlahtransaksi: 1,
-            // Supabase akan otomatis mengisi created_at jika defaultnya now()
           });
 
         if (insertLoyaltyError) {
           console.error("Error inserting new loyalty data:", insertLoyaltyError);
           alert("Terjadi kesalahan saat menambahkan data loyalitas baru: " + insertLoyaltyError.message);
+        } else {
+          // Manually update the local state for loyalty points after a successful insert
+          setLoyaltyPoints(pointsEarnedThisPurchase);
         }
       }
 
@@ -384,9 +449,9 @@ const PetStoreApp = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-          <div className="p-4 border-b">
+      <div className="fixed inset-0 bg-gradient-to-tr from-blue-100 via-white to-blue-200 bg-opacity-75 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="p-4 border-b border-gray-300">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Konfirmasi Pesanan</h3>
               <button
@@ -403,17 +468,17 @@ const PetStoreApp = () => {
             {cart.length === 0 ? (
               <p className="text-center text-gray-500">Tidak ada item di keranjang.</p>
             ) : (
-              <ul className="space-y-2 border-b pb-4 mb-4">
+              <ul className="space-y-2 border-b pb-4 mb-4 border-gray-300">
                 {cart.map(item => (
                   <li key={item.id} className="flex justify-between items-center text-sm">
                     <span className="text-gray-800 font-medium">{item.name} (x{item.quantity})</span>
-                    <span className="text-gray-600">{formatPrice(item.price * item.quantity)}</span>
+                    <span className="text-[#2563EB] font-semibold">{formatPrice(item.price * item.quantity)}</span>
                   </li>
                 ))}
               </ul>
             )}
 
-            <div className="mt-6 pt-4 border-t">
+            <div className="mt-4 pt-4 border-t border-gray-300">
               <div className="flex justify-between items-center mb-4">
                 <span className="font-semibold">Total Pembayaran:</span>
                 <span className="font-bold text-xl text-[#2563EB]">
@@ -444,9 +509,27 @@ const PetStoreApp = () => {
             <Link to="/homeuserlogin" className="hover:underline">
               Beranda
             </Link>
-            <Link to="/homeuserlogin" className="hover:underline">
-              Layanan
+            {/* --- NEW: Pembelian Produk Link --- */}
+            <Link to="/pelangganjb" className="hover:underline">
+              Pembelian Produk
             </Link>
+            {/* START OF LAYANAN DROPDOWN */}
+            <div className="relative">
+              <button onClick={handleReservasiClick} className="hover:underline flex items-center gap-1">
+                Layanan
+                <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 transform transition-transform duration-300 ${showReservasiMenu ? "rotate-180" : "rotate-0"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showReservasiMenu && (
+                <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white border border-blue-100 rounded-lg shadow-xl z-10 overflow-hidden animate-fade-down">
+                  <Link to="/form-penitipan" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Penitipan Hewan</Link>
+                  <Link to="/form-kebiri" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Kebiri</Link>
+                  <Link to="/form-vaksinasi" onClick={() => setShowReservasiMenu(false)} className="block w-full px-4 py-3 text-left text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition">Vaksinasi</Link>
+                </div>
+              )}
+            </div>
+            {/* END OF LAYANAN DROPDOWN */}
             <Link to="/homeuserlogin" className="hover:underline">
               FAQ
             </Link>
@@ -459,6 +542,13 @@ const PetStoreApp = () => {
               />
               <span>{currentUserName}</span>
             </div>
+
+            {/* --- Display Loyalty Points --- */}
+            {loyaltyPoints > 0 && (
+              <Link to="/loyalty" className="flex items-center bg-yellow-500 text-white px-3 py-1 rounded-full font-semibold hover:bg-yellow-600 transition-colors">
+                Poin: {formatPoints(loyaltyPoints)} ⭐
+              </Link>
+            )}
 
             <button
               onClick={() => setShowCart(true)}
@@ -481,6 +571,7 @@ const PetStoreApp = () => {
                 localStorage.removeItem("userRole");
                 setCurrentUser(null);
                 setCurrentUserName("Pengguna");
+                setLoyaltyPoints(0); // Clear loyalty points on logout
                 navigate("/login");
               }}
               className="bg-white text-blue-600 px-3 py-1 rounded hover:bg-gray-200"

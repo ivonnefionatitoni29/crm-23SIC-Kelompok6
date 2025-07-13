@@ -40,6 +40,7 @@ function App() {
       <Route path="/homeuserlogin" element={<HomeUserLogin />} />
       <Route path="/pelangganjb" element={<PelangganJB />} />
       
+      
       <Route path="/loyalty" element={<LoyaltyPage />} /> {/* New Route */}
       <Route path="/faq-page" element={<FaqPage />} />
       {/* Rute untuk Admin Product CRUD */}
